@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35521.163 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeTube.Data", "MeTube.Data\MeTube.Data.csproj", "{9651CA0D-9DAF-4BCE-B324-0BE9D0506395}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeTube.DTO", "MeTube.DTO\MeTube.DTO.csproj", "{BCEA3DA3-7766-4DE1-B2D7-3B04321A4629}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeTube.API", "MeTube.API\MeTube.API.csproj", "{251DFB41-AD12-4964-82D7-054AB4B56597}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeTube.Client", "MeTube.Client\MeTube.Client.csproj", "{5C5D8ED5-2BAB-4F39-BB29-89EDDE980F7B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9651CA0D-9DAF-4BCE-B324-0BE9D0506395}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9651CA0D-9DAF-4BCE-B324-0BE9D0506395}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9651CA0D-9DAF-4BCE-B324-0BE9D0506395}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9651CA0D-9DAF-4BCE-B324-0BE9D0506395}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCEA3DA3-7766-4DE1-B2D7-3B04321A4629}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCEA3DA3-7766-4DE1-B2D7-3B04321A4629}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCEA3DA3-7766-4DE1-B2D7-3B04321A4629}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCEA3DA3-7766-4DE1-B2D7-3B04321A4629}.Release|Any CPU.Build.0 = Release|Any CPU
+		{251DFB41-AD12-4964-82D7-054AB4B56597}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{251DFB41-AD12-4964-82D7-054AB4B56597}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{251DFB41-AD12-4964-82D7-054AB4B56597}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{251DFB41-AD12-4964-82D7-054AB4B56597}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C5D8ED5-2BAB-4F39-BB29-89EDDE980F7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C5D8ED5-2BAB-4F39-BB29-89EDDE980F7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C5D8ED5-2BAB-4F39-BB29-89EDDE980F7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C5D8ED5-2BAB-4F39-BB29-89EDDE980F7B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
