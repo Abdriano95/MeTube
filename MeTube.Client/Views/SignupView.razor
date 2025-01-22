@@ -1,0 +1,27 @@
+﻿@page "/signup"
+
+<link href="css/login_and_signup.css" rel="stylesheet" />
+
+<PageTitle>Signup</PageTitle>
+
+<div class="FormContainer">
+    <form>
+        <div class="FormText">
+            <h1>Sign up</h1>
+            <p>Create an account here</p>
+            <hr/>
+        </div>
+        <label for="name">Name</label>
+        <input id="name" type="text" placeholder="Enter your name" />
+
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="Enter your email" />
+
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="Enter your password" />
+
+        <button>Create account</button>
+        <p class="TextWithLink">Already have an account? <a href="/login">Log In</a></p>
+    </form>
+</div>
+
