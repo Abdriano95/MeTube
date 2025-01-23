@@ -7,7 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MeTube.Data\MeTube.Data.csproj" />
+    <ProjectReference Include="..\MeTube.DTO\MeTube.DTO.csproj" />
   </ItemGroup>
 
 </Project>
