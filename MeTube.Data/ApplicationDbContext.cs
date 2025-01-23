@@ -1,10 +1,6 @@
 ﻿using MeTube.Data.Entity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace MeTube.Data
 {
@@ -31,21 +27,43 @@ namespace MeTube.Data
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Username).ValueGeneratedOnAdd()
-                                                .IsRequired();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(entity => entity.Username).IsRequired().HasMaxLength(20);
+                entity.Property(entity => entity.Password).IsRequired().HasMaxLength(20);
+                entity.Property(entity => entity.Email).IsRequired();
             });
 
             // Configure Admin entity
+
             modelBuilder.Entity<Admin>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Username).IsRequired().HasMaxLength(20);
-                entity.Property(e => e.Password).IsRequired().HasMaxLength(20);
-                entity.Property(e => e.Email).IsRequired();
+                entity.HasBaseType<User>();
             });
 
-
+            SeedData(modelBuilder);
         }
 
+        private void SeedData(ModelBuilder modelBuilder)
+        {
+            // Seed Users
+            User user1 = new()
+            {
+                Id = 1,
+                Username = "johndoe1",
+                Password = "john.doe@example.com",
+                Email = "pwd123"
+            };
+
+            Admin admin1 = new()
+            {
+                Id = 2,
+                Username = "janesmith2",
+                Password = "pwd456",
+                Email = "jane.smith@example.com",
+            };
+
+            modelBuilder.Entity<User>().HasData(user1);
+            modelBuilder.Entity<Admin>().HasData(admin1);
+        }
     }
 }
