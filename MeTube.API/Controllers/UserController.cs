@@ -3,7 +3,6 @@ using MeTube.Data.Entity;
 using MeTube.Data.Repository;
 using MeTube.DTO;
 using AutoMapper;
-using System.Threading.Tasks;
 
 namespace MeTube.API.Controllers
 {
@@ -52,7 +51,7 @@ namespace MeTube.API.Controllers
             var user = _mapper.Map<User>(request);
 
             await _unitOfWork.Users.AddUserAsync(user);
-            await _unitOfWork.Update();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { Message = "User signed up successfully" });
         }
@@ -73,7 +72,7 @@ namespace MeTube.API.Controllers
 
             _mapper.Map(request, user);
 
-            await _unitOfWork.Update();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { Message = "User updated successfully" });
         }
@@ -88,7 +87,7 @@ namespace MeTube.API.Controllers
             }
 
             _unitOfWork.Users.DeleteUser(user);
-            await _unitOfWork.Update();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { Message = "User deleted successfully" });
         }
