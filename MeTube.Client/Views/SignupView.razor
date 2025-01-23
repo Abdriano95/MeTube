@@ -1,7 +1,8 @@
 ﻿@page "/signup"
+@using MeTube.Client.ViewModels.SignupViewModels
+@inject SignupViewModel ViewModel
 
 <link href="css/login_and_signup.css" rel="stylesheet" />
-
 <PageTitle>Signup</PageTitle>
 
 <div class="FormContainer">
@@ -11,17 +12,20 @@
             <p>Create an account here</p>
             <hr/>
         </div>
-        <label for="name">Name</label>
-        <input id="name" type="text" placeholder="Enter your name" />
+        <label for="username">Username</label>
+        <input id="username" type="text" @bind="ViewModel.Username" placeholder="Enter your username" />
+        @* <ValidationMessage For="@(() => ViewModel.Username)" /> *@
 
         <label for="email">Email</label>
-        <input id="email" type="email" placeholder="Enter your email" />
+        <input id="email" type="email" @bind="ViewModel.Email" placeholder="Enter your email" />
+        @* <ValidationMessage For="@(() => ViewModel.Email)" /> *@
 
         <label for="password">Password</label>
-        <input id="password" type="password" placeholder="Enter your password" />
+        <input id="password" type="password" @bind="ViewModel.Password" placeholder="Enter your password" />
+        @* <ValidationMessage For="@(() => ViewModel.Password)" /> *@
 
-        <button>Create account</button>
+        <button @onclick="ViewModel.SignupButtonCommand.Execute" type="button">Create account</button>
+
         <p class="TextWithLink">Already have an account? <a href="/login">Log In</a></p>
     </form>
 </div>
-
