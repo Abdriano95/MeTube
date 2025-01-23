@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using MeTube.Data;
+using MeTube.Data.Entity;
 using MeTube.DTO;
 
 namespace MeTube.API.Profiles

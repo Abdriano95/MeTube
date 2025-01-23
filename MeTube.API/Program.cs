@@ -1,6 +1,7 @@
 using MeTube.Data.Repository;
 using MeTube.API.Profiles;
 using Microsoft.EntityFrameworkCore;
+using MeTube.Data;
 
 namespace MeTube.API
 {
@@ -17,7 +18,7 @@ namespace MeTube.API
             builder.Services.AddSwaggerGen();
 
             // Add DbContext
-            builder.Services.AddDbContext<MeTubeDbContext>(options =>
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Add UnitOfWork and Repositories
