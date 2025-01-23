@@ -11,7 +11,7 @@ namespace MeTube.Client.ViewModels.SignupViewModels
         [ObservableProperty]
         [Required(ErrorMessage = "Username is required.")]
         [StringLength(20, ErrorMessage = "Username cannot exceed more or less than 3-20 characters.")]
-        public string username = string.Empty;
+        public string username = "Hej";
 
         [ObservableProperty]
         [Required(ErrorMessage = "Email is required.")]
@@ -22,7 +22,6 @@ namespace MeTube.Client.ViewModels.SignupViewModels
         [Required(ErrorMessage = "Password is required.")]
         [StringLength(20, MinimumLength = 3, ErrorMessage = "Password must be between 3 and 20 characters.")]
         public string password = string.Empty;
-
 
         private static readonly Regex EmailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
 
@@ -41,13 +40,12 @@ namespace MeTube.Client.ViewModels.SignupViewModels
 
         private void ClearAllFields()
         {
-            //Username = string.Empty;
-            //Email = string.Empty;
-            //Password = string.Empty;
+            Username = string.Empty;
+            Email = string.Empty;
+            Password = string.Empty;
         }
 
-        [RelayCommand]
-        public async Task SignupButton()
+        public void SignupButton()
         {
             if (HasErrors)
             {
@@ -63,9 +61,11 @@ namespace MeTube.Client.ViewModels.SignupViewModels
                 //await Application.Current.MainPage.DisplayAlert("Error", "Registration failed", "OK");
                 return;
             }
+            else
+                ClearAllFields();
 
 
-            ClearAllFields();
+
         }
     }
 }

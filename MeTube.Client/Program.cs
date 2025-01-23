@@ -15,8 +15,12 @@ namespace MeTube.Client
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-            builder.Services.AddScoped<SignupViewModel>();
-            builder.Services.AddScoped<SignupView>();
+            //builder.Services.AddScoped<SignupViewModel>();
+            //builder.Services.AddScoped<SignupView>();
+
+            builder.Services.AddSingleton<SignupView>();
+            builder.Services.AddTransient<SignupViewModel>();
+
             await builder.Build().RunAsync();
         }
     }

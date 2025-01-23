@@ -24,8 +24,17 @@
         <input id="password" type="password" @bind="ViewModel.Password" placeholder="Enter your password" />
         @* <ValidationMessage For="@(() => ViewModel.Password)" /> *@
 
-        <button @onclick="ViewModel.SignupButtonCommand.Execute" type="button">Create account</button>
+
+        
+        <button @onclick="() => ViewModel.SignupButton()" type="button">Create Account</button>
 
         <p class="TextWithLink">Already have an account? <a href="/login">Log In</a></p>
     </form>
 </div>
+
+@* @code{
+    public void SignupButton()
+    {
+        ViewModel.SignupButton();
+    }
+} *@
