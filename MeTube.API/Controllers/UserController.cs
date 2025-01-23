@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MeTube.Data;
+using MeTube.Data.Entity;
+using MeTube.Data.Repository;
 using MeTube.DTO;
 using AutoMapper;
 using System.Threading.Tasks;

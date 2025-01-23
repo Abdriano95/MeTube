@@ -1,4 +1,4 @@
-using MeTube.Data;
+using MeTube.Data.Repository;
 using MeTube.API.Profiles;
 using Microsoft.EntityFrameworkCore;
 
