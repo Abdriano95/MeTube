@@ -4,9 +4,12 @@
     {
         private readonly ApplicationDbContext context;
 
+        public IUserRepository Users { get; private set; }
+
         public UnitOfWork(ApplicationDbContext context)
         {
             this.context = context;
+            Users = new UserRepository(context);
         }
         public void Dispose()
         {
