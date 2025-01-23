@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace MeTube.DTO
 {
-    internal class LoginDto
+    public class LoginDto
     {
+        [Required]
+        [StringLength(20, MinimumLength = 3)]
+        public string Username { get; set; }
+
+        [Required]
+        [StringLength(20, MinimumLength = 3)]
+        public string Password { get; set; }
     }
 }
