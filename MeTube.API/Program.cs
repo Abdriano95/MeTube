@@ -19,7 +19,7 @@ namespace MeTube.API
 
             // Add DbContext
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("MeTubeDB")));
 
             // Add UnitOfWork and Repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();
