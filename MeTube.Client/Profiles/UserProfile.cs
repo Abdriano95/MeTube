@@ -14,6 +14,7 @@ namespace MeTube.Client.Profiles
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password));
 
+
             // Map DTO to Entity
             CreateMap<User, CreateUserDto>()
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
