@@ -1,0 +1,27 @@
+﻿@page "/login"
+@using MeTube.Client.ViewModels.LoginViewModels
+@inject LoginViewModel ViewModel
+
+<link href="css/login_and_signup.css" rel="stylesheet" />
+
+
+<div class="FormContainer">
+    <form>
+        <div class="FormText">
+            <h1>Sign up</h1>
+            <p>Create an account here</p>
+            <hr />
+        </div>
+        <label for="username">Username</label>
+        <input id="username" type="text" @bind="ViewModel.Username" placeholder="Enter your username" />
+        @* <ValidationMessage For="@(() => ViewModel.Username)" /> *@
+
+        <label for="password">Password</label>
+        <input id="password" type="password" @bind="ViewModel.Password" placeholder="Enter your password" />
+        @* <ValidationMessage For="@(() => ViewModel.Password)" /> *@
+
+        <button @onclick="() => ViewModel.LoginButton()" type="button">Create Account</button>
+
+        <p class="TextWithLink">Dont have an account? <a href="/signup">Signup</a></p>
+    </form>
+</div>
