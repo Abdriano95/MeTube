@@ -28,6 +28,16 @@ namespace MeTube.API
             // Add AutoMapper
             builder.Services.AddAutoMapper(typeof(UserProfile));
 
+            builder.Services.AddCors(options => 
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.WithOrigins("https://locolhost:7248")
+                .AllowAnyHeader()
+                .AllowAnyOrigin()
+                .AllowAnyMethod();
+            })
+                );
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -45,6 +55,8 @@ namespace MeTube.API
             app.UseAuthorization();
 
             app.MapControllers();
+
+            app.UseCors();
 
             app.Run();
         }

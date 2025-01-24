@@ -43,6 +43,7 @@ namespace MeTube.Client.ViewModels.SignupViewModels
 
         public async Task SignupButton()
         {
+            
             if (HasErrors && !EmailRegex.IsMatch(Email))
             {
                 var errors = string.Join("\n", GetErrors(null).Select(e => e.ErrorMessage));
@@ -63,8 +64,10 @@ namespace MeTube.Client.ViewModels.SignupViewModels
                 //await Application.Current.MainPage.DisplayAlert("Error", "Registration failed", "OK");
                 return;
             }
+            else
+                ClearAllFields();
 
-            ClearAllFields();
+
 
             //Gå exempelvis till login
         }

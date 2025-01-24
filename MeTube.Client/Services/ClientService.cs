@@ -14,9 +14,10 @@ namespace MeTube.Client.Services
         private JsonSerializerOptions _serializerOptions;
         private IMapper _mapper;
 
-        public ClientService(IMapper mapper) 
+        public ClientService(HttpClient client, IMapper mapper) 
         {
             _mapper = mapper;
+            _client = client ?? throw new ArgumentNullException(nameof(client));
 
             _serializerOptions = new JsonSerializerOptions
             {
@@ -29,9 +30,9 @@ namespace MeTube.Client.Services
         {
             try
             {
-                CreateUserDto dto = _mapper.Map<CreateUserDto>(user);
+                var dto = _mapper.Map<CreateUserDto>(user);
                 Uri uri = new Uri(Constants.UserRegisterUrl);
-                HttpResponseMessage response = await _client.PostAsJsonAsync(uri, dto);
+                var response = await _client.PostAsJsonAsync(uri, dto);
                 if (!response.IsSuccessStatusCode)
                 {
                     Debug.WriteLine($"Registration failed. StatusCode: {response.StatusCode}");
