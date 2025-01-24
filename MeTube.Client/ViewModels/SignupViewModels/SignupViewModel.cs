@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MeTube.Client.Models;
+using MeTube.Client.Services;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using static System.Net.Mime.MediaTypeNames;
@@ -8,10 +10,12 @@ namespace MeTube.Client.ViewModels.SignupViewModels
 {
     public partial class SignupViewModel : ObservableValidator
     {
+        private readonly IUserService _userService;
+
         [ObservableProperty]
         [Required(ErrorMessage = "Username is required.")]
         [StringLength(20, ErrorMessage = "Username cannot exceed more or less than 3-20 characters.")]
-        public string username = "Hej";
+        public string username = string.Empty;
 
         [ObservableProperty]
         [Required(ErrorMessage = "Email is required.")]
@@ -25,17 +29,9 @@ namespace MeTube.Client.ViewModels.SignupViewModels
 
         private static readonly Regex EmailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
 
-        public SignupViewModel() 
+        public SignupViewModel(IUserService userService) 
         {
-        }
-
-        private bool ValidateFields()
-        {
-
-            if (!string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Email) && EmailRegex.IsMatch(Email) && !string.IsNullOrEmpty(Password))
-                return true;
-            else
-                return false;
+            _userService = userService;
         }
 
         private void ClearAllFields()
@@ -45,27 +41,32 @@ namespace MeTube.Client.ViewModels.SignupViewModels
             Password = string.Empty;
         }
 
-        public void SignupButton()
+        public async Task SignupButton()
         {
-            if (HasErrors)
+            if (HasErrors && !EmailRegex.IsMatch(Email))
             {
                 var errors = string.Join("\n", GetErrors(null).Select(e => e.ErrorMessage));
                 //await Application.Current.MainPage.DisplayAlert("Validation Error", errors, "OK");
                 return;
             }
 
-            //var success = await _customerService.RegisterCustomerAsync(customer);
-            bool success = true;
+            var newUser = new User
+            {
+                Username = Username,
+                Email = Email,
+                Password = Password,
+            };
+
+            var success = await _userService.RegisterUserAsync(newUser);
             if (!success)
             {
                 //await Application.Current.MainPage.DisplayAlert("Error", "Registration failed", "OK");
                 return;
             }
-            else
-                ClearAllFields();
 
+            ClearAllFields();
 
-
+            //Gå exempelvis till login
         }
     }
 }
