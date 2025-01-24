@@ -27,6 +27,15 @@ namespace MeTube.Client.ViewModels.SignupViewModels
         [StringLength(20, MinimumLength = 3, ErrorMessage = "Password must be between 3 and 20 characters.")]
         public string password = string.Empty;
 
+        [ObservableProperty]
+        private string usernameError = string.Empty;
+
+        [ObservableProperty]
+        private string passwordError = string.Empty;
+
+        [ObservableProperty]
+        private string emailError = string.Empty;
+
         private static readonly Regex EmailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
 
         public SignupViewModel(IUserService userService) 
@@ -43,13 +52,20 @@ namespace MeTube.Client.ViewModels.SignupViewModels
 
         public async Task SignupButton()
         {
-            
-            if (HasErrors && !EmailRegex.IsMatch(Email))
+            ValidateAllProperties();
+            PasswordError = string.Empty;
+            if (HasErrors)
             {
-                var errors = string.Join("\n", GetErrors(null).Select(e => e.ErrorMessage));
-                //await Application.Current.MainPage.DisplayAlert("Validation Error", errors, "OK");
+                var usernameErrors = GetErrors(nameof(Username)).OfType<ValidationResult>().Select(e => e.ErrorMessage);
+                var passwordErrors = GetErrors(nameof(Password)).OfType<ValidationResult>().Select(e => e.ErrorMessage);
+                var emailErrors = GetErrors(nameof(Email)).OfType<ValidationResult>().Select(e => e.ErrorMessage);
+                UsernameError = string.Join("\n", usernameErrors);
+                PasswordError = string.Join("\n", passwordErrors);
+                EmailError = string.Join("\n", emailErrors);
                 return;
             }
+            else
+                ClearAllFields();
 
             var newUser = new User
             {
@@ -66,10 +82,6 @@ namespace MeTube.Client.ViewModels.SignupViewModels
             }
             else
                 ClearAllFields();
-
-
-
-            //Gå exempelvis till login
         }
     }
 }

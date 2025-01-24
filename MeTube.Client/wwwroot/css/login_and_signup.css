@@ -4,7 +4,7 @@
     background-color: #ffffff;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 5px;
     border: 1px solid #ddd;
     border-radius: 8px;
 }
@@ -83,4 +83,9 @@ a{
 
 a:hover {
     text-decoration: underline;
+}
+
+.validationerror {
+    font-family: 'Times New Roman';
+    font-size: 0.8rem;
 }

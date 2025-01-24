@@ -1,33 +1,26 @@
-﻿@page "/signup"
-@using MeTube.Client.ViewModels.SignupViewModels
-@inject SignupViewModel ViewModel
+﻿@page "/login"
+@using MeTube.Client.ViewModels.LoginViewModels
+@inject LoginViewModel ViewModel
 
 <link href="css/login_and_signup.css" rel="stylesheet" />
-@* <PageTitle>Signup</PageTitle> *@
 
 <div class="FormContainer">
     <form>
         <div class="FormText">
             <h1>Sign up</h1>
             <p>Create an account here</p>
-            <hr/>
+            <hr />
         </div>
         <label for="username">Username</label>
         <input id="username" type="text" @bind="ViewModel.Username" placeholder="Enter your username" />
         <p class="validationerror">@ViewModel.UsernameError</p>
 
-        <label for="email">Email</label>
-        <input id="email" type="email" @bind="ViewModel.Email" placeholder="Enter your email" />
-        <p class="validationerror">@ViewModel.EmailError</p>
-
         <label for="password">Password</label>
         <input id="password" type="password" @bind="ViewModel.Password" placeholder="Enter your password" />
         <p class="validationerror">@ViewModel.PasswordError</p>
 
+        <button @onclick="() => ViewModel.LoginButton()" type="button">Create Account</button>
 
-        
-        <button @onclick="() => ViewModel.SignupButton()" type="button">Create Account</button>
-
-        <p class="TextWithLink">Already have an account? <a href="/login">Log In</a></p>
+        <p class="TextWithLink">Dont have an account? <a href="/signup">Signup</a></p>
     </form>
 </div>
