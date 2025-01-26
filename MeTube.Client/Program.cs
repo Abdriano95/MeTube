@@ -32,6 +32,8 @@ namespace MeTube.Client
 
             builder.Services.AddSingleton<ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
+
+
             builder.Services.AddAutoMapper(typeof(User));
             builder.Services.AddTransient<HttpClient>();
             //builder.Services.AddSingleton<IHttpsClientHandlerService, HttpsClientHandlerService>();

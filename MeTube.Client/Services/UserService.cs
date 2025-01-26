@@ -15,10 +15,10 @@ namespace MeTube.Client.Services
             return _clientService.RegisterUserAsync(user);
         }
 
-        //public Task<User?> LoginAsync(string username, string password)
-        //{
+        public Task<User?> LoginAsync(string username, string password)
+        {
 
-        //    //return _clientService.LoginAsync(username, password);
-        //}
+            return _clientService.LoginAsync(username, password);
+        }
     }
 }

@@ -8,8 +8,8 @@
 <div class="FormContainer">
     <form>
         <div class="FormText">
-            <h1>Sign up</h1>
-            <p>Create an account here</p>
+            <h1>Login</h1>
+            <p>Login to account here</p>
             <hr />
         </div>
         <label for="username">Username</label>
@@ -20,7 +20,7 @@
         <input id="password" type="password" @bind="ViewModel.Password" placeholder="Enter your password" />
         <p class="validationerror">@ViewModel.PasswordError</p>
 
-        <button @onclick="() => ViewModel.LoginButton()" type="button">Create Account</button>
+        <button @onclick="() => ViewModel.LoginButton()" type="button">Login</button>
 
         <p class="TextWithLink">Dont have an account? <a href="/signup">Signup</a></p>
     </form>

@@ -21,14 +21,12 @@ namespace MeTube.Client.Profiles
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password));
 
-            CreateMap<LoginDto, User>()
-                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
-                .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password));
+            CreateMap<UserDto, User>()
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+            .ForMember(dest => dest.Password, opt => opt.Ignore());
 
-            CreateMap<User, LoginDto>()
-                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
-                .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password));
-
+            CreateMap<User, LoginDto>().ReverseMap();
         }
     }
 }

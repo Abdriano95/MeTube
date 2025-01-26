@@ -49,30 +49,30 @@ namespace MeTube.Client.Services
             }
         }
 
-        //public async Task<User?> LoginAsync(string username, string password)
-        //{
-        //    try
-        //    {
-        //        LoginDto loginDto = new LoginDto { Username = username, Password = password };
-        //        Uri uri = new Uri(Constants.UserLoginUrl);
-        //        HttpResponseMessage response = await _client.PostAsJsonAsync(uri, loginDto);
+        public async Task<User?> LoginAsync(string username, string password)
+        {
+            try
+            {
+                LoginDto loginDto = new LoginDto { Username = username, Password = password };
+                Uri uri = new Uri(Constants.UserLoginUrl);
+                HttpResponseMessage response = await _client.PostAsJsonAsync(uri, loginDto);
 
-        //        if (!response.IsSuccessStatusCode) return null;
+                if (!response.IsSuccessStatusCode) return null;
 
-        //        UserDto userDto = await response.Content.ReadFromJsonAsync<UserDto>(_serializerOptions);
+                UserDto userDto = await response.Content.ReadFromJsonAsync<UserDto>(_serializerOptions);
 
-        //        if (userDto == null)
-        //        {
-        //            Debug.WriteLine("Failed to deserialize CustomerDto");
-        //            return null;
-        //        }
-        //        return _mapper.Map<User>(userDto);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Debug.WriteLine(@"\tERROR {0}", ex.Message);
-        //        return null;
-        //    }
-        //}
+                if (userDto == null)
+                {
+                    Debug.WriteLine("Failed to deserialize CustomerDto");
+                    return null;
+                }
+                return _mapper.Map<User>(userDto);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(@"\tERROR {0}", ex.Message);
+                return null;
+            }
+        }
     }
 }

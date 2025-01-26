@@ -64,8 +64,6 @@ namespace MeTube.Client.ViewModels.SignupViewModels
                 EmailError = string.Join("\n", emailErrors);
                 return;
             }
-            else
-                ClearAllFields();
 
             var newUser = new User
             {

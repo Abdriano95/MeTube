@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using MeTube.Client.Services;
 using System.ComponentModel.DataAnnotations;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -21,8 +22,11 @@ namespace MeTube.Client.ViewModels.LoginViewModels
 
         [ObservableProperty]
         private string passwordError = string.Empty;
-        public LoginViewModel() 
-        { 
+
+        private readonly IUserService _userService;
+        public LoginViewModel(IUserService userService) 
+        {
+            _userService = userService;
         }
         public async Task LoginButton()
         {
@@ -36,10 +40,15 @@ namespace MeTube.Client.ViewModels.LoginViewModels
                 PasswordError = string.Join("\n", passwordErrors);
                 return;
             }
-            else
-                ClearAllFields();
-        }
 
+            var userFound = await _userService.LoginAsync(Username, Password);
+            if (userFound != null) 
+            {
+                ClearAllFields();
+                return;
+            }
+
+        }
         private void ClearAllFields()
         {
             Username = string.Empty;
