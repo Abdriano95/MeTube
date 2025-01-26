@@ -91,6 +91,32 @@ namespace MeTube.API.Controllers
 
             return Ok(new { Message = "User deleted successfully" });
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var user = await _unitOfWork.Users.GetUserByUsernameAsync(request.Username);
+                if (user == null || user.Password != request.Password)
+                {
+                    return BadRequest(new { Message = "Invalid username or password" });
+                }
+
+                var userDto = _mapper.Map<UserDto>(user);
+                return Ok(userDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = "Could not log in", Message = ex.Message });
+            }
+
+        }
     }
 }
 

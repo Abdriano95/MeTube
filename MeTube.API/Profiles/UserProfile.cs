@@ -16,6 +16,8 @@ namespace MeTube.API.Profiles
 
             // Optionally, map from User to a DTO if needed
             CreateMap<User, UserDto>();
+
+
         }
     }
 }
