@@ -38,6 +38,16 @@ namespace MeTube.API.Controllers
             return Ok(user);
         }
 
+        [HttpPost("manageUsers")]
+        public async Task<IActionResult> GetAllusers()
+        {
+            var users = await _unitOfWork.Users.GetAllAsync();
+            if(!users.Any())
+                return NotFound(new { Message = "User not found" });
+            else
+            return Ok(users);
+        }
+
         [Authorize]
         [HttpPost("signup")]
         public async Task<IActionResult> SignUp([FromBody] CreateUserDto request)
