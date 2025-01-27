@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MeTube.Client.Services;
+using Microsoft.JSInterop;
 using System.ComponentModel.DataAnnotations;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -23,10 +24,17 @@ namespace MeTube.Client.ViewModels.LoginViewModels
         [ObservableProperty]
         private string passwordError = string.Empty;
 
+        [ObservableProperty]
+        public bool isUserLoggedIn = false;
+
         private readonly IUserService _userService;
-        public LoginViewModel(IUserService userService) 
+        private readonly IAuthenticationService _authService;
+        private readonly IJSRuntime _jsRuntime;
+        public LoginViewModel(IUserService userService, IAuthenticationService authService, IJSRuntime jsRuntime) 
         {
             _userService = userService;
+            _authService = authService;
+            _jsRuntime = jsRuntime;
         }
         public async Task LoginButton()
         {
@@ -42,9 +50,15 @@ namespace MeTube.Client.ViewModels.LoginViewModels
             }
 
             var userFound = await _userService.LoginAsync(Username, Password);
+
             if (userFound != null) 
             {
+                string token = await _userService.GetTokenAsync(Username, Password);
+                if (!string.IsNullOrEmpty(token))
+                    await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "jwtToken", token);
+
                 ClearAllFields();
+                IsUserLoggedIn = true;
                 return;
             }
 
@@ -53,6 +67,11 @@ namespace MeTube.Client.ViewModels.LoginViewModels
         {
             Username = string.Empty;
             Password = string.Empty;
+        }
+
+        public async Task Logout()
+        {
+            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "jwtToken");
         }
     }
 }
