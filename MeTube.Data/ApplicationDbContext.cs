@@ -8,6 +8,7 @@ namespace MeTube.Data
     {
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<Admin> Admins { get; set; } = null!;
+        public virtual DbSet<Video> Videos { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -34,10 +35,24 @@ namespace MeTube.Data
             });
 
             // Configure Admin entity
-
             modelBuilder.Entity<Admin>(entity =>
             {
                 entity.HasBaseType<User>();
+            });
+
+            // Configure Video entity
+            modelBuilder.Entity<Video>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Title).IsRequired().HasMaxLength(30);
+                entity.Property(e => e.Description).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Genre).IsRequired().HasMaxLength(30);
+                entity.Property(e => e.VideoUrl).HasMaxLength(2083); // Standard for URLs (length)
+                entity.Property(e => e.DateUploaded).IsRequired().HasColumnType("datetime");
+
+                // Relation with user
+                entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
             });
 
             SeedData(modelBuilder);

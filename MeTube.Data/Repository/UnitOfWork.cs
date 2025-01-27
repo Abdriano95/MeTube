@@ -5,11 +5,13 @@
         private readonly ApplicationDbContext context;
 
         public IUserRepository Users { get; private set; }
+        public IVideoRepository Videos { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
             this.context = context;
             Users = new UserRepository(context);
+            Videos = new VideoRepository(context);
         }
         public void Dispose()
         {
