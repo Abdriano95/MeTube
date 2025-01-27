@@ -24,6 +24,9 @@ namespace MeTube.Client.ViewModels.LoginViewModels
         [ObservableProperty]
         private string passwordError = string.Empty;
 
+        [ObservableProperty]
+        public bool isUserLoggedIn = false;
+
         private readonly IUserService _userService;
         private readonly IAuthenticationService _authService;
         private readonly IJSRuntime _jsRuntime;
@@ -52,11 +55,10 @@ namespace MeTube.Client.ViewModels.LoginViewModels
             {
                 string token = await _userService.GetTokenAsync(Username, Password);
                 if (!string.IsNullOrEmpty(token))
-                {
                     await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "jwtToken", token);
 
-                }
                 ClearAllFields();
+                IsUserLoggedIn = true;
                 return;
             }
 
@@ -65,6 +67,11 @@ namespace MeTube.Client.ViewModels.LoginViewModels
         {
             Username = string.Empty;
             Password = string.Empty;
+        }
+
+        public async Task Logout()
+        {
+            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "jwtToken");
         }
     }
 }

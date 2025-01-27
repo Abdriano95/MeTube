@@ -59,15 +59,17 @@ namespace MeTube.Client.Services
 
                 if (!response.IsSuccessStatusCode) return null;
 
-                UserDto userDto = await response.Content.ReadFromJsonAsync<UserDto>(_serializerOptions);
+                //UserDto userDto = await response.Content.ReadFromJsonAsync<UserDto>(_serializerOptions);
 
-                if (userDto == null)
-                {
-                    Debug.WriteLine("Failed to deserialize CustomerDto");
-                    return null;
-                }
-
-                var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                //if (userDto == null)
+                //{
+                //    Debug.WriteLine("Failed to deserialize CustomerDto");
+                //    return null;
+                //}
+                //var hasse = _mapper.Map<User>(userDto);
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var loginResponse = JsonSerializer.Deserialize<LoginResponse>(jsonResponse, _serializerOptions);
+                //var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
                 if (loginResponse == null)
                 {
                     Debug.WriteLine("Failed to deserialize LoginResponse.");

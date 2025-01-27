@@ -21,7 +21,6 @@ namespace MeTube.Client.Services
         public async Task<User?> LoginAsync(string username, string password)
         {
             var loginResponse = await _clientService.LoginAsync(username, password);
-
             return loginResponse?.User;
         }
 
