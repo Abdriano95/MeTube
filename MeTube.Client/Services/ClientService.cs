@@ -49,7 +49,7 @@ namespace MeTube.Client.Services
             }
         }
 
-        public async Task<User?> LoginAsync(string username, string password)
+        public async Task<LoginResponse?> LoginAsync(string username, string password)
         {
             try
             {
@@ -66,7 +66,15 @@ namespace MeTube.Client.Services
                     Debug.WriteLine("Failed to deserialize CustomerDto");
                     return null;
                 }
-                return _mapper.Map<User>(userDto);
+
+                var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                if (loginResponse == null)
+                {
+                    Debug.WriteLine("Failed to deserialize LoginResponse.");
+                    return null;
+                }
+
+                return loginResponse;
             }
             catch (Exception ex)
             {

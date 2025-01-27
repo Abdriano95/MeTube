@@ -3,6 +3,14 @@ using MeTube.Data.Entity;
 using MeTube.Data.Repository;
 using MeTube.DTO;
 using AutoMapper;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using Microsoft.JSInterop;
 
 namespace MeTube.API.Controllers
 {
@@ -30,6 +38,7 @@ namespace MeTube.API.Controllers
             return Ok(user);
         }
 
+        [Authorize]
         [HttpPost("signup")]
         public async Task<IActionResult> SignUp([FromBody] CreateUserDto request)
         {
@@ -107,15 +116,46 @@ namespace MeTube.API.Controllers
                 {
                     return BadRequest(new { Message = "Invalid username or password" });
                 }
-
+                var token = GenerateJwtToken(user);
                 var userDto = _mapper.Map<UserDto>(user);
-                return Ok(userDto);
+
+
+                return Ok(new
+                {
+                    User = userDto,
+                    Token = token
+                });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { Error = "Could not log in", Message = ex.Message });
             }
 
+        }
+
+        private string GenerateJwtToken(User user)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword")); // Håll detta säkert!
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            // Lägg till claims för användaren (inklusive rollen från din databas)
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email),
+                //new Claim(ClaimTypes.Role, role)
+            };
+
+
+            // Skapa token
+            var token = new JwtSecurityToken(
+                issuer: "Customer",
+                audience: "User",
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
