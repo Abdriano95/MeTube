@@ -156,16 +156,12 @@ namespace MeTube.API.Controllers
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword")); // Håll detta säkert!
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            // Lägg till claims för användaren (inklusive rollen från din databas)
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email),
-                //new Claim(ClaimTypes.Role, role)
             };
 
-
-            // Skapa token
             var token = new JwtSecurityToken(
                 issuer: "Customer",
                 audience: "User",

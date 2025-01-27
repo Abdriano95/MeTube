@@ -82,7 +82,6 @@ namespace MeTube.Client.Services
         {
             try
             {
-                // Hämta token från Local Storage
                 var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "jwtToken");
 
                 if (string.IsNullOrEmpty(token))
@@ -91,11 +90,9 @@ namespace MeTube.Client.Services
                     return false;
                 }
 
-                // Skapa förfrågan med token i Authorization-headern
                 var request = new HttpRequestMessage(HttpMethod.Post, "api/user/logout");
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-                // Skicka förfrågan
                 var response = await _client.SendAsync(request);
 
                 if (response.IsSuccessStatusCode)
