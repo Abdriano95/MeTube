@@ -14,8 +14,12 @@ namespace MeTube.API.Profiles
             // Map from UpdateUserDto to User
             CreateMap<UpdateUserDto, User>();
 
+            // Map from User to ManageUserDto
+            CreateMap<User, ManageUserDto>();
+
             // Optionally, map from User to a DTO if needed
             CreateMap<User, UserDto>();
+
 
 
         }

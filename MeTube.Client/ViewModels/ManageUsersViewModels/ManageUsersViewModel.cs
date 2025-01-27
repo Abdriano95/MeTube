@@ -15,9 +15,13 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             _userService = userService;
         }
 
-        private async void GetUsers()
+        
+        public async Task GetUsers()
         {
-            //AllUsers
+            var allUsers = await _userService.GetAllUsersAsync();
+            AllUsers.Clear();
+            foreach (var user in allUsers.OrderBy(a => a.Username))
+                AllUsers.Add(user);
         }
         
     }

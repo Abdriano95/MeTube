@@ -8,5 +8,6 @@ namespace MeTube.Client.Services
         Task<User?> LoginAsync(string username, string password);
         Task<bool> LogoutAsync();
         Task<string> GetTokenAsync(string username, string password);
+        Task<IEnumerable<User>> GetAllUsersAsync();
     }
 }

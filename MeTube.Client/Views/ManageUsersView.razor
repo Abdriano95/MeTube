@@ -1,5 +1,8 @@
-﻿<h3>ManageUsersView</h3>
+﻿@page "/manageaccounts"
+@using MeTube.Client.ViewModels.ManageUsersViewModels
+@inject ManageUsersViewModel ViewModel
+<link href="css/login_and_signup.css" rel="stylesheet" />
 
-@code {
-
-}
+<div>
+    <button @onclick="() => ViewModel.GetUsers()" type="button">Login</button>
+</div>

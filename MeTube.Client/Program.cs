@@ -1,6 +1,7 @@
 using MeTube.Client.Models;
 using MeTube.Client.Services;
 using MeTube.Client.ViewModels.LoginViewModels;
+using MeTube.Client.ViewModels.ManageUsersViewModels;
 using MeTube.Client.ViewModels.SignupViewModels;
 using MeTube.Client.Views;
 using MeTube.DTO;
@@ -27,10 +28,12 @@ namespace MeTube.Client
 
             //builder.Services.AddSingleton<SignupView>();
             builder.Services.AddSingleton<LoginView>();
+            builder.Services.AddSingleton<ManageUsersView>();
 
 
             builder.Services.AddTransient<SignupViewModel>();
             builder.Services.AddTransient<LoginViewModel>();
+            builder.Services.AddTransient<ManageUsersViewModel>();
 
             builder.Services.AddSingleton<ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
