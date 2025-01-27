@@ -1,5 +1,6 @@
 ﻿using MeTube.Client.Models;
 using Microsoft.JSInterop;
+using System.Diagnostics;
 
 namespace MeTube.Client.Services
 {
@@ -22,6 +23,17 @@ namespace MeTube.Client.Services
         {
             var loginResponse = await _clientService.LoginAsync(username, password);
             return loginResponse?.User;
+        }
+
+        public async Task<bool> LogoutAsync()
+        {
+            var response = await _clientService.LogoutAsync();
+            if (response)
+            {
+                await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "jwtToken");
+                return true;
+            }
+            return false;
         }
 
         public async Task<string> GetTokenAsync(string username, string password)

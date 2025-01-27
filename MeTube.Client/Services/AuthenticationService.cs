@@ -5,10 +5,12 @@ namespace MeTube.Client.Services
     public class AuthenticationService : IAuthenticationService
     {
         private readonly IJSRuntime _jsRuntime;
+        private readonly HttpClient _httpClient;
 
-        public AuthenticationService(IJSRuntime jsRuntime)
+        public AuthenticationService(IJSRuntime jsRuntime, HttpClient httpClient)
         {
             _jsRuntime = jsRuntime;
+            _httpClient = httpClient;
         }
 
         public async Task<bool> IsUserAuthenticated()

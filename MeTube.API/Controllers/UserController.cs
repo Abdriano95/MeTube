@@ -130,7 +130,25 @@ namespace MeTube.API.Controllers
             {
                 return StatusCode(500, new { Error = "Could not log in", Message = ex.Message });
             }
+        }
 
+        [HttpPost("logout")]
+        [Authorize]
+        public IActionResult Logout()
+        {
+            try
+            {
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+                if (string.IsNullOrEmpty(token))
+                    return BadRequest(new { Message = "Token is required." });
+
+                return Ok(new { Message = "User successfully logged out." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = "Could not log out", Message = ex.Message });
+            }
         }
 
         private string GenerateJwtToken(User user)
