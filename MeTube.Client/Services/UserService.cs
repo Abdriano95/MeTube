@@ -51,5 +51,10 @@ namespace MeTube.Client.Services
             var response = await _clientService.LoginAsync(username, password);
             return response?.Token ?? string.Empty;
         }
+
+        public async Task<bool> DeleteUserAsync(int id)
+        {
+            return await _clientService.DeleteUser(id);
+        }
     }
 }

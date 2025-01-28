@@ -125,7 +125,7 @@ namespace MeTube.API.Controllers
             _unitOfWork.Users.DeleteUser(user);
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new { Message = "User deleted successfully" });
+            return Ok(new { Message = "User deleted" });
         }
 
         [HttpPost("login")]

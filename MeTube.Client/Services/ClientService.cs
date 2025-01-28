@@ -169,8 +169,8 @@ namespace MeTube.Client.Services
         {
             try
             {
-                Uri uri = new Uri($"{Constants.GetUserIdByEmail}");
-                var response = await _client.GetAsync(uri);
+                Uri uri = new Uri($"{Constants.DeleteUser}/{id}");
+                var response = await _client.DeleteAsync(uri);
 
                 if (!response.IsSuccessStatusCode)
                 {

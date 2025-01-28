@@ -14,6 +14,7 @@
         public static string GetUserIdByEmail = $"{BaseUrl}/user/userIdFromEmail";
         public static string UserLoginUrl = $"{BaseUrl}/user/login";
         public static string GetUserUrl = $"{BaseUrl}/user/{{0}}";
+        public static string DeleteUser = $"{BaseUrl}/user";
 
 
     }

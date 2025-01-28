@@ -30,6 +30,12 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
         public async Task DeleteUser(User user)
         {
             int userId = await GetUserId(user);
+            bool response = await _userService.DeleteUserAsync(userId);
+            if (response)
+            {
+                string hasse = "User Deleted";
+            }
+
         }
 
         public async Task SaveAndUpdateUser(User user)
