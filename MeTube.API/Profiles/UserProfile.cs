@@ -20,8 +20,11 @@ namespace MeTube.API.Profiles
             // Optionally, map from User to a DTO if needed
             CreateMap<User, UserDto>();
 
+            CreateMap<User, UserIdDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
-
+            CreateMap<int?, UserIdDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.HasValue ? src.Value : 0));
         }
     }
 }

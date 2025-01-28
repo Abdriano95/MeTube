@@ -35,6 +35,12 @@ namespace MeTube.Data.Repository
             return await GetAllAsync();
         }
 
+        public async Task<int?> GetUserIdByEmailAsync(string email)
+        {
+            var user = await DbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return user?.Id;
+        }
+
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             return await DbContext.Users.FirstOrDefaultAsync(u => u.Email == email);

@@ -11,6 +11,7 @@
         // Specific REST URLs
         public static string UserRegisterUrl = $"{BaseUrl}/user/signup";
         public static string GetAllUsers = $"{BaseUrl}/user/manageUsers";
+        public static string GetUserIdByEmail = $"{BaseUrl}/user/userIdFromEmail";
         public static string UserLoginUrl = $"{BaseUrl}/user/login";
         public static string GetUserUrl = $"{BaseUrl}/user/{{0}}";
 

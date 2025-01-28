@@ -24,6 +24,11 @@ namespace MeTube.Client.Services
             return _clientService.GetAllUsersAsync();
         }
 
+        public async Task<int?> GetUserIdByEmailAsync(string email)
+        {
+            return await _clientService.GetUserIdByEmailAsync(email);
+        }
+
         public async Task<User?> LoginAsync(string username, string password)
         {
             var loginResponse = await _clientService.LoginAsync(username, password);

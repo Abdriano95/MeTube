@@ -14,7 +14,7 @@ namespace MeTube.Client.ViewModels.SignupViewModels
 
         [ObservableProperty]
         [Required(ErrorMessage = "Username is required.")]
-        [StringLength(20, ErrorMessage = "Username cannot exceed more or less than 3-20 characters.")]
+        [StringLength(20, ErrorMessage = "Username must be 3-20 characters")]
         public string username = string.Empty;
 
         [ObservableProperty]
@@ -24,7 +24,7 @@ namespace MeTube.Client.ViewModels.SignupViewModels
 
         [ObservableProperty]
         [Required(ErrorMessage = "Password is required.")]
-        [StringLength(20, MinimumLength = 3, ErrorMessage = "Password must be between 3 and 20 characters.")]
+        [StringLength(20, MinimumLength = 3, ErrorMessage = "Password must be between 3 and 20 characters")]
         public string password = string.Empty;
 
         [ObservableProperty]

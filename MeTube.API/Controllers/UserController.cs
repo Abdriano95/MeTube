@@ -38,6 +38,7 @@ namespace MeTube.API.Controllers
             return Ok(user);
         }
 
+
         [HttpGet("manageUsers")]
         public async Task<IActionResult> GetAllusers()
         {
@@ -47,6 +48,22 @@ namespace MeTube.API.Controllers
 
             var userDtos = _mapper.Map<IEnumerable<ManageUserDto>>(users);
             return Ok(userDtos);
+        }
+
+        [HttpGet("userIdFromEmail")]
+        public async Task<IActionResult> GetUserIdByEmail([FromQuery] string email)
+        {
+            var user = await _unitOfWork.Users.GetUserIdByEmailAsync(email);
+
+            if (user == null)
+                return NotFound(new { Message = "User not found" });
+
+            var userIdDto = new UserIdDto 
+            { 
+                Id = user.Value 
+            };
+
+            return Ok(userIdDto);
         }
 
         [HttpPost("signup")]
@@ -128,7 +145,6 @@ namespace MeTube.API.Controllers
                 }
                 var token = GenerateJwtToken(user);
                 var userDto = _mapper.Map<UserDto>(user);
-
 
                 return Ok(new
                 {

@@ -49,7 +49,6 @@ namespace MeTube.API
 
             // Add AutoMapper
             builder.Services.AddAutoMapper(typeof(UserProfile));
-
             builder.Services.AddCors(options => 
             options.AddDefaultPolicy(policy =>
             {

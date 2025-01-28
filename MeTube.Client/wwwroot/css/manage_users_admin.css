@@ -48,12 +48,16 @@ input::placeholder {
 }
 
 #saveButton {
-    background-color: #0428de;
+    background-color: #007bff;
     color: white;
     border: none;
     padding: 10px;
     border-radius: 20px;
     cursor: pointer;
+}
+
+#saveButton:hover {
+    background-color: #0056b3;
 }
 
 #deleteButton {
@@ -86,5 +90,5 @@ h1 {
     font-weight: bold;
     margin-bottom: 10px;
     text-align: center;
-    color: #0056b3;
+    color: #007bff;
 }

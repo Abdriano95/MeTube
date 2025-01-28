@@ -142,5 +142,51 @@ namespace MeTube.Client.Services
                 return Enumerable.Empty<User>();
             }
         }
+        public async Task<int?> GetUserIdByEmailAsync(string email)
+        {
+            try
+            {
+                Uri uri = new Uri($"{Constants.GetUserIdByEmail}?email={Uri.EscapeDataString(email)}");
+                var response = await _client.GetAsync(uri);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine($"Failed to fetch user ID: {response.StatusCode}");
+                    return null;
+                }
+
+                var userIdDto = await response.Content.ReadFromJsonAsync<UserIdDto>(_serializerOptions);
+                return userIdDto?.Id;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error fetching users: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<bool> DeleteUser(int id)
+        {
+            try
+            {
+                Uri uri = new Uri($"{Constants.GetUserIdByEmail}");
+                var response = await _client.GetAsync(uri);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine($"Failed to fetch user ID: {response.StatusCode}");
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error fetching users: {ex.Message}");
+                return false;
+            }
+        }
+
+
+
     }
 }

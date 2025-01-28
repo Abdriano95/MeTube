@@ -32,8 +32,8 @@
             </div>
 
             <div class="ManageUsersButtons">
-                <button type="button" id="deleteButton">Delete User</button>
-                <button type="button" id="saveButton">Save Canges</button>
+                <button type="button" @onclick="() => ViewModel.DeleteUser(user)" id="deleteButton">Delete User</button>
+                <button type="button" @onclick="() => ViewModel.SaveAndUpdateUser(user)" id="saveButton">Save Canges</button>
             </div>
         </form>
     }
