@@ -1,8 +1,52 @@
 ﻿@page "/manageaccounts"
+@using MeTube.Client.Models
 @using MeTube.Client.ViewModels.ManageUsersViewModels
 @inject ManageUsersViewModel ViewModel
-<link href="css/login_and_signup.css" rel="stylesheet" />
+<link href="css/manage_users_admin.css" rel="stylesheet" />
 
-<div>
-    <button @onclick="() => ViewModel.GetUsers()" type="button">Login</button>
+<h3>Manage Accounts</h3>
+
+<div class="ManageUsers">
+    @foreach (var user in ViewModel.AllUsers)
+    {
+        <form class="FormContainer">
+            <div class="FormText">
+                <h1>User</h1>
+            </div>
+
+            <label>Username</label>
+            <input @bind="user.Username" />
+
+            <label>Email</label>
+            <input @bind="user.Email" type="email" />
+
+            <label>Password</label>
+            <input @bind="user.Password" type="text" />
+
+            <label for="roles">Role</label>
+            <div class="SelectRole">
+                <select id="roles">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+
+            <div class="ManageUsersButtons">
+                <button type="button" id="deleteButton">Delete User</button>
+                <button type="button" id="saveButton">Save Canges</button>
+            </div>
+        </form>
+    }
 </div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadUsers();
+    }
+
+    private async Task SaveUser(User user)
+    {
+        // await ViewModel.SaveUserAsync(user);
+    }
+}

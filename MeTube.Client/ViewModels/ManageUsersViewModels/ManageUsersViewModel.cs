@@ -9,20 +9,17 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
     {
         private readonly IUserService _userService;
 
-        ObservableCollection<User> AllUsers { get; set; } = new ObservableCollection<User>();
+        public ObservableCollection<User> AllUsers { get; set; } = new ObservableCollection<User>();
         public ManageUsersViewModel(IUserService userService) 
         {
             _userService = userService;
         }
-
-        
-        public async Task GetUsers()
+        public async Task LoadUsers()
         {
             var allUsers = await _userService.GetAllUsersAsync();
             AllUsers.Clear();
             foreach (var user in allUsers.OrderBy(a => a.Username))
                 AllUsers.Add(user);
         }
-        
     }
 }
