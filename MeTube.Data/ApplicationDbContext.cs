@@ -65,8 +65,8 @@ namespace MeTube.Data
             {
                 Id = 1,
                 Username = "johndoe1",
-                Password = "john.doe@example.com",
-                Email = "pwd123"
+                Password = "pwd123",
+                Email = "john.doe@example.com"
             };
 
             Admin admin1 = new()
@@ -79,6 +79,42 @@ namespace MeTube.Data
 
             modelBuilder.Entity<User>().HasData(user1);
             modelBuilder.Entity<Admin>().HasData(admin1);
+
+            // Seed Videos
+            Video video1 = new()
+            {
+                Id = 1,
+                UserId = 1,
+                Title = "Learning C# Basics",
+                Description = "An introduction to C# programming for beginners.",
+                Genre = "Education",
+                VideoUrl = "https://example.com/video1",
+                DateUploaded = new DateTime(2023, 1, 1)
+            };
+
+            Video video2 = new()
+            {
+                Id = 2,
+                UserId = 1,
+                Title = "Advanced LINQ Tips",
+                Description = "Learn advanced LINQ techniques to simplify your C# code.",
+                Genre = "Tech",
+                VideoUrl = "https://example.com/video2",
+                DateUploaded = new DateTime(2023, 1, 1)
+            };
+
+            Video video3 = new()
+            {
+                Id = 3,
+                UserId = 2,
+                Title = "Introduction to .NET MAUI",
+                Description = "Explore .NET MAUI and learn how to build cross-platform apps.",
+                Genre = "Education",
+                VideoUrl = "https://example.com/video3",
+                DateUploaded = new DateTime(2023, 1, 1)
+            };
+
+            modelBuilder.Entity<Video>().HasData(video1, video2, video3);
         }
     }
 }

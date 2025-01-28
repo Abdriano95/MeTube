@@ -22,11 +22,12 @@ namespace MeTube.API
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MeTubeDB")));
 
             // Add UnitOfWork and Repositories
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 
             // Add AutoMapper
-            builder.Services.AddAutoMapper(typeof(UserProfile));
+            builder.Services.AddAutoMapper(typeof(UserProfile), typeof(VideoProfile));
 
             builder.Services.AddCors(options => 
             options.AddDefaultPolicy(policy =>
@@ -35,8 +36,7 @@ namespace MeTube.API
                 .AllowAnyHeader()
                 .AllowAnyOrigin()
                 .AllowAnyMethod();
-            })
-                );
+            }));
 
             var app = builder.Build();
 
