@@ -1,4 +1,5 @@
 ﻿using MeTube.Client.Models;
+using MeTube.DTO;
 using Microsoft.JSInterop;
 using System.Diagnostics;
 
@@ -55,6 +56,11 @@ namespace MeTube.Client.Services
         public async Task<bool> DeleteUserAsync(int id)
         {
             return await _clientService.DeleteUser(id);
+        }
+
+        public async Task<bool> UpdateUserAsync(int id, UpdateUserDto updateUserDto)
+        {
+            return await _clientService.UpdateUserAsync(id, updateUserDto);
         }
     }
 }

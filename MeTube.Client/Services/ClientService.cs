@@ -186,7 +186,20 @@ namespace MeTube.Client.Services
             }
         }
 
+        public async Task<bool> UpdateUserAsync(int id, UpdateUserDto updateUserDto)
+        {
+            Uri uri = new Uri($"{Constants.UpdateUser}/{id}");
+            var response = await _client.PutAsJsonAsync(uri, updateUserDto);
 
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Failed to update user: {response.StatusCode}");
+                return false;
+            }
+
+            Console.WriteLine("User updated successfully!");
+            return true;
+        }
 
     }
 }

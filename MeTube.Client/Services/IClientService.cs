@@ -1,4 +1,5 @@
 ﻿using MeTube.Client.Models;
+using MeTube.DTO;
 
 namespace MeTube.Client.Services
 {
@@ -9,5 +10,6 @@ namespace MeTube.Client.Services
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<int?> GetUserIdByEmailAsync(string email);
         Task<bool> DeleteUser(int id);
+        Task<bool> UpdateUserAsync(int id, UpdateUserDto updateUserDto);
     }
 }

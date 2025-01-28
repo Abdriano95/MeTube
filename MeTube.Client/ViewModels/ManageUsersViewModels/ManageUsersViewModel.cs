@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
+using MeTube.DTO;
 using System.Collections.ObjectModel;
 
 namespace MeTube.Client.ViewModels.ManageUsersViewModels
@@ -27,7 +28,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             return hasse.Value;
         }
 
-        public async Task DeleteUser(User user)
+        public async Task DeleteUserButton(User user)
         {
             int userId = await GetUserId(user);
             bool response = await _userService.DeleteUserAsync(userId);
@@ -38,9 +39,20 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
 
         }
 
-        public async Task SaveAndUpdateUser(User user)
+        public async Task SaveChangesButton(User user)
         {
-
+            int userId = await GetUserId(user);
+            UpdateUserDto dto = new UpdateUserDto
+            {
+                Username = user.Username,
+                Email = user.Email,
+                Password = user.Password,
+            };
+            bool response = await _userService.UpdateUserAsync(userId, dto);
+            if(response)
+            {
+                string hasse = "Det fungerar";
+            }
         }
     }
 }

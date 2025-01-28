@@ -23,8 +23,10 @@ namespace MeTube.API.Profiles
             CreateMap<User, UserIdDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
-            CreateMap<int?, UserIdDto>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.HasValue ? src.Value : 0));
-        }
+            CreateMap<UpdateUserDto, User>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
+                .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email));
+            }
     }
 }

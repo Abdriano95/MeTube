@@ -15,6 +15,7 @@
         public static string UserLoginUrl = $"{BaseUrl}/user/login";
         public static string GetUserUrl = $"{BaseUrl}/user/{{0}}";
         public static string DeleteUser = $"{BaseUrl}/user";
+        public static string UpdateUser = $"{BaseUrl}/user";
 
 
     }
