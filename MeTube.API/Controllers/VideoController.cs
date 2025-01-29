@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MeTube.API.Services;
 using MeTube.Data.Entity;
 using MeTube.Data.Repository;
 using MeTube.DTO;
@@ -12,11 +13,13 @@ namespace MeTube.API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly VideoService _videoService;
 
-        public VideoController(IUnitOfWork unitOfWork, IMapper mapper)
+        public VideoController(IUnitOfWork unitOfWork, IMapper mapper, VideoService videoService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _videoService = videoService;
         }
 
         // GET: api/Video
@@ -89,5 +92,6 @@ namespace MeTube.API.Controllers
 
             return NoContent();
         }
+
     }
 }
