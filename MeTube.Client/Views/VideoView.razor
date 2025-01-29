@@ -1,0 +1,41 @@
+﻿@page "/video"
+@using MeTube.Client.ViewModels.VideoViewModels
+@inject VideoViewModel ViewModel
+
+<link href="css/video_view.css" rel="stylesheet" />
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <!-- Video -->
+        <div class="col-lg-8 col-md-12">
+            <div class="video-container">
+                <video controls class="video-player">
+                    <source src="~/videos/sample-video.mp4" type="video/mp4">
+                    Din webbläsare stöder inte videouppspelning.
+                </video>
+
+                <!-- Title, Description and Likes -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <h4 class="fw-bold mb-0">@ViewModel.Title</h4>
+                    <div class="like-section">
+                        <span class="fs-4">👍</span>
+                        <span class="fs-5">@ViewModel.Likes</span>
+                    </div>
+                </div>
+
+                <p>@ViewModel.Description</p>
+            </div>
+        </div>
+
+        <!-- Comments -->
+        <div class="col-lg-4 col-md-12">
+            <div class="comment-box">
+                @foreach (var comment in ViewModel.Comments)
+                {
+                    <p>@comment</p>
+                }
+            </div>
+            <input type="text" class="form-control mt-2" placeholder="Skriv kommentar...">
+        </div>
+    </div>
+</div>
