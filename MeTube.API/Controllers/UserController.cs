@@ -38,11 +38,11 @@ namespace MeTube.API.Controllers
             return Ok(user);
         }
 
-
         [HttpGet("manageUsers")]
         public async Task<IActionResult> GetAllusers()
         {
             var users = await _unitOfWork.Users.GetAllAsync();
+            //if (!User.IsInRole("User"))
             if(!users.Any())
                 return NotFound(new { Message = "Users not found" });
 

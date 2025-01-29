@@ -6,6 +6,11 @@
 
 <h3>Manage Accounts</h3>
 
+<div class="SearchContainer">
+    <input name="fsrch" id="fsrch" placeholder="Search W3Schools" @bind="ViewModel.Search">
+    <button id="saveButton" @onclick="() => ViewModel.SearchButton()" type="button">Search</button>
+</div>
+
 <div class="ManageUsers">
     @foreach (var user in ViewModel.AllUsers)
     {
