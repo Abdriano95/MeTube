@@ -2,6 +2,8 @@
 using MeTube.Client.Models;
 using MeTube.Client.Services;
 using MeTube.DTO;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System.Collections.ObjectModel;
 
 namespace MeTube.Client.ViewModels.ManageUsersViewModels
@@ -9,6 +11,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
     public partial class ManageUsersViewModel : ObservableValidator
     {
         private readonly IUserService _userService;
+        private readonly IJSRuntime _jsRuntime;
 
         [ObservableProperty]
         private string search = string.Empty;
@@ -29,9 +32,10 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
         public string selectedRole = string.Empty;
         public ObservableCollection<User> AllUsers { get; set; } = new ObservableCollection<User>();
         public ObservableCollection<User> FilteredUsers { get; set; } = new ObservableCollection<User>();
-        public ManageUsersViewModel(IUserService userService) 
+        public ManageUsersViewModel(IUserService userService, IJSRuntime jsRuntime) 
         {
             _userService = userService;
+            _jsRuntime = jsRuntime;
         }
         public async Task LoadUsers()
         {
@@ -43,7 +47,6 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
                 FilteredUsers.Add(user);
             }
         }
-
         private async Task<int> GetUserId(User user)
         {
             var hasse = await _userService.GetUserIdByEmailAsync(user.Email);
@@ -53,10 +56,14 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
         public async Task DeleteUserButton(User user)
         {
             int userId = await GetUserId(user);
-            bool response = await _userService.DeleteUserAsync(userId);
-            if (response)
+            bool securedelete = await _jsRuntime.InvokeAsync<bool>("confirm", $"You sure you want to delete this user?");
+            if (securedelete)
             {
-                string hasse = "User Deleted";
+                bool response = await _userService.DeleteUserAsync(userId);
+                if (response)
+                    await _jsRuntime.InvokeAsync<bool>("alert", "User succesfully deleted!");
+                else
+                    await _jsRuntime.InvokeAsync<bool>("alert", "Unable to succesfully delete user!");
             }
         }
 
@@ -70,11 +77,15 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
                 Password = user.Password,
                 Role = SelectedRole,
             };
-
-            bool response = await _userService.UpdateUserAsync(userId, dto);
-            if(response)
+            bool secureupdate = await _jsRuntime.InvokeAsync<bool>("confirm", $"You sure you want to update this user?");
+            if (secureupdate)
             {
-                string hasse = "Det fungerar";
+                bool response = await _userService.UpdateUserAsync(userId, dto);
+                string message = string.Empty;
+                if(response)
+                    await _jsRuntime.InvokeAsync<bool>("alert", "User succesfully saved!");
+                else
+                    await _jsRuntime.InvokeAsync<bool>("alert", "Unable to succesfully update user!");
             }
         }
         public void SearchButton()
@@ -93,6 +104,10 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             foreach (User song in FilteredUsers.Distinct())
                 AllUsers.Add(song);
             return;
+        }
+        public async Task<bool> ConfirmLeave()
+        {
+            return await _jsRuntime.InvokeAsync<bool>("confirm", "Do you wish to leave and lose the pending changes?");
         }
     }
 }
