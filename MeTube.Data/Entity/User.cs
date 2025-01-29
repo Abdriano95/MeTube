@@ -22,7 +22,5 @@ namespace MeTube.Data.Entity
 
         [Required(ErrorMessage = "Email is required")]
         public required string Email { get; set; }
-
-
     }
 }

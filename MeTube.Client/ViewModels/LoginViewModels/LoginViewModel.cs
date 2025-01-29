@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MeTube.Client.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System.ComponentModel.DataAnnotations;
 using static System.Net.Mime.MediaTypeNames;
@@ -30,11 +31,13 @@ namespace MeTube.Client.ViewModels.LoginViewModels
         private readonly IUserService _userService;
         private readonly IAuthenticationService _authService;
         private readonly IJSRuntime _jsRuntime;
-        public LoginViewModel(IUserService userService, IAuthenticationService authService, IJSRuntime jsRuntime) 
+        private readonly NavigationManager _navigation;
+        public LoginViewModel(IUserService userService, IAuthenticationService authService, IJSRuntime jsRuntime, NavigationManager navigation) 
         {
             _userService = userService;
             _authService = authService;
             _jsRuntime = jsRuntime;
+            _navigation = navigation;
         }
         public async Task LoginButton()
         {
@@ -59,6 +62,7 @@ namespace MeTube.Client.ViewModels.LoginViewModels
 
                 ClearAllFields();
                 IsUserLoggedIn = true;
+                _navigation.NavigateTo("/", forceLoad: true);
                 return;
             }
 
@@ -72,6 +76,7 @@ namespace MeTube.Client.ViewModels.LoginViewModels
         public async Task Logout()
         {
             await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "jwtToken");
+            _navigation.NavigateTo("/login", forceLoad: true);
         }
     }
 }

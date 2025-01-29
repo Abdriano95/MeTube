@@ -1,13 +1,14 @@
 ﻿@page "/manageaccounts"
 @using MeTube.Client.Models
 @using MeTube.Client.ViewModels.ManageUsersViewModels
+@using Microsoft.AspNetCore.Components.Authorization
 @inject ManageUsersViewModel ViewModel
 <link href="css/manage_users_admin.css" rel="stylesheet" />
 
-<h3>Manage Accounts</h3>
+<h1 id="Front">MANAGE ACCOUNTS</h1>
 
 <div class="SearchContainer">
-    <input name="fsrch" id="fsrch" placeholder="Search W3Schools" @bind="ViewModel.Search">
+    <input placeholder="Search users" @bind="ViewModel.Search">
     <button id="saveButton" @onclick="() => ViewModel.SearchButton()" type="button">Search</button>
 </div>
 
@@ -30,9 +31,9 @@
 
             <label for="roles">Role</label>
             <div class="SelectRole">
-                <select id="roles">
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
+                <select id="roles" @bind="ViewModel.SelectedRole">
+                    <option value="User">User</option>
+                    <option value="Admin">Admin</option>
                 </select>
             </div>
 

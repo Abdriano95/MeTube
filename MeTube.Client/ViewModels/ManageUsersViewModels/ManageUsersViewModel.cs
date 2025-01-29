@@ -12,6 +12,21 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
 
         [ObservableProperty]
         private string search = string.Empty;
+
+        [ObservableProperty]
+        private string username = string.Empty;
+
+        [ObservableProperty]
+        private string email = string.Empty;
+
+        [ObservableProperty]
+        private string password = string.Empty;
+
+        [ObservableProperty]
+        private string userRole = string.Empty;
+
+        [ObservableProperty]
+        public string selectedRole = string.Empty;
         public ObservableCollection<User> AllUsers { get; set; } = new ObservableCollection<User>();
         public ObservableCollection<User> FilteredUsers { get; set; } = new ObservableCollection<User>();
         public ManageUsersViewModel(IUserService userService) 
@@ -53,6 +68,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
                 Username = user.Username,
                 Email = user.Email,
                 Password = user.Password,
+                Role = SelectedRole,
             };
 
             bool response = await _userService.UpdateUserAsync(userId, dto);
@@ -61,7 +77,6 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
                 string hasse = "Det fungerar";
             }
         }
-
         public void SearchButton()
         {
             if (string.IsNullOrWhiteSpace(Search))

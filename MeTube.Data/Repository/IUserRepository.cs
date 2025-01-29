@@ -10,6 +10,7 @@ namespace MeTube.Data.Repository
         Task<bool> UsernameExistsAsync(string username);
         Task<User?> GetUserByUsernameAsync(string username);
         Task<int?> GetUserIdByEmailAsync(string email);
+        //Task<bool> ChangeUserRoleAsync(int userId, string newRole);
         Task AddUserAsync(User user);
         void UpdateUser(User user);
         void DeleteUser(User user);

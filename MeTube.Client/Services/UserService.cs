@@ -2,6 +2,7 @@
 using MeTube.DTO;
 using Microsoft.JSInterop;
 using System.Diagnostics;
+using System.Net.Http.Json;
 
 namespace MeTube.Client.Services
 {
@@ -9,10 +10,12 @@ namespace MeTube.Client.Services
     {
         private readonly ClientService _clientService;
         private readonly IJSRuntime _jsRuntime;
-        public UserService(ClientService clientservice, IJSRuntime jsRuntime)
+        private readonly HttpClient _httpClient;
+        public UserService(ClientService clientservice, IJSRuntime jsRuntime, HttpClient httpClient)
         {
             _clientService = clientservice;
             _jsRuntime = jsRuntime;
+            _httpClient = httpClient;
         }
 
         public Task<bool> RegisterUserAsync(User user)
@@ -53,6 +56,12 @@ namespace MeTube.Client.Services
             return response?.Token ?? string.Empty;
         }
 
+        public async Task<bool> IsUserAuthenticated()
+        {
+            var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "jwtToken");
+            return !string.IsNullOrEmpty(token);
+        }
+
         public async Task<bool> DeleteUserAsync(int id)
         {
             return await _clientService.DeleteUser(id);
@@ -62,5 +71,13 @@ namespace MeTube.Client.Services
         {
             return await _clientService.UpdateUserAsync(id, updateUserDto);
         }
+
+        //public async Task<bool> ChangeUserRoleAsync(int id, string newRole)
+        //{
+        //    Uri uri = new Uri($"{Constants.ChangeRole}/{id}");
+        //    var response = await _httpClient.PutAsJsonAsync(uri, new { Role = newRole });
+
+        //    return response.IsSuccessStatusCode;
+        //}
     }
 }

@@ -5,6 +5,7 @@ using MeTube.Client.ViewModels.ManageUsersViewModels;
 using MeTube.Client.ViewModels.SignupViewModels;
 using MeTube.Client.Views;
 using MeTube.DTO;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +40,7 @@ namespace MeTube.Client
             builder.Services.AddSingleton<IUserService, UserService>();
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddAuthorizationCore();
             builder.Services.AddAutoMapper(typeof(User));
             builder.Services.AddTransient<HttpClient>();
             //builder.Services.AddSingleton<IHttpsClientHandlerService, HttpsClientHandlerService>();
