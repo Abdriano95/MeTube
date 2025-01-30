@@ -2,6 +2,7 @@ using MeTube.Data.Repository;
 using MeTube.API.Profiles;
 using Microsoft.EntityFrameworkCore;
 using MeTube.Data;
+using MeTube.API.Services;
 
 namespace MeTube.API
 {
@@ -21,12 +22,11 @@ namespace MeTube.API
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MeTubeDB")));
 
-            // Add UnitOfWork and Repositories
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            // Add UnitOfWork 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             // Add AutoMapper
-            builder.Services.AddAutoMapper(typeof(UserProfile));
+            builder.Services.AddAutoMapper(typeof(UserProfile), typeof(VideoProfile));
 
             builder.Services.AddCors(options => 
             options.AddDefaultPolicy(policy =>
@@ -35,8 +35,11 @@ namespace MeTube.API
                 .AllowAnyHeader()
                 .AllowAnyOrigin()
                 .AllowAnyMethod();
-            })
-                );
+            }));
+
+            // Add VideoService
+            builder.Services.AddScoped<VideoService>();
+
 
             var app = builder.Build();
 
