@@ -7,7 +7,6 @@ namespace MeTube.Data
     public class ApplicationDbContext : DbContext
     {
         public virtual DbSet<User> Users { get; set; } = null!;
-        public virtual DbSet<Admin> Admins { get; set; } = null!;
         public virtual DbSet<Video> Videos { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
@@ -27,32 +26,33 @@ namespace MeTube.Data
             // Configure User entity
             modelBuilder.Entity<User>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.HasKey(u => u.Id);
+                entity.Property(u => u.Id).ValueGeneratedOnAdd();
                 entity.Property(entity => entity.Username).IsRequired().HasMaxLength(20);
                 entity.Property(entity => entity.Password).IsRequired().HasMaxLength(20);
                 entity.Property(entity => entity.Email).IsRequired();
+                entity.Property(entity => entity.Role).IsRequired().HasDefaultValue("User");
+
+                // Relation with videos
+                entity.HasMany(u => u.Videos).WithOne(v => v.User).HasForeignKey(v => v.UserId).OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configure Admin entity
-            modelBuilder.Entity<Admin>(entity =>
-            {
-                entity.HasBaseType<User>();
-            });
 
             // Configure Video entity
             modelBuilder.Entity<Video>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
-                entity.Property(e => e.Title).IsRequired().HasMaxLength(30);
-                entity.Property(e => e.Description).IsRequired().HasMaxLength(255);
-                entity.Property(e => e.Genre).IsRequired().HasMaxLength(30);
-                entity.Property(e => e.VideoUrl).HasMaxLength(2083); // Standard for URLs (length)
-                entity.Property(e => e.DateUploaded).IsRequired().HasColumnType("datetime");
+                entity.HasKey(v => v.Id);
+                entity.Property(v => v.Id).ValueGeneratedOnAdd();
+                entity.Property(v => v.Title).IsRequired().HasMaxLength(30);
+                entity.Property(v => v.Description).IsRequired().HasMaxLength(255);
+                entity.Property(v => v.Genre).IsRequired().HasMaxLength(30);
+                entity.Property(v => v.VideoUrl).HasMaxLength(2083); // Standard for URLs (length)
+                entity.Property(v => v.ThumbnailUrl).HasMaxLength(2083); // Standard for URLs (length)
+                entity.Property(v => v.BlobName).HasMaxLength(500);
+                entity.Property(v => v.DateUploaded).IsRequired().HasColumnType("datetime");
 
                 // Relation with user
-                entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(v => v.User).WithMany(u => u.Videos).HasForeignKey(v => v.UserId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             });
 
             SeedData(modelBuilder);
@@ -66,19 +66,22 @@ namespace MeTube.Data
                 Id = 1,
                 Username = "johndoe1",
                 Password = "pwd123",
-                Email = "john.doe@example.com"
+                Email = "john.doe@example.com",
+                Role = "Admin"
             };
 
-            Admin admin1 = new()
+            User user2 = new()
             {
                 Id = 2,
-                Username = "janesmith2",
+                Username = "janedoe2",
                 Password = "pwd456",
-                Email = "jane.smith@example.com",
+                Email = "jane.doe@example.com",
+                Role = "User"
             };
 
-            modelBuilder.Entity<User>().HasData(user1);
-            modelBuilder.Entity<Admin>().HasData(admin1);
+            modelBuilder.Entity<User>().HasData(user1, user2);
+
+           
 
             // Seed Videos
             Video video1 = new()

@@ -17,17 +17,19 @@ namespace MeTube.Data.Entity
 
         [Required(ErrorMessage = "Title is required.")]
         [StringLength(30, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 30 characters.")]
-        public string Title { get; set; }
+        public required string Title { get; set; }
 
         [Required(ErrorMessage = "Description is required.")]
         [StringLength(255, MinimumLength = 3, ErrorMessage = "Description must be between 3 and 255 characters.")]
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
         [Required(ErrorMessage = "Genre is required.")]
         [StringLength(30, MinimumLength = 3, ErrorMessage = "Genre must be between 3 and 30 characters.")]
-        public string Genre { get; set; }
-        public string VideoUrl { get; set; }
+        public required string Genre { get; set; }
+        public string? VideoUrl { get; set; }
+        public string? ThumbnailUrl { get; set; }
+        public string? BlobName { get; set; }
         public DateTime DateUploaded { get; set; }
-        public User User { get; set; }
+        public User? User { get; set; }
     }
 }

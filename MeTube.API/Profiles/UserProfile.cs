@@ -15,8 +15,7 @@ namespace MeTube.API.Profiles
             CreateMap<UpdateUserDto, User>();
 
             // Map from User to ManageUserDto
-            CreateMap<User, ManageUserDto>()
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src is Admin ? "Admin" : "User"));
+            CreateMap<User, ManageUserDto>();
 
             // Optionally, map from User to a DTO if needed
             CreateMap<User, UserDto>();
