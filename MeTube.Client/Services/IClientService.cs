@@ -1,10 +1,15 @@
 ﻿using MeTube.Client.Models;
+using MeTube.DTO;
 
 namespace MeTube.Client.Services
 {
     public interface IClientService
     {
         Task<bool> RegisterUserAsync(User user);
-        Task<User?> LoginAsync(string username, string password);
+        Task<LoginResponse?> LoginAsync(string username, string password);
+        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<int?> GetUserIdByEmailAsync(string email);
+        Task<bool> DeleteUser(int id);
+        Task<bool> UpdateUserAsync(int id, UpdateUserDto updateUserDto);
     }
 }

@@ -1,0 +1,58 @@
+﻿@page "/manageaccounts"
+@using MeTube.Client.Models
+@using MeTube.Client.ViewModels.ManageUsersViewModels
+@using Microsoft.AspNetCore.Components.Authorization
+@inject ManageUsersViewModel ViewModel
+<link href="css/manage_users_admin.css" rel="stylesheet" />
+
+<h1 id="Front">MANAGE ACCOUNTS</h1>
+
+<div class="SearchContainer">
+    <input placeholder="Search users" @bind="ViewModel.Search">
+    <button id="saveButton" @onclick="() => ViewModel.SearchButton()" type="button">Search</button>
+</div>
+
+<div class="ManageUsers">
+    @foreach (var user in ViewModel.AllUsers)
+    {
+        <form class="FormContainer">
+            <div class="FormText">
+                <h1>User</h1>
+            </div>
+
+            <label>Username</label>
+            <input @bind="user.Username" />
+
+            <label>Email</label>
+            <input @bind="user.Email" type="email" />
+
+            <label>Password</label>
+            <input @bind="user.Password" type="text" />
+
+            <label for="roles">Role</label>
+            <div class="SelectRole">
+                <select id="roles" @bind="ViewModel.SelectedRole">
+                    <option value="User">User</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+
+            <div class="ManageUsersButtons">
+                <button type="button" @onclick="() => ViewModel.DeleteUserButton(user)" id="deleteButton">DELETE USER</button>
+                <button type="button" @onclick="() => ViewModel.SaveChangesButton(user)" id="saveButton">SAVE CHANGES</button>
+            </div>
+        </form>
+    }
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadUsers();
+    }
+
+    private async Task SaveUser(User user)
+    {
+        // await ViewModel.SaveUserAsync(user);
+    }
+}

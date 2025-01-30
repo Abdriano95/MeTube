@@ -35,6 +35,12 @@ namespace MeTube.Data.Repository
             return await GetAllAsync();
         }
 
+        public async Task<int?> GetUserIdByEmailAsync(string email)
+        {
+            var user = await DbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return user?.Id;
+        }
+
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             return await DbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -59,5 +65,32 @@ namespace MeTube.Data.Repository
         {
             return await DbContext.Users.AnyAsync(u => u.Username == username);
         }
+
+        //public async Task<bool> ChangeUserRoleAsync(int userId, string newRole)
+        //{
+        //    var user = await DbContext.Users.FindAsync(userId);
+        //    if (user == null)
+        //        return false;
+
+        //    // Kontrollera om användaren redan är Admin
+        //    if (user is Admin)
+        //        return false;
+
+        //    // Skapa en ny Admin-instans baserat på användaren
+        //    Admin newAdmin = new Admin
+        //    {
+        //        Id = userId,
+        //        Username = user.Username,
+        //        Email = user.Email,
+        //        Password = user.Password
+        //    };
+
+        //    // Ta bort den gamla användaren och lägg till den nya Admin
+        //    DbContext.Users.Remove(user);
+        //    await DbContext.Users.AddAsync(newAdmin);
+
+        //    await DbContext.SaveChangesAsync();
+        //    return true;
+        //}
     }
 }
