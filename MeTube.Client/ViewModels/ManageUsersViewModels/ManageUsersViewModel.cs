@@ -32,6 +32,8 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
         public string selectedRole = string.Empty;
         public ObservableCollection<User> AllUsers { get; set; } = new ObservableCollection<User>();
         public ObservableCollection<User> FilteredUsers { get; set; } = new ObservableCollection<User>();
+
+        public List<string> Roles = new() { "User", "Admin" };
         public ManageUsersViewModel(IUserService userService, IJSRuntime jsRuntime) 
         {
             _userService = userService;
@@ -75,7 +77,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
                 Username = user.Username,
                 Email = user.Email,
                 Password = user.Password,
-                Role = SelectedRole,
+                Role = user.Role,
             };
             bool secureupdate = await _jsRuntime.InvokeAsync<bool>("confirm", "You sure you want to update this user?");
             if (secureupdate)

@@ -31,9 +31,12 @@
 
             <label for="roles">Role</label>
             <div class="SelectRole">
-                <select id="roles" @bind="ViewModel.SelectedRole">
-                    <option value="User">User</option>
-                    <option value="Admin">Admin</option>
+                <select id="roles" @bind="user.Role">
+                    <option selected value="@user.Role">@user.Role</option>
+                    @foreach (var role in ViewModel.Roles.Where(a => a != user.Role))
+                    {
+                        <option value="@role">@role</option>
+                    }
                 </select>
             </div>
 
@@ -50,7 +53,7 @@
     {
         await ViewModel.LoadUsers();
     }
-
+    
     private async Task SaveUser(User user)
     {
         // await ViewModel.SaveUserAsync(user);
