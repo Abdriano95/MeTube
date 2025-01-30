@@ -99,17 +99,12 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             foreach (User user in result)
                 AllUsers.Add(user);
         }
-
         private void ResetSearchedSongs()
         {
             AllUsers.Clear();
             foreach (User song in FilteredUsers.Distinct())
                 AllUsers.Add(song);
             return;
-        }
-        public async Task<bool> ConfirmLeave()
-        {
-            return await _jsRuntime.InvokeAsync<bool>("confirm", "Do you wish to leave and lose the pending changes?");
         }
     }
 }
