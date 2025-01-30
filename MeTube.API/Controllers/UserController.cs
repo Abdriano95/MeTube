@@ -101,6 +101,11 @@ namespace MeTube.API.Controllers
                 return BadRequest(ModelState);
             }
 
+            var requestFromUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userIdRequestedFromuser = int.Parse(requestFromUser);
+            if (userIdRequestedFromuser == id)
+                return NotFound(new { Message = "Cant delete your own user" });
+
             var user = await _unitOfWork.Users.GetUserByIdAsync(id);
             if (user == null)
             {
@@ -118,6 +123,11 @@ namespace MeTube.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
+            var requestFromUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userIdRequestedFromuser = int.Parse(requestFromUser);
+            if (userIdRequestedFromuser == id)
+                return NotFound(new { Message = "Cant delete your own user" });
+
             var user = await _unitOfWork.Users.GetUserByIdAsync(id);
             if (user == null)
             {
@@ -186,6 +196,7 @@ namespace MeTube.API.Controllers
 
             var claims = new[]
             {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role)
