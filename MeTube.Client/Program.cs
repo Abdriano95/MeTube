@@ -3,6 +3,7 @@ using MeTube.Client.Services;
 using MeTube.Client.ViewModels.LoginViewModels;
 using MeTube.Client.ViewModels.ManageUsersViewModels;
 using MeTube.Client.ViewModels.SignupViewModels;
+using MeTube.Client.ViewModels.VideoViewModels;
 using MeTube.Client.Views;
 using MeTube.DTO;
 using Microsoft.AspNetCore.Components;
@@ -30,11 +31,13 @@ namespace MeTube.Client
             //builder.Services.AddSingleton<SignupView>();
             builder.Services.AddSingleton<LoginView>();
             builder.Services.AddSingleton<ManageUsersView>();
+            builder.Services.AddSingleton<VideoView>();
 
 
             builder.Services.AddTransient<SignupViewModel>();
             builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<ManageUsersViewModel>();
+            builder.Services.AddTransient<VideoViewModel>();
 
             builder.Services.AddSingleton<ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
