@@ -77,7 +77,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
                 Password = user.Password,
                 Role = SelectedRole,
             };
-            bool secureupdate = await _jsRuntime.InvokeAsync<bool>("confirm", $"You sure you want to update this user?");
+            bool secureupdate = await _jsRuntime.InvokeAsync<bool>("confirm", "You sure you want to update this user?");
             if (secureupdate)
             {
                 bool response = await _userService.UpdateUserAsync(userId, dto);

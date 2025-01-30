@@ -71,13 +71,5 @@ namespace MeTube.Client.Services
         {
             return await _clientService.UpdateUserAsync(id, updateUserDto);
         }
-
-        //public async Task<bool> ChangeUserRoleAsync(int id, string newRole)
-        //{
-        //    Uri uri = new Uri($"{Constants.ChangeRole}/{id}");
-        //    var response = await _httpClient.PutAsJsonAsync(uri, new { Role = newRole });
-
-        //    return response.IsSuccessStatusCode;
-        //}
     }
 }

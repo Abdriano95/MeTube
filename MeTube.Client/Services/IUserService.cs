@@ -15,6 +15,5 @@ namespace MeTube.Client.Services
         Task<bool> UpdateUserAsync(int id, UpdateUserDto updateUserDto);
         Task<bool> IsUserAuthenticated();
 
-        //Task<bool> ChangeUserRoleAsync(int id, string newRole);
     }
 }

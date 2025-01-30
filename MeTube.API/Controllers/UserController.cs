@@ -112,28 +112,6 @@ namespace MeTube.API.Controllers
             return Ok(new { Message = "User updated successfully" });
         }
 
-        //[HttpPut("changeRole/{id}")]
-        //public async Task<IActionResult> ChangeUserRole(int id, [FromBody] UpdateUserDto request)
-        //{
-        //    var user = await _unitOfWork.Users.GetUserByIdAsync(id);
-        //    if (user == null)
-        //    {
-        //        return NotFound(new { Message = "User not found" });
-        //    }
-
-        //    // Uppdatera rollen om den är angiven
-        //    if (!string.IsNullOrEmpty(request.Role))
-        //    {
-        //        bool success = await _unitOfWork.Users.ChangeUserRoleAsync(id, request.Role);
-        //        if (!success)
-        //        {
-        //            return BadRequest(new { Message = "Could not update user role" });
-        //        }
-        //    }
-
-        //    return Ok(new { Message = "User role updated successfully" });
-        //}
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -200,7 +178,7 @@ namespace MeTube.API.Controllers
 
         private string GenerateJwtToken(User user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword")); // Håll detta säkert!
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword"));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
