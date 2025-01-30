@@ -1,7 +1,9 @@
 ﻿using Azure.Storage;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using MeTube.DTO;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace MeTube.API.Services
 {
@@ -56,17 +58,50 @@ namespace MeTube.API.Services
             BlobResponseDto response = new();
             BlobClient client = _blobServiceClient.GetBlobClient(blob.FileName);
 
+            var blobHttpHeaders = new BlobHttpHeaders
+            {
+                ContentType = blob.ContentType
+            };
+
+            var contentType = blob.ContentType;
+            if (string.IsNullOrEmpty(contentType))
+            {
+                var provider = new FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(blob.FileName, out contentType))
+                {
+                    contentType = "application/octet-stream";
+                }
+            }
+
+            var allowedTypes = new[] { "video/mp4", "video/webm" };
+            if (!allowedTypes.Contains(contentType))
+            {
+                return new BlobResponseDto
+                {
+                    Error = true,
+                    Status = "Otillåten filtyp"
+                };
+            }
+
             await using (Stream? stream = blob.OpenReadStream())
             {
-                await client.UploadAsync(stream, true);
+                await client.UploadAsync(
+                    stream,
+                    new BlobUploadOptions { HttpHeaders = blobHttpHeaders },
+                    cancellationToken: default
+                );
             }
+
+            
+            var properties = await client.GetPropertiesAsync();
 
             response.Status = $"File {blob.FileName} Uploaded Successfully";
             response.Error = false;
             response.Blob = new BlobDto
             {
                 Uri = client.Uri.AbsoluteUri,
-                Name = client.Name
+                Name = client.Name,
+                ContentType = properties.Value.ContentType
             };
 
             return response;
