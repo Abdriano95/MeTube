@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MeTube.API.Services;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace MeTube.API
 {
@@ -16,10 +19,17 @@ namespace MeTube.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                            .AddNewtonsoftJson();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "MeTube API", Version = "v1" });
+
+                // Lägg till denna anpassade operation filter
+                c.OperationFilter<FileUploadOperationFilter>();
+            });
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -38,6 +48,12 @@ namespace MeTube.API
                     ValidAudience = "User",
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword"))
                 };
+            });
+
+
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 1073741824; // 1 GB
             });
 
             // Add DbContext
@@ -89,6 +105,39 @@ namespace MeTube.API
 
             app.Run();
 
+        }
+    }
+
+    public class FileUploadOperationFilter : IOperationFilter
+    {
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            var fileParameters = context.MethodInfo.GetParameters()
+                .Where(p => p.ParameterType == typeof(IFormFile))
+                .ToList();
+
+            if (!fileParameters.Any()) return;
+
+            operation.RequestBody = new OpenApiRequestBody
+            {
+                Content =
+            {
+                ["multipart/form-data"] = new OpenApiMediaType
+                {
+                    Schema = new OpenApiSchema
+                    {
+                        Type = "object",
+                        Properties = fileParameters.ToDictionary(
+                            param => param.Name,
+                            _ => new OpenApiSchema
+                            {
+                                Type = "string",
+                                Format = "binary"
+                            })
+                    }
+                }
+            }
+            };
         }
     }
 }

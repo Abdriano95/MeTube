@@ -11,8 +11,10 @@ namespace MeTube.Data.Repository
     {
         Task<IEnumerable<Video>> GetAllVideosAsync();
         Task<Video?> GetVideoByIdAsync(int id);
+        Task<Video?> GetVideoByIdWithTrackingAsync(int id);
         Task<IEnumerable<Video>> GetVideosByUserIdAsync(int userId);
         Task AddVideoAsync(Video video);
+        Task AddVideoWithoutSaveAsync(Video video);
         void UpdateVideo(Video video);
         void DeleteVideo(Video video);
     }
