@@ -201,5 +201,87 @@ namespace MeTube.Client.Services
             return true;
         }
 
+        public async Task<T?> GetAsync<T>(string url)
+        {
+            try
+            {
+                Uri uri = new Uri(url);
+                var response = await _client.GetAsync(uri);
+                if (!response.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine($"Failed to fetch data. StatusCode: {response.StatusCode}");
+                    return default;
+                }
+                var data = await response.Content.ReadFromJsonAsync<T>(_serializerOptions);
+                return data;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error fetching data: {ex.Message}");
+                return default;
+            }
+        }
+
+        public async Task<T?> PostAsync<T>(string url, object data)
+        {
+            try
+            {
+                Uri uri = new Uri(url);
+                var response = await _client.PostAsJsonAsync(uri, data);
+                if (!response.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine($"Failed to post data. StatusCode: {response.StatusCode}");
+                    return default;
+                }
+                var responseData = await response.Content.ReadFromJsonAsync<T>(_serializerOptions);
+                return responseData;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error posting data: {ex.Message}");
+                return default;
+            }
+        }
+
+        public async Task<T?> PutAsync<T>(string url, object data)
+        {
+            try
+            {
+                Uri uri = new Uri(url);
+                var response = await _client.PutAsJsonAsync(uri, data);
+                if (!response.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine($"Failed to put data. StatusCode: {response.StatusCode}");
+                    return default;
+                }
+                var responseData = await response.Content.ReadFromJsonAsync<T>(_serializerOptions);
+                return responseData;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error putting data: {ex.Message}");
+                return default;
+            }
+        }
+
+        public async Task<bool> DeleteAsync(string url)
+        {
+            try
+            {
+                Uri uri = new Uri(url);
+                var response = await _client.DeleteAsync(uri);
+                if (!response.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine($"Failed to delete data. StatusCode: {response.StatusCode}");
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error deleting data: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

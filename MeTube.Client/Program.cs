@@ -38,13 +38,16 @@ namespace MeTube.Client
             builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<ManageUsersViewModel>();
             builder.Services.AddTransient<VideoViewModel>();
+            builder.Services.AddTransient<VideoListViewModel>();
 
             builder.Services.AddSingleton<ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
+            builder.Services.AddSingleton<VideoService>();
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddAuthorizationCore();
             builder.Services.AddAutoMapper(typeof(User));
+            builder.Services.AddAutoMapper(typeof(Program).Assembly);
             builder.Services.AddTransient<HttpClient>();
             //builder.Services.AddSingleton<IHttpsClientHandlerService, HttpsClientHandlerService>();
 

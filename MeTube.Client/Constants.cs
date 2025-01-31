@@ -18,6 +18,19 @@
         public static string UpdateUser = $"{BaseUrl}/user";
         public static string ChangeRole = $"{BaseUrl}/user/changeRole/{{0}}";
 
+        // Video endpoints
+        public static string VideoBaseUrl = $"{BaseUrl}/Video";
+        public static string VideoGetAllUrl = VideoBaseUrl;
+        public static string VideoGetByIdUrl = $"{VideoBaseUrl}/{{0}}";
+        public static string VideoUploadUrl = VideoBaseUrl;
+        public static string VideoStreamUrl = $"{VideoBaseUrl}/stream/{{0}}";
+        public static string VideoUpdateUrl = $"{VideoBaseUrl}/{{0}}";
+        public static string VideoUpdateFileUrl = $"{VideoBaseUrl}/{{0}}/file";
+        public static string VideoUpdateThumbnailUrl = $"{VideoBaseUrl}/{{0}}/thumbnail";
+        public static string VideoDeleteUrl = $"{VideoBaseUrl}/{{0}}";
+        public static string VideoResetThumbnailUrl = $"{VideoBaseUrl}/{{0}}/default-thumbnail";
+
+
 
     }
 }

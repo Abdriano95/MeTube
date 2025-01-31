@@ -11,5 +11,13 @@ namespace MeTube.Client.Services
         Task<int?> GetUserIdByEmailAsync(string email);
         Task<bool> DeleteUser(int id);
         Task<bool> UpdateUserAsync(int id, UpdateUserDto updateUserDto);
+        Task<T?> GetAsync<T>(string url);
+
+        Task<T?> PostAsync<T>(string url, object data);
+
+        Task<T?> PutAsync<T>(string url, object data);
+
+        Task<bool> DeleteAsync(string url);
+
     }
 }
