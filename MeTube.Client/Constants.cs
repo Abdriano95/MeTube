@@ -21,9 +21,9 @@
         // Video endpoints
         public static string VideoBaseUrl = $"{BaseUrl}/Video";
         public static string VideoGetAllUrl = VideoBaseUrl;
-        public static string VideoGetByIdUrl = $"{VideoBaseUrl}/{{0}}";
+        public static string VideoGetByIdUrl = $"{VideoBaseUrl}";
         public static string VideoUploadUrl = VideoBaseUrl;
-        public static string VideoStreamUrl = $"{VideoBaseUrl}/stream/{{0}}";
+        public static string VideoStreamUrl = $"{VideoBaseUrl}/stream";
         public static string VideoUpdateUrl = $"{VideoBaseUrl}/{{0}}";
         public static string VideoUpdateFileUrl = $"{VideoBaseUrl}/{{0}}/file";
         public static string VideoUpdateThumbnailUrl = $"{VideoBaseUrl}/{{0}}/thumbnail";

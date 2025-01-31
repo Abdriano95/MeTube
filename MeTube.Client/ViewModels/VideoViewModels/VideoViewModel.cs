@@ -1,54 +1,91 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using MeTube.Client.Models;
+using MeTube.Client.Services;
+using Microsoft.AspNetCore.Components;
 using System.Collections.ObjectModel;
+using System.Xml.Linq;
 
 namespace MeTube.Client.ViewModels.VideoViewModels
 {
     [ObservableObject]
     public partial class VideoViewModel
     {
+        private readonly VideoService _videoService;
+        private readonly NavigationManager _navigationManager;
 
-        [ObservableProperty]
-        public string _title;
-
-        [ObservableProperty]
-        public string _description;
-
-        [ObservableProperty]
-        public int _likes;
-
-        [ObservableProperty]
-        public ObservableCollection<string> _comments;
-
-        public VideoViewModel()
+        public VideoViewModel(VideoService videoService, NavigationManager navigationManager)
         {
-            _title = string.Empty;
-            _description = string.Empty;
-            _comments = new ObservableCollection<string>();
-            FillPost();
+            _videoService = videoService;
+            _navigationManager = navigationManager;
+            Comments = new ObservableCollection<Comment>();
         }
 
-        public void FillPost()
+        [ObservableProperty]
+        private Video _currentVideo;
+
+        [ObservableProperty]
+        private bool _isLoading;
+
+        [ObservableProperty]
+        private string _errorMessage;
+
+        [ObservableProperty]
+        private Stream _videoStream;
+
+        public ObservableCollection<Comment> Comments { get; }
+
+        [RelayCommand]
+        public async Task LoadVideoAsync(int videoId)
         {
-            List<string> comments = new List<string>
+            IsLoading = true;
+            ErrorMessage = string.Empty;
+
+            try
             {
-                "Bra video!",
-                "Härlig video",
-                "Bra video!",
-                "Härlig video",
-                "Bra video!",
-                "Härlig video"
+                CurrentVideo = await _videoService.GetVideoByIdAsync(videoId);
+
+                if (CurrentVideo == null)
+                {
+                    ErrorMessage = "Video kunde inte hittas";
+                    _navigationManager.NavigateTo("/");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(CurrentVideo.VideoUrl))
+                {
+                    CurrentVideo.VideoUrl = $"{Constants.VideoStreamUrl}/{videoId}";
+                    VideoStream = await _videoService.GetVideoStreamAsync(videoId);
+                }
+
+
+                // TODO: Hämta kommentarer från API
+                await LoadCommentsAsync(videoId);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Ett fel uppstod: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private async Task LoadCommentsAsync(int videoId)
+        {
+            // Implementera när du har kommentars-API
+            var mockComments = new List<Comment>
+            {
+                new Comment { Author = "Användare1", Text = "Bra video!", Date = DateTime.Now.AddHours(-2) },
+                new Comment { Author = "Användare2", Text = "Mycket informativt", Date = DateTime.Now.AddHours(-1) }
             };
 
-            foreach (var comment in comments)
+            Comments.Clear();
+            foreach (var comment in mockComments)
             {
                 Comments.Add(comment);
             }
-
-            Title = "VSause, Michael here.";
-
-            Description = "Ranting about unrelated things";
-
-            Likes = 15;
         }
     }
 }
