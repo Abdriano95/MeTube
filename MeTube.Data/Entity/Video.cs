@@ -16,7 +16,7 @@ namespace MeTube.Data.Entity
         public int UserId { get; set; }
 
         [Required(ErrorMessage = "Title is required.")]
-        [StringLength(30, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 30 characters.")]
+        [StringLength(120, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 30 characters.")]
         public required string Title { get; set; }
 
         [Required(ErrorMessage = "Description is required.")]

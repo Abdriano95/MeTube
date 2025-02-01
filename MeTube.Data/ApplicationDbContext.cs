@@ -43,7 +43,7 @@ namespace MeTube.Data
             {
                 entity.HasKey(v => v.Id);
                 entity.Property(v => v.Id).ValueGeneratedOnAdd();
-                entity.Property(v => v.Title).IsRequired().HasMaxLength(30);
+                entity.Property(v => v.Title).IsRequired().HasMaxLength(120);
                 entity.Property(v => v.Description).IsRequired().HasMaxLength(255);
                 entity.Property(v => v.Genre).IsRequired().HasMaxLength(30);
                 entity.Property(v => v.VideoUrl).HasMaxLength(2083); // Standard for URLs (length)

@@ -3,7 +3,6 @@
     public static class Constants
     {
         public static string LocalhostUrl = "localhost";
-
         public static string Scheme = "https"; // or http
         public static string Port = "5001"; // or 5000
         public static string BaseUrl = $"{Scheme}://{LocalhostUrl}:{Port}/api";
@@ -24,11 +23,11 @@
         public static string VideoGetByIdUrl = $"{VideoBaseUrl}";
         public static string VideoUploadUrl = VideoBaseUrl;
         public static string VideoStreamUrl = $"{VideoBaseUrl}/stream";
-        public static string VideoUpdateUrl = $"{VideoBaseUrl}/{{0}}";
-        public static string VideoUpdateFileUrl = $"{VideoBaseUrl}/{{0}}/file";
-        public static string VideoUpdateThumbnailUrl = $"{VideoBaseUrl}/{{0}}/thumbnail";
-        public static string VideoDeleteUrl = $"{VideoBaseUrl}/{{0}}";
-        public static string VideoResetThumbnailUrl = $"{VideoBaseUrl}/{{0}}/default-thumbnail";
+        public static string VideoUpdateUrl = $"{VideoBaseUrl}/{0}";
+        public static string VideoUpdateFileUrl = $"{VideoBaseUrl}/{0}/file";
+        public static string VideoUpdateThumbnailUrl = $"{VideoBaseUrl}/{0}/thumbnail";
+        public static string VideoDeleteUrl = $"{VideoBaseUrl}/{0}";
+        public static string VideoResetThumbnailUrl = $"{VideoBaseUrl}/{0}/default-thumbnail";
 
 
 

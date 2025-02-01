@@ -10,13 +10,13 @@ namespace MeTube.Client.ViewModels.VideoViewModels
     [ObservableObject]
     public partial class VideoListViewModel
     {
-        private readonly VideoService _videoService;
+        private readonly IVideoService _videoService;
 
         [ObservableProperty]
         private ObservableCollection<Video> videos; 
         public bool IsLoading { get; set; }
 
-        public VideoListViewModel(VideoService videoService)
+        public VideoListViewModel(IVideoService videoService)
         {
             _videoService = videoService;     
         }

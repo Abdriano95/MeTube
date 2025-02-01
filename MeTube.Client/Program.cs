@@ -42,7 +42,7 @@ namespace MeTube.Client
 
             builder.Services.AddSingleton<ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
-            builder.Services.AddSingleton<VideoService>();
+            builder.Services.AddScoped<IVideoService, VideoService>();
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddAuthorizationCore();

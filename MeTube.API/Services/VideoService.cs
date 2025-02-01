@@ -137,7 +137,7 @@ namespace MeTube.API.Services
                 return new BlobResponseDto
                 {
                     Error = true,
-                    Status = "Otillåten filtyp"
+                    Status = "Only MP4 & WEBM are allowed"
                 };
             }
 

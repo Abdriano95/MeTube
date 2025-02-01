@@ -18,6 +18,11 @@ namespace MeTube.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.WebHost.ConfigureKestrel(serverOptions =>
+            {
+                serverOptions.Limits.MaxRequestBodySize = 1073741824; // 1 GB
+            });
+
             // Add services to the container.
             builder.Services.AddControllers()
                             .AddNewtonsoftJson();
@@ -67,14 +72,13 @@ namespace MeTube.API
             builder.Services.AddAutoMapper(typeof(UserProfile));
             builder.Services.AddAutoMapper(typeof(UserProfile), typeof(VideoProfile));
 
-            builder.Services.AddCors(options => 
-            options.AddDefaultPolicy(policy =>
+            builder.Services.AddCors(options =>
             {
-                policy.WithOrigins("https://locolhost:7248")
-                .AllowAnyHeader()
-                .AllowAnyOrigin()
-                .AllowAnyMethod();
-            }));
+                options.AddPolicy("AllowAll",
+                    policy => policy.AllowAnyOrigin()
+                                    .AllowAnyMethod()
+                                    .AllowAnyHeader());
+            });
 
             // Add VideoService
             builder.Services.AddScoped<VideoService>();
@@ -98,7 +102,7 @@ namespace MeTube.API
 
             app.MapControllers();
 
-            app.UseCors();
+            app.UseCors("AllowAll");
 
             app.UseAuthentication();
             app.UseAuthorization();

@@ -29,6 +29,15 @@ namespace MeTube.Client.Profiles
                 .ForMember(dest => dest.ThumbnailUrl, opt => opt.MapFrom(src => src.ThumbnailUrl))
                 .ForMember(dest => dest.DateUploaded, opt => opt.MapFrom(src => src.DateUploaded))
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId));
+
+            // Map Video to UploadVideoDto (one-way, for creation)
+            CreateMap<UploadVideoDto, Video>()
+                .ForMember(dest => dest.DateUploaded, opt => opt.MapFrom(_ => DateTime.UtcNow))
+                .ForMember(dest => dest.VideoUrl, opt => opt.Ignore());
+
+            // Map Video to UpdateVideoDto (partial update)
+            CreateMap<UpdateVideoDto, Video>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

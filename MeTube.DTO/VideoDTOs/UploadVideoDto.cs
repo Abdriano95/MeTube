@@ -6,7 +6,7 @@ namespace MeTube.DTO.VideoDTOs
     public class UploadVideoDto
     {
         [Required]
-        [StringLength(30, MinimumLength = 3)]
+        [StringLength(120, MinimumLength = 3)]
         public string Title { get; set; }
 
         [Required]

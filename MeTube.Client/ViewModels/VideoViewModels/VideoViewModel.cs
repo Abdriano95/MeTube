@@ -11,10 +11,10 @@ namespace MeTube.Client.ViewModels.VideoViewModels
     [ObservableObject]
     public partial class VideoViewModel
     {
-        private readonly VideoService _videoService;
+        private readonly IVideoService _videoService;
         private readonly NavigationManager _navigationManager;
 
-        public VideoViewModel(VideoService videoService, NavigationManager navigationManager)
+        public VideoViewModel(IVideoService videoService, NavigationManager navigationManager)
         {
             _videoService = videoService;
             _navigationManager = navigationManager;
@@ -30,8 +30,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         [ObservableProperty]
         private string _errorMessage;
 
-        [ObservableProperty]
-        private Stream _videoStream;
+       
 
         public ObservableCollection<Comment> Comments { get; }
 
@@ -45,18 +44,16 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             {
                 CurrentVideo = await _videoService.GetVideoByIdAsync(videoId);
 
+
+
                 if (CurrentVideo == null)
                 {
                     ErrorMessage = "Video kunde inte hittas";
                     _navigationManager.NavigateTo("/");
                     return;
-                }
+                } 
+                
 
-                if (string.IsNullOrEmpty(CurrentVideo.VideoUrl))
-                {
-                    CurrentVideo.VideoUrl = $"{Constants.VideoStreamUrl}/{videoId}";
-                    VideoStream = await _videoService.GetVideoStreamAsync(videoId);
-                }
 
 
                 // TODO: Hämta kommentarer från API
