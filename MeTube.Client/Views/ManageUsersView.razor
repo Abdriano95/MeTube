@@ -6,34 +6,53 @@
 <link href="css/manage_users_admin.css" rel="stylesheet" />
 
 <h1 id="Front">MANAGE ACCOUNTS</h1>
-
 <div class="SearchContainer">
     <input placeholder="Search users" @bind="ViewModel.Search">
     <button id="saveButton" @onclick="() => ViewModel.SearchButton()" type="button">Search</button>
 </div>
+<div class ="user-container">
+    <div class="user-row">
+        <label>Username</label>
+        <label>Email</label>
+        <label>Password</label>
+        <label for="roles">Role</label>
+    </div>
 
-<div class="ManageUsers">
     @foreach (var user in ViewModel.AllUsers)
     {
+       <div class="user-row">
+            <input type="text" readonly @bind="user.Username" />
+            <input type="email" readonly @bind="user.Email" />
+            <input type="text" readonly @bind="user.Password" />
+            <input type="text" readonly @bind="user.Role" />
+
+            <button id="deleteButton" @onclick="() => ViewModel.EditUserButton(user)">EDIT</button>
+        </div>
+    }
+</div>
+
+@if (ViewModel.SelectedUser != null && ViewModel.ShowUserCard == true)
+{
+<div class="ManageUsers">
         <form class="FormContainer">
             <div class="FormText">
                 <h1>User</h1>
             </div>
 
             <label>Username</label>
-            <input @bind="user.Username" />
+            <input @bind="ViewModel.SelectedUser.Username" />
 
             <label>Email</label>
-            <input @bind="user.Email" type="email" />
+            <input @bind="ViewModel.SelectedUser.Email" type="email" />
 
             <label>Password</label>
-            <input @bind="user.Password" type="text" />
+            <input @bind="ViewModel.SelectedUser.Password" type="text" />
 
             <label for="roles">Role</label>
             <div class="SelectRole">
-                <select id="roles" @bind="user.Role">
-                    <option selected value="@user.Role">@user.Role</option>
-                    @foreach (var role in ViewModel.Roles.Where(a => a != user.Role))
+                <select id="roles" @bind="ViewModel.SelectedUser.Role">
+                    <option selected value="@ViewModel.SelectedUser.Role">@ViewModel.SelectedUser.Role</option>
+                    @foreach (var role in ViewModel.Roles.Where(a => a != ViewModel.SelectedUser.Role))
                     {
                         <option value="@role">@role</option>
                     }
@@ -41,12 +60,13 @@
             </div>
 
             <div class="ManageUsersButtons">
-                <button type="button" @onclick="() => ViewModel.DeleteUserButton(user)" id="deleteButton">DELETE USER</button>
-                <button type="button" @onclick="() => ViewModel.SaveChangesButton(user)" id="saveButton">SAVE CHANGES</button>
+                <button type="button" @onclick="() => ViewModel.DeleteUserButton(ViewModel.SelectedUser)" id="deleteButton">DELETE USER</button>
+                <button type="button" @onclick="() => ViewModel.SaveChangesButton(ViewModel.SelectedUser)" id="saveButton">SAVE CHANGES</button>
             </div>
         </form>
-    }
+    
 </div>
+}
 
 @code {
     protected override async Task OnInitializedAsync()

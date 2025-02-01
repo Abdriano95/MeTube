@@ -30,6 +30,12 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
 
         [ObservableProperty]
         public string selectedRole = string.Empty;
+
+        [ObservableProperty]
+        private bool showUserCard = false;
+
+        [ObservableProperty]
+        private User selectedUser = null;
         public ObservableCollection<User> AllUsers { get; set; } = new ObservableCollection<User>();
         public ObservableCollection<User> FilteredUsers { get; set; } = new ObservableCollection<User>();
 
@@ -48,6 +54,18 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
                 AllUsers.Add(user);
                 FilteredUsers.Add(user);
             }
+        }
+
+        public void EditUserButton(User user)
+        {
+            ShowUserCard = true;
+            SelectedUser = user;
+        }
+
+        public void CloseUserCard()
+        {
+            ShowUserCard = false;
+            SelectedUser = null;
         }
         private async Task<int> GetUserId(User user)
         {
@@ -94,7 +112,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
         {
             if (string.IsNullOrWhiteSpace(Search))
                 ResetSearchedSongs();
-            IEnumerable<User> result = FilteredUsers.Where(a => a.Username.ToLower().Contains(Search.ToLower()) || a.Email.ToLower().Contains(Search.ToLower()) || a.Password.ToLower().Contains(Search.ToLower())).Distinct();
+            IEnumerable<User> result = FilteredUsers.Where(a => a.Username.ToLower().Contains(Search.ToLower()) || a.Email.ToLower().Contains(Search.ToLower()) || a.Password.ToLower().Contains(Search.ToLower()) || a.Role.ToLower().Contains(Search.ToLower())).Distinct();
             AllUsers.Clear();
             foreach (User user in result)
                 AllUsers.Add(user);

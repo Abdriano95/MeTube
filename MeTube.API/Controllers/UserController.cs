@@ -170,8 +170,8 @@ namespace MeTube.API.Controllers
             }
         }
 
-        [HttpPost("logout")]
         [Authorize]
+        [HttpPost("logout")]
         public IActionResult Logout()
         {
             try
