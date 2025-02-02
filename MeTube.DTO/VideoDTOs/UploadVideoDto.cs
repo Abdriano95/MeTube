@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MeTube.DTO
+namespace MeTube.DTO.VideoDTOs
 {
     public class UploadVideoDto
     {
         [Required]
-        [StringLength(30, MinimumLength = 3)]
+        [StringLength(120, MinimumLength = 3)]
         public string Title { get; set; }
 
         [Required]
@@ -21,10 +17,17 @@ namespace MeTube.DTO
         [StringLength(30, MinimumLength = 3)]
         public string Genre { get; set; }
 
-        [Required]
         public string VideoUrl { get; set; }
 
         [Required]
         public int UserId { get; set; }
+
+        [Required]
+        [DataType(DataType.Upload)]
+        public IFormFile VideoFile { get; set; }
+
+        [DataType(DataType.Upload)]
+        public IFormFile? ThumbnailFile { get; set; }
+
     }
 }

@@ -43,7 +43,7 @@ namespace MeTube.Data
             {
                 entity.HasKey(v => v.Id);
                 entity.Property(v => v.Id).ValueGeneratedOnAdd();
-                entity.Property(v => v.Title).IsRequired().HasMaxLength(30);
+                entity.Property(v => v.Title).IsRequired().HasMaxLength(120);
                 entity.Property(v => v.Description).IsRequired().HasMaxLength(255);
                 entity.Property(v => v.Genre).IsRequired().HasMaxLength(30);
                 entity.Property(v => v.VideoUrl).HasMaxLength(2083); // Standard for URLs (length)
@@ -80,44 +80,6 @@ namespace MeTube.Data
             };
 
             modelBuilder.Entity<User>().HasData(user1, user2);
-
-           
-
-            // Seed Videos
-            Video video1 = new()
-            {
-                Id = 1,
-                UserId = 1,
-                Title = "Learning C# Basics",
-                Description = "An introduction to C# programming for beginners.",
-                Genre = "Education",
-                VideoUrl = "https://example.com/video1",
-                DateUploaded = new DateTime(2023, 1, 1)
-            };
-
-            Video video2 = new()
-            {
-                Id = 2,
-                UserId = 1,
-                Title = "Advanced LINQ Tips",
-                Description = "Learn advanced LINQ techniques to simplify your C# code.",
-                Genre = "Tech",
-                VideoUrl = "https://example.com/video2",
-                DateUploaded = new DateTime(2023, 1, 1)
-            };
-
-            Video video3 = new()
-            {
-                Id = 3,
-                UserId = 2,
-                Title = "Introduction to .NET MAUI",
-                Description = "Explore .NET MAUI and learn how to build cross-platform apps.",
-                Genre = "Education",
-                VideoUrl = "https://example.com/video3",
-                DateUploaded = new DateTime(2023, 1, 1)
-            };
-
-            modelBuilder.Entity<Video>().HasData(video1, video2, video3);
         }
     }
 }

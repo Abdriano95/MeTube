@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeTube.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250127130454_AddVideoEntity")]
-    partial class AddVideoEntity
+    [Migration("20250201134631_IncreasingMaxLengthTitle")]
+    partial class IncreasingMaxLengthTitle
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,11 +33,6 @@ namespace MeTube.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -46,6 +41,12 @@ namespace MeTube.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("User");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -56,17 +57,22 @@ namespace MeTube.Data.Migrations
 
                     b.ToTable("Users");
 
-                    b.HasDiscriminator().HasValue("User");
-
-                    b.UseTphMappingStrategy();
-
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            Email = "pwd123",
-                            Password = "john.doe@example.com",
+                            Email = "john.doe@example.com",
+                            Password = "pwd123",
+                            Role = "Admin",
                             Username = "johndoe1"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Email = "jane.doe@example.com",
+                            Password = "pwd456",
+                            Role = "User",
+                            Username = "janedoe2"
                         });
                 });
 
@@ -77,6 +83,10 @@ namespace MeTube.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BlobName")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("DateUploaded")
                         .HasColumnType("datetime");
@@ -91,16 +101,19 @@ namespace MeTube.Data.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
+                    b.Property<string>("ThumbnailUrl")
+                        .HasMaxLength(2083)
+                        .HasColumnType("nvarchar(2083)");
+
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.Property<string>("VideoUrl")
-                        .IsRequired()
                         .HasMaxLength(2083)
                         .HasColumnType("nvarchar(2083)");
 
@@ -111,31 +124,20 @@ namespace MeTube.Data.Migrations
                     b.ToTable("Videos");
                 });
 
-            modelBuilder.Entity("MeTube.Data.Entity.Admin", b =>
-                {
-                    b.HasBaseType("MeTube.Data.Entity.User");
-
-                    b.HasDiscriminator().HasValue("Admin");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 2,
-                            Email = "jane.smith@example.com",
-                            Password = "pwd456",
-                            Username = "janesmith2"
-                        });
-                });
-
             modelBuilder.Entity("MeTube.Data.Entity.Video", b =>
                 {
                     b.HasOne("MeTube.Data.Entity.User", "User")
-                        .WithMany()
+                        .WithMany("Videos")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MeTube.Data.Entity.User", b =>
+                {
+                    b.Navigation("Videos");
                 });
 #pragma warning restore 612, 618
         }

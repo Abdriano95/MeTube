@@ -200,6 +200,5 @@ namespace MeTube.Client.Services
             Console.WriteLine("User updated successfully!");
             return true;
         }
-
     }
 }

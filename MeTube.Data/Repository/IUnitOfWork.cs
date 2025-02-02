@@ -1,4 +1,6 @@
-﻿namespace MeTube.Data.Repository
+﻿using Microsoft.EntityFrameworkCore.Storage;
+
+namespace MeTube.Data.Repository
 {
     public interface IUnitOfWork : IDisposable
     {
@@ -6,5 +8,10 @@
         IVideoRepository Videos { get; }
 
         Task<int> SaveChangesAsync();
+
+        Task<IDbContextTransaction> BeginTransactionAsync();
+        Task CommitAsync();
+        Task RollbackAsync();
+
     }
 }
