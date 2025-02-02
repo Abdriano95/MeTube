@@ -1,5 +1,6 @@
 using MeTube.Client.Models;
 using MeTube.Client.Services;
+using MeTube.Client.ViewModels;
 using MeTube.Client.ViewModels.LoginViewModels;
 using MeTube.Client.ViewModels.ManageUsersViewModels;
 using MeTube.Client.ViewModels.SignupViewModels;
@@ -42,6 +43,7 @@ namespace MeTube.Client
             builder.Services.AddTransient<ManageUsersViewModel>();
             builder.Services.AddTransient<VideoViewModel>();
             builder.Services.AddTransient<VideoListViewModel>();
+            builder.Services.AddTransient<ManageVideosViewModel>();
 
             builder.Services.AddSingleton<ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
