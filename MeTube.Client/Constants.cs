@@ -18,18 +18,31 @@
         public static string ChangeRole = $"{BaseUrl}/user/changeRole/{{0}}";
 
         // Video endpoints
+        // Video GET endpoints
         public static string VideoBaseUrl = $"{BaseUrl}/Video";
-        public static string VideoGetAllUrl = VideoBaseUrl;
         public static string VideoGetByIdUrl = $"{VideoBaseUrl}";
-        public static string VideoUploadUrl = VideoBaseUrl;
         public static string VideoStreamUrl = $"{VideoBaseUrl}/stream";
-        public static string VideoUpdateUrl = $"{VideoBaseUrl}/{0}";
-        public static string VideoUpdateFileUrl = $"{VideoBaseUrl}/{0}/file";
-        public static string VideoUpdateThumbnailUrl = $"{VideoBaseUrl}/{0}/thumbnail";
-        public static string VideoDeleteUrl = $"{VideoBaseUrl}/{0}";
+        public static string VideoGetUsersVideos = $"{VideoBaseUrl}/user";
+
+        // Video POST endpoints
+        public static string VideoUploadUrl = VideoBaseUrl;
+
+        // Video PUT endpoints
+        public static string VideoUpdateUrl = $"{VideoBaseUrl}";
+        public static string VideoUpdateFileUrl = $"{VideoBaseUrl}";
+        public static string VideoUpdateThumbnailUrl = $"{VideoBaseUrl}";
         public static string VideoResetThumbnailUrl = $"{VideoBaseUrl}/{0}/default-thumbnail";
 
+        // Video DELETE endpoints
+        public static string VideoDeleteUrl = $"{VideoBaseUrl}/{0}";
 
+        //public static string BaseUrl = $"{Constants.BaseUrl}/Video";
+
+        //// GET endpoints
+        //public static string VideoGetAllUrl = BaseUrl;
+        //public static string VideoGetByIdUrl = $"{BaseUrl}/{0}";
+        //public static string VideoGetStreamUrl = $"{BaseUrl}/stream/{0}";
+        //public static string VideoGetByUserIdUrl = $"{BaseUrl}/user/{0}";
 
     }
 }

@@ -38,6 +38,9 @@ namespace MeTube.Client.Profiles
             // Map Video to UpdateVideoDto (partial update)
             CreateMap<UpdateVideoDto, Video>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Video, VideoDto>().ReverseMap();
+            CreateMap<UpdateVideoDto, Video>().ReverseMap();
         }
     }
 }

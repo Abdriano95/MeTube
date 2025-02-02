@@ -53,6 +53,17 @@ namespace MeTube.API.Controllers
             return Ok(videoDto);
         }
 
+        // GET: api/Video/user/{userId}
+        [HttpGet("user/{userId:int}")]
+        public async Task<IActionResult> GetVideosByUserId(int userId)
+        {
+            var videos = await _unitOfWork.Videos.GetVideosByUserIdAsync(userId);
+            if (videos == null || videos.Count() == 0)
+                return NotFound();
+            var videoDtos = _mapper.Map<IEnumerable<VideoDto>>(videos);
+            return Ok(videoDtos);
+        }
+
         // POST: api/Video
         [HttpPost]
         public async Task<IActionResult> UploadVideo([FromForm] UploadVideoDto uploadVideoDto)
