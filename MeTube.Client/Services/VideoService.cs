@@ -12,11 +12,13 @@ namespace MeTube.Client.Services
         private readonly HttpClient _httpClient;
         private readonly IMapper _mapper;
         private readonly JsonSerializerOptions _serializerOptions;
+        private readonly UserService _userservice;
 
-        public VideoService(HttpClient httpClient, IMapper mapper)
+        public VideoService(HttpClient httpClient, IMapper mapper, UserService userservice)
         {
             _httpClient = httpClient;
             _mapper = mapper;
+            _userservice = userservice; 
             _serializerOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -57,9 +59,9 @@ namespace MeTube.Client.Services
             return _mapper.Map<Video>(videoDto);
         }
 
-        public async Task<List<Video>?> GetVideosByUserIdAsync(string userId)
+        public async Task<List<Video>?> GetVideosByUserIdAsync()
         {
-            var response = await _httpClient.GetAsync($"{Constants.VideoGetUsersVideos}/{userId}");
+            var response = await _httpClient.GetAsync($"{Constants.VideoGetUsersVideos}");
             if (!response.IsSuccessStatusCode) return null;
 
             var json = await response.Content.ReadAsStringAsync();

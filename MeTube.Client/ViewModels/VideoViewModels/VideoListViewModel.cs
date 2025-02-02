@@ -28,7 +28,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
 
             try
             {
-                var videos = await _videoService.GetAllVideosAsync();
+                var videos = await _videoService.GetVideosByUserIdAsync();
                 Videos = new ObservableCollection<Video>(videos);
             }
             finally
