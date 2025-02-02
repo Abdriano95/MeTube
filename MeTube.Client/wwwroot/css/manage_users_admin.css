@@ -101,13 +101,13 @@ h1 {
 }
 
 .SearchContainer {
-    width:68%;
+    width:30%;
     display: flex;
-    align-items: center;
+    /*align-items: center;*/
     gap: 10px;
     padding:20px;
     margin-bottom:20px;
-    margin:auto;
+    margin-left: 200px;
 }
 .user-container {
     width: 100%;
