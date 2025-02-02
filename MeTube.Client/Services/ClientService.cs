@@ -115,6 +115,7 @@ namespace MeTube.Client.Services
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
+            await AddAuthorizationHeader();
             try
             {
                 Uri uri = new Uri(Constants.GetAllUsers);
@@ -167,6 +168,7 @@ namespace MeTube.Client.Services
 
         public async Task<bool> DeleteUser(int id)
         {
+            await AddAuthorizationHeader();
             try
             {
                 Uri uri = new Uri($"{Constants.DeleteUser}/{id}");
@@ -188,6 +190,7 @@ namespace MeTube.Client.Services
 
         public async Task<bool> UpdateUserAsync(int id, UpdateUserDto updateUserDto)
         {
+            await AddAuthorizationHeader();
             Uri uri = new Uri($"{Constants.UpdateUser}/{id}");
             var response = await _client.PutAsJsonAsync(uri, updateUserDto);
 
@@ -200,5 +203,15 @@ namespace MeTube.Client.Services
             Console.WriteLine("User updated successfully!");
             return true;
         }
+
+        public async Task AddAuthorizationHeader()
+        {
+            var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "jwtToken");
+            if (!string.IsNullOrEmpty(token))
+            {
+                _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
+        }
+
     }
 }

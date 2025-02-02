@@ -2,7 +2,9 @@
 using MeTube.DTO;
 using Microsoft.JSInterop;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Json;
+using System.Security.Claims;
 
 namespace MeTube.Client.Services
 {
@@ -56,12 +58,35 @@ namespace MeTube.Client.Services
             return response?.Token ?? string.Empty;
         }
 
-        public async Task<bool> IsUserAuthenticated()
+        //public async Task<bool> IsUserAuthenticated()
+        //{
+        //    var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "jwtToken");
+        //    return !string.IsNullOrEmpty(token);
+        //}
+
+        public async Task<Dictionary<string, string>> IsUserAuthenticated()
         {
             var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "jwtToken");
-            return !string.IsNullOrEmpty(token);
-        }
 
+            if (string.IsNullOrEmpty(token))
+            {
+                return new Dictionary<string, string>
+                {
+                    { "IsAuthenticated", "false" },
+                    { "Role", "Customer" }
+                };
+            }
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? "User";
+
+            return new Dictionary<string, string>
+            {
+                { "IsAuthenticated", "true" },
+                { "Role", role }};
+            }
         public async Task<bool> DeleteUserAsync(int id)
         {
             return await _clientService.DeleteUser(id);
@@ -71,5 +96,7 @@ namespace MeTube.Client.Services
         {
             return await _clientService.UpdateUserAsync(id, updateUserDto);
         }
+
+        
     }
 }

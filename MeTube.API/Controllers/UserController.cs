@@ -38,6 +38,7 @@ namespace MeTube.API.Controllers
             return Ok(user);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("manageUsers")]
         public async Task<IActionResult> GetAllusers()
         {
@@ -91,6 +92,7 @@ namespace MeTube.API.Controllers
             return Ok(new { Message = "User signed up successfully" });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto request)
         {
@@ -98,6 +100,11 @@ namespace MeTube.API.Controllers
             {
                 return BadRequest(ModelState);
             }
+
+            var requestFromUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userIdRequestedFromuser = int.Parse(requestFromUser);
+            if (userIdRequestedFromuser == id)
+                return NotFound(new { Message = "Cant delete your own user" });
 
             var user = await _unitOfWork.Users.GetUserByIdAsync(id);
             if (user == null)
@@ -112,9 +119,15 @@ namespace MeTube.API.Controllers
             return Ok(new { Message = "User updated successfully" });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
+            var requestFromUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userIdRequestedFromuser = int.Parse(requestFromUser);
+            if (userIdRequestedFromuser == id)
+                return NotFound(new { Message = "Cant delete your own user" });
+
             var user = await _unitOfWork.Users.GetUserByIdAsync(id);
             if (user == null)
             {
@@ -157,8 +170,8 @@ namespace MeTube.API.Controllers
             }
         }
 
-        [HttpPost("logout")]
         [Authorize]
+        [HttpPost("logout")]
         public IActionResult Logout()
         {
             try
@@ -183,8 +196,10 @@ namespace MeTube.API.Controllers
 
             var claims = new[]
             {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
             };
 
             var token = new JwtSecurityToken(

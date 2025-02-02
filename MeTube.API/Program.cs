@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MeTube.API.Services;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -32,7 +33,7 @@ namespace MeTube.API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MeTube API", Version = "v1" });
 
-                // Lägg till denna anpassade operation filter
+                // Lï¿½gg till denna anpassade operation filter
                 c.OperationFilter<FileUploadOperationFilter>();
             });
             builder.Services.AddAuthentication(options =>
@@ -51,10 +52,51 @@ namespace MeTube.API
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = "Customer",
                     ValidAudience = "User",
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword"))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword")),
+                    RoleClaimType = ClaimTypes.Role
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine($"JWT Error: {context.Exception.Message}");
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        Console.WriteLine($"User authenticated: {context.Principal.Identity.Name}");
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Description = "Enter 'Bearer {your JWT token}' below"
+                });
+
+                c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+                {
+                    {
+                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                        {
+                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                            {
+                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new List<string>()
+                    }
+                });
+            });
 
             builder.Services.Configure<FormOptions>(options =>
             {
@@ -67,7 +109,7 @@ namespace MeTube.API
 
             // Add UnitOfWork 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+            builder.Services.AddSwaggerGen();
             // Add AutoMapper
             builder.Services.AddAutoMapper(typeof(UserProfile));
             builder.Services.AddAutoMapper(typeof(UserProfile), typeof(VideoProfile));
@@ -106,9 +148,8 @@ namespace MeTube.API
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.MapControllers();
             app.Run();
-
         }
     }
 
