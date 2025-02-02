@@ -1,7 +1,9 @@
 ﻿@page "/manage-videos"
 @using MeTube.Client.Models
 @using MeTube.Client.Services   
+@using MeTube.Client.ViewModels.VideoViewModels
 @inject IVideoService VideoService
+@inject ManagageVideos
 @inject NavigationManager NavigationManager
 
 <PageTitle>Manage Videos - MeTube</PageTitle>
@@ -47,7 +49,7 @@
 </div>
 
 @code {
-    private ManageVideosViewModel ViewModel { get; set; } = null!;
+  
 
     protected override void OnInitialized()
     {
