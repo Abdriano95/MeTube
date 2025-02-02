@@ -29,13 +29,13 @@ namespace MeTube.API
                             .AddNewtonsoftJson();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "MeTube API", Version = "v1" });
+            //builder.Services.AddSwaggerGen(c =>
+            //{
+            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "MeTube API", Version = "v1" });
 
-                // L�gg till denna anpassade operation filter
-                c.OperationFilter<FileUploadOperationFilter>();
-            });
+            //    // L�gg till denna anpassade operation filter
+            //    c.OperationFilter<FileUploadOperationFilter>();
+            //});
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -72,6 +72,10 @@ namespace MeTube.API
 
             builder.Services.AddSwaggerGen(c =>
             {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "MeTube API", Version = "v1" });
+
+                // L�gg till denna anpassade operation filter
+                c.OperationFilter<FileUploadOperationFilter>();
                 c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -139,10 +143,6 @@ namespace MeTube.API
             }
 
             app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-            app.MapControllers();
 
             app.UseCors("AllowAll");
 
