@@ -209,8 +209,7 @@ namespace MeTube.Client.Services
             var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "jwtToken");
             if (!string.IsNullOrEmpty(token))
             {
-                _client.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             }
         }
 
