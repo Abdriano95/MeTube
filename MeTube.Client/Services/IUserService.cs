@@ -13,7 +13,7 @@ namespace MeTube.Client.Services
         Task<int?> GetUserIdByEmailAsync(string email);
         Task<bool> DeleteUserAsync(int id);
         Task<bool> UpdateUserAsync(int id, UpdateUserDto updateUserDto);
-        Task<bool> IsUserAuthenticated();
+        Task<Dictionary<string, string>> IsUserAuthenticated();
 
     }
 }
