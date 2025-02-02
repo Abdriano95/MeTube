@@ -1,17 +1,17 @@
 ﻿@page "/manageaccounts"
-@using MeTube.Client.Models
 @using MeTube.Client.ViewModels.ManageUsersViewModels
+@using MeTube.Client.Models
 @using Microsoft.AspNetCore.Components.Authorization
 @inject ManageUsersViewModel ViewModel
 <link href="css/manage_users_admin.css" rel="stylesheet" />
 
 <h1 id="Front">MANAGE ACCOUNTS</h1>
-
 <div class="SearchContainer">
     <input placeholder="Search users" @bind="ViewModel.Search">
     <button id="saveButton" @onclick="() => ViewModel.SearchButton()" type="button">Search</button>
+    @* <button id="saveButton" @onclick="() => ViewModel.SearchButton()" type="button">+ ADD USER</button> *@
 </div>
-<div class ="user-container">
+<div class="user-container">
     <div class="user-row">
         <label>Username</label>
         <label>Email</label>
@@ -30,9 +30,10 @@
         </div>
     }
 </div>
+
 @if (ViewModel.SelectedUser != null && ViewModel.ShowUserCard == true)
 {
-<div class="ManageUsers">
+    <div class="ManageUsers">
         <form class="FormContainer">
             <div class="FormText">
                 <h1>User</h1>
@@ -56,7 +57,7 @@
                     }
                 </select>
             </div>
-            
+
             <div class="ManageUsersButtons">
                 <button type="button" @onclick="() => ViewModel.DeleteUserButton(ViewModel.SelectedUser)" id="deleteButton">DELETE USER</button>
                 <button type="button" @onclick="() => ViewModel.SaveChangesButton(ViewModel.SelectedUser)" id="saveButton">SAVE CHANGES</button>

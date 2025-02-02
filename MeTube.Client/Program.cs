@@ -33,8 +33,6 @@ namespace MeTube.Client
             builder.Services.AddSingleton<LoginView>();
             builder.Services.AddSingleton<ManageUsersView>();
             builder.Services.AddSingleton<VideoView>();
-            builder.Services.AddSingleton<ManageVideos>();
-            builder.Services.AddSingleton<EditVideo>();
             builder.Services.AddSingleton<Home>();
 
 
@@ -43,7 +41,6 @@ namespace MeTube.Client
             builder.Services.AddTransient<ManageUsersViewModel>();
             builder.Services.AddTransient<VideoViewModel>();
             builder.Services.AddTransient<VideoListViewModel>();
-            builder.Services.AddTransient<ManageVideosViewModel>();
 
             builder.Services.AddSingleton<ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
