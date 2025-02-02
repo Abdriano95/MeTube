@@ -32,6 +32,9 @@ namespace MeTube.Client
             builder.Services.AddSingleton<LoginView>();
             builder.Services.AddSingleton<ManageUsersView>();
             builder.Services.AddSingleton<VideoView>();
+            builder.Services.AddSingleton<ManageVideos>();
+            builder.Services.AddSingleton<EditVideo>();
+            builder.Services.AddSingleton<Home>();
 
 
             builder.Services.AddTransient<SignupViewModel>();

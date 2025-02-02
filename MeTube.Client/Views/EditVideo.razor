@@ -1,0 +1,167 @@
+﻿@page "/edit-video/{VideoId:int}"
+@using MeTube.Client.Services
+@inject IVideoService VideoService
+@using MeTube.Client.Models
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit Video - MeTube</PageTitle>
+
+<div class="container mx-auto px-4 py-8">
+    @if (video == null)
+    {
+        <div class="flex justify-center items-center h-32">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+    }
+    else
+    {
+        <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold">Edit Video</h1>
+                <button class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                        @onclick="HandleDelete">
+                    Delete Video
+                </button>
+            </div>
+
+            <EditForm Model="video" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2" for="title">Title</label>
+                    <InputText id="title" class="w-full p-2 border rounded" @bind-Value="video.Title" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2" for="description">Description</label>
+                    <InputTextArea id="description" class="w-full p-2 border rounded" @bind-Value="video.Description" rows="4" />
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2">Thumbnail</label>
+                    <img src="@video.ThumbnailUrl" alt="Video thumbnail" class="mb-2 w-full aspect-video object-cover rounded" />
+                    <InputFile OnChange="HandleThumbnailSelected" accept="image/*" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        @errorMessage
+                    </div>
+                }
+
+                <div class="flex justify-between">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                            disabled="@isLoading">
+                        Update Video
+                    </button>
+                    <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                            @onclick="NavigateBack">
+                        Back
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int VideoId { get; set; }
+
+    private Video? video;
+    private bool isLoading;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        video = await VideoService.GetVideoByIdAsync(VideoId);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (video == null) return;
+        isLoading = true;
+        errorMessage = string.Empty;
+
+        try
+        {
+            var updatedVideo = await VideoService.UpdateVideoAsync(video);
+            if (updatedVideo != null)
+            {
+                NavigateBack();
+            }
+            else
+            {
+                errorMessage = "Failed to update video";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred while updating the video";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleDelete()
+    {
+        if (video == null) return;
+        isLoading = true;
+        errorMessage = string.Empty;
+
+        try
+        {
+            var result = await VideoService.DeleteVideoAsync(video.Id);
+            if (result)
+            {
+                NavigateBack();
+            }
+            else
+            {
+                errorMessage = "Failed to delete video";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred while deleting the video";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleThumbnailSelected(InputFileChangeEventArgs e)
+    {
+        if (video == null) return;
+        isLoading = true;
+        errorMessage = string.Empty;
+
+        try
+        {
+            var file = e.File;
+            var stream = file.OpenReadStream(maxAllowedSize: 4 * 1024 * 1024); // 4MB limit
+            await VideoService.UpdateVideoThumbnailAsync(video.Id, stream);
+
+            // Reload the video to get the new thumbnail URL
+            video = await VideoService.GetVideoByIdAsync(VideoId);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Failed to update thumbnail";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/manage-videos");
+    }
+}
