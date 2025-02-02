@@ -1,57 +1,69 @@
 ﻿@page "/manage-videos"
+@inherits ComponentBase
 @using MeTube.Client.Models
-@using MeTube.Client.Services   
-@inject IVideoService VideoService
-@inject NavigationManager NavigationManager
+@using MeTube.Client.ViewModels 
+@inject ManageVideosViewModel ViewModel
+@inject NavigationManager Navigation
 
-<PageTitle>Manage Videos - MeTube</PageTitle>
-
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Manage Videos</h1>
-        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                @onclick="@(() => NavigationManager.NavigateTo("/upload"))">
-            Upload New Video
-        </button>
-    </div>
+<div class="manage-videos-container">
+    <h3>My Videos</h3>
 
     @if (ViewModel.IsLoading)
     {
-        <div class="flex justify-center items-center h-32">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div class="loading-overlay">
+            <div class="spinner-border text-primary" role="status"></div>
         </div>
     }
-    else if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+
+    @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
     {
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div class="alert alert-danger">
             @ViewModel.ErrorMessage
         </div>
     }
-    else
-    {
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach (var video in ViewModel.Videos)
-            {
-                <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
-                     @onclick="@(() => NavigationManager.NavigateTo($"/edit-video/{video.Id}"))">
-                    <img src="@video.ThumbnailUrl" alt="@video.Title"
-                         class="w-full h-48 object-cover" />
-                    <div class="p-4">
-                        <h2 class="text-xl font-semibold mb-2">@video.Title</h2>
-                        <p class="text-gray-600">@video.Description</p>
-                    </div>
+
+    <div class="video-list">
+        @foreach (var video in ViewModel.UserVideos)
+        {
+            <div class="video-card">
+                <div class="video-preview">
+                    <video controls>
+                        <source src="@video.VideoUrl" type="video/mp4">
+                    </video>
                 </div>
-            }
-        </div>
-    }
+
+                <div class="video-info">
+                    <h5>@video.Title</h5>
+                    <p>@video.Description</p>
+@*                     <div class="video-stats">
+                        <span>Uploaded: @video.DateUploaded.ToString("d")</span>
+                        <span>Views: @video.ViewCount</span>
+                    </div> *@
+                </div>
+
+                <div class="video-actions">
+                    <button @onclick="() => ShowEditModal(video)"
+                            class="btn btn-primary">
+                        Edit
+                    </button>
+                    <button @onclick="() => ViewModel.DeleteVideoCommand.Execute(video.Id)"
+                            class="btn btn-danger">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
 </div>
 
 @code {
-    private ManageVideosViewModel ViewModel { get; set; } = null!;
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        ViewModel = new ManageVideosViewModel(VideoService, NavigationManager);
-        base.OnInitialized();
+        await ViewModel.LoadUserVideosCommand.ExecuteAsync(null);
+    }
+
+    private void ShowEditModal(Video video)
+    {
+        // Implementera modal fÃ¶r redigering
     }
 }

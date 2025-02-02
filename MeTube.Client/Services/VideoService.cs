@@ -13,12 +13,14 @@ namespace MeTube.Client.Services
         private readonly IMapper _mapper;
         private readonly JsonSerializerOptions _serializerOptions;
         private readonly UserService _userservice;
+        private readonly IJSRuntime _jsruntime;
 
-        public VideoService(HttpClient httpClient, IMapper mapper, UserService userservice)
+        public VideoService(HttpClient httpClient, IMapper mapper, UserService userservice, IJSRuntime jsRuntime)
         {
             _httpClient = httpClient;
             _mapper = mapper;
-            _userservice = userservice; 
+            _userservice = userservice;
+            _jsruntime = jsRuntime;
             _serializerOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -61,6 +63,7 @@ namespace MeTube.Client.Services
 
         public async Task<List<Video>?> GetVideosByUserIdAsync()
         {
+            //await AddAuthorizationHeader();
             var response = await _httpClient.GetAsync($"{Constants.VideoGetUsersVideos}");
             if (!response.IsSuccessStatusCode) return null;
 
@@ -137,6 +140,15 @@ namespace MeTube.Client.Services
             var responseJson = await response.Content.ReadAsStringAsync();
             var uploadedVideoDto = JsonSerializer.Deserialize<VideoDto>(responseJson, _serializerOptions);
             return _mapper.Map<Video>(uploadedVideoDto);
+        }
+
+        public async Task AddAuthorizationHeader()
+        {
+            var token = await _jsruntime.InvokeAsync<string>("localStorage.getItem", "jwtToken");
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
         }
     }
 }

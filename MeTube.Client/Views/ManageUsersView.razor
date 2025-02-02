@@ -1,68 +1,77 @@
-﻿@page "/manage-videos"
-@inherits ComponentBase
-@using MeTube.Client.ViewModels
+﻿@page "/manageaccounts"
 @using MeTube.Client.Models
-@inject ManageVideosViewModel ViewModel
-@inject NavigationManager Navigation
+@using MeTube.Client.ViewModels.ManageUsersViewModels
+@using Microsoft.AspNetCore.Components.Authorization
+@inject ManageUsersViewModel ViewModel
+<link href="css/manage_users_admin.css" rel="stylesheet" />
 
-<div class="manage-videos-container">
-    <h3>My Videos</h3>
+<h1 id="Front">MANAGE ACCOUNTS</h1>
 
-    @if (ViewModel.IsLoading)
-    {
-        <div class="loading-overlay">
-            <div class="spinner-border text-primary" role="status"></div>
-        </div>
-    }
-
-    @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
-    {
-        <div class="alert alert-danger">
-            @ViewModel.ErrorMessage
-        </div>
-    }
-
-    <div class="video-list">
-        @foreach (var video in ViewModel.UserVideos)
-        {
-            <div class="video-card">
-                <div class="video-preview">
-                    <video controls>
-                        <source src="@video.VideoUrl" type="video/mp4">
-                    </video>
-                </div>
-
-                <div class="video-info">
-                    <h5>@video.Title</h5>
-                    <p>@video.Description</p>
-                    <div class="video-stats">
-                        <span>Uploaded: @video.DateUploaded.ToString("d")</span>
-                    </div>
-                </div>
-
-                <div class="video-actions">
-                    <button @onclick="() => ShowEditModal(video)"
-                            class="btn btn-primary">
-                        Edit
-                    </button>
-                    <button @onclick="() => ViewModel.DeleteVideoCommand.Execute(video.Id)"
-                            class="btn btn-danger">
-                        Delete
-                    </button>
-                </div>
-            </div>
-        }
-    </div>
+<div class="SearchContainer">
+    <input placeholder="Search users" @bind="ViewModel.Search">
+    <button id="saveButton" @onclick="() => ViewModel.SearchButton()" type="button">Search</button>
 </div>
+<div class ="user-container">
+    <div class="user-row">
+        <label>Username</label>
+        <label>Email</label>
+        <label>Password</label>
+        <label for="roles">Role</label>
+    </div>
+    @foreach (var user in ViewModel.AllUsers)
+    {
+        <div class="user-row">
+            <input type="text" readonly @bind="user.Username" />
+            <input type="email" readonly @bind="user.Email" />
+            <input type="text" readonly @bind="user.Password" />
+            <input type="text" readonly @bind="user.Role" />
 
+            <button id="deleteButton" @onclick="() => ViewModel.EditUserButton(user)">EDIT</button>
+        </div>
+    }
+</div>
+@if (ViewModel.SelectedUser != null && ViewModel.ShowUserCard == true)
+{
+<div class="ManageUsers">
+        <form class="FormContainer">
+            <div class="FormText">
+                <h1>User</h1>
+            </div>
+
+            <label>Username</label>
+            <input @bind="ViewModel.SelectedUser.Username" />
+
+            <label>Email</label>
+            <input @bind="ViewModel.SelectedUser.Email" type="email" />
+
+            <label>Password</label>
+            <input @bind="ViewModel.SelectedUser.Password" type="text" />
+            <label for="roles">Role</label>
+            <div class="SelectRole">
+                <select id="roles" @bind="ViewModel.SelectedUser.Role">
+                    <option selected value="@ViewModel.SelectedUser.Role">@ViewModel.SelectedUser.Role</option>
+                    @foreach (var role in ViewModel.Roles.Where(a => a != ViewModel.SelectedUser.Role))
+                    {
+                        <option value="@role">@role</option>
+                    }
+                </select>
+            </div>
+            
+            <div class="ManageUsersButtons">
+                <button type="button" @onclick="() => ViewModel.DeleteUserButton(ViewModel.SelectedUser)" id="deleteButton">DELETE USER</button>
+                <button type="button" @onclick="() => ViewModel.SaveChangesButton(ViewModel.SelectedUser)" id="saveButton">SAVE CHANGES</button>
+            </div>
+        </form>
+    </div>
+}
 @code {
     protected override async Task OnInitializedAsync()
     {
-        await ViewModel.LoadUserVideosCommand.ExecuteAsync(null);
+        await ViewModel.LoadUsers();
     }
 
-    private void ShowEditModal(Video video)
+    private async Task SaveUser(User user)
     {
-        // Implementera modal för redigering
+        // await ViewModel.SaveUserAsync(user);
     }
 }
