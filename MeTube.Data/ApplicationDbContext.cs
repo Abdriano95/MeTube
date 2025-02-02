@@ -87,7 +87,7 @@ namespace MeTube.Data
             // Seed Videos
             Video video1 = new()
             {
-                Id = 7,
+                Id = 1,
                 UserId = 1,
                 Title = "164. What is the Future of Blazor? Should I Learn Blazor?",
                 Description = "Should I learn a JavaScript framework or concentrate on mastering Blazor? What is the future of Blazor? Is Microsoft invested in making Blazor great? We will answer these questions in today's Dev Questions episode.   Website: https://www.iamtimcorey.com/",
@@ -101,7 +101,7 @@ namespace MeTube.Data
 
             Video video2 = new()
             {
-                Id = 8,
+                Id = 2,
                 UserId = 2,
                 Title = "string",
                 Description = "string",

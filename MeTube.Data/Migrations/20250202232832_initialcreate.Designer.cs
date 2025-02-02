@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeTube.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250201134631_IncreasingMaxLengthTitle")]
-    partial class IncreasingMaxLengthTitle
+    [Migration("20250202232832_initialcreate")]
+    partial class initialcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -122,6 +122,32 @@ namespace MeTube.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Videos");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            BlobName = "youtube_OUUlO8fQOfE_1920x1080_h264.mp4",
+                            DateUploaded = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Should I learn a JavaScript framework or concentrate on mastering Blazor? What is the future of Blazor? Is Microsoft invested in making Blazor great? We will answer these questions in today's Dev Questions episode.   Website: https://www.iamtimcorey.com/",
+                            Genre = "Programming",
+                            ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/whatisthefutureofblazor.jpg",
+                            Title = "164. What is the Future of Blazor? Should I Learn Blazor?",
+                            UserId = 1,
+                            VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/youtube_OUUlO8fQOfE_1920x1080_h264.mp4"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            BlobName = "videoplayback (1).mp4",
+                            DateUploaded = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "string",
+                            Genre = "string",
+                            ThumbnailUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/YouTube_Diamond_Play_Button.png/1200px-YouTube_Diamond_Play_Button.png",
+                            Title = "string",
+                            UserId = 2,
+                            VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/videoplayback%20%281%29.mp4"
+                        });
                 });
 
             modelBuilder.Entity("MeTube.Data.Entity.Video", b =>

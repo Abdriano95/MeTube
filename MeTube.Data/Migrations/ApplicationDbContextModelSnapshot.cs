@@ -123,7 +123,7 @@ namespace MeTube.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 7,
+                            Id = 1,
                             BlobName = "youtube_OUUlO8fQOfE_1920x1080_h264.mp4",
                             DateUploaded = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Should I learn a JavaScript framework or concentrate on mastering Blazor? What is the future of Blazor? Is Microsoft invested in making Blazor great? We will answer these questions in today's Dev Questions episode.   Website: https://www.iamtimcorey.com/",
@@ -135,7 +135,7 @@ namespace MeTube.Data.Migrations
                         },
                         new
                         {
-                            Id = 8,
+                            Id = 2,
                             BlobName = "videoplayback (1).mp4",
                             DateUploaded = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "string",
