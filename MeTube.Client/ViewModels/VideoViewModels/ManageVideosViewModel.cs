@@ -36,13 +36,13 @@ namespace MeTube.Client.ViewModels
             try
             {
                 //var userId = _authService.CurrentUser?.Id;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    ErrorMessage = "User not authenticated";
-                    return;
-                }
+                //if (string.IsNullOrEmpty(userId))
+                //{
+                //    ErrorMessage = "User not authenticated";
+                //    return;
+                //}
 
-                var videos = await _videoService.GetVideosByUserIdAsync(userId);
+                var videos = await _videoService.GetVideosByUserIdAsync();
                 UserVideos = new ObservableCollection<Video>(videos);
             }
             catch (Exception ex)

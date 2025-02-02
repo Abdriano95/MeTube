@@ -92,6 +92,7 @@ namespace MeTube.API.Controllers
             return Ok(new { Message = "User signed up successfully" });
         }
 
+
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto request)

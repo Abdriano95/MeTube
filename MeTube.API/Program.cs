@@ -53,7 +53,7 @@ namespace MeTube.API
                     ValidIssuer = "Customer",
                     ValidAudience = "User",
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword")),
-                    RoleClaimType = ClaimTypes.Role
+                    RoleClaimType = ClaimTypes.Role,
                 };
                 options.Events = new JwtBearerEvents
                 {
@@ -83,7 +83,7 @@ namespace MeTube.API
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                    Description = "Enter 'Bearer {your JWT token}' below"
+                    Description = "Enter 'Bearer {your JWT token}' below",
                 });
 
                 c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement

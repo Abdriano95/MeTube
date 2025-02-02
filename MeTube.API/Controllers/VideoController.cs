@@ -4,6 +4,7 @@ using MeTube.Data.Entity;
 using MeTube.Data.Repository;
 using MeTube.DTO.VideoDTOs;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace MeTube.API.Controllers
 {
@@ -32,7 +33,7 @@ namespace MeTube.API.Controllers
             foreach (var video in videos)
             {
                 var dto = _mapper.Map<VideoDto>(video);
-                dto.BlobExists = await _videoService.BlobExistsAsync(video.BlobName); 
+                dto.BlobExists = await _videoService.BlobExistsAsync(video.BlobName);
                 videoDtos.Add(dto);
             }
 
@@ -53,15 +54,20 @@ namespace MeTube.API.Controllers
             return Ok(videoDto);
         }
 
-        // GET: api/Video/user/{userId}
-        [HttpGet("user/{userId:int}")]
-        public async Task<IActionResult> GetVideosByUserId(int userId)
+        // GET: api/Video/user}
+        [HttpGet("user")]
+        public async Task<IActionResult> GetVideosByUserId()
         {
-            var videos = await _unitOfWork.Videos.GetVideosByUserIdAsync(userId);
-            if (videos == null || videos.Count() == 0)
-                return NotFound();
-            var videoDtos = _mapper.Map<IEnumerable<VideoDto>>(videos);
-            return Ok(videoDtos);
+            var requestFromUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userIdRequestedFromuser = int.Parse(requestFromUser);
+            var videos = await _unitOfWork.Videos.GetVideosByUserIdAsync(userIdRequestedFromuser);
+            if (videos.Any())
+            {
+                var videoDtos = _mapper.Map<IEnumerable<VideoDto>>(videos);
+                return Ok(videoDtos);
+            }
+            else
+                return Ok(new List<Video>());
         }
 
         // POST: api/Video
@@ -334,6 +340,8 @@ namespace MeTube.API.Controllers
             }
             return true;
         }
+
+        
 
     }
 }
