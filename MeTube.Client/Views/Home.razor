@@ -1,7 +1,53 @@
 ﻿@page "/"
+@inherits LayoutComponentBase
+@using MeTube.Client.Models
+@using MeTube.Client.ViewModels.VideoViewModels
+@inject VideoListViewModel ViewModel
+@inject NavigationManager NavigationManager
 
-<PageTitle>Home</PageTitle>
+<h3>Last uploaded videos</h3>
 
-<h1>Hello, world!</h1>
+@if (ViewModel.IsLoading)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    <div class="video-grid">
+        @foreach (var video in ViewModel.Videos)
+        {
+            <div class="video-card" @onclick="() => NavigateToVideo(video.Id.ToString())">
+                <img src="@GetThumbnailUrl(video)"
+                     alt="@video.Title"
+                     class="thumbnail" />
+                <div class="video-info">
+                    <h4>@video.Title</h4>
+                    <p class="author">@video.UserId</p>
+                    <p class="date">@video.DateUploaded.ToString("dd MMM yyyy")</p>
+                </div>
+            </div>
+        }
+    </div>
+}
 
-Welcome to your new app.
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadVideosAsync();
+    }
+
+    private string GetThumbnailUrl(Video video)
+    {
+        return !string.IsNullOrEmpty(video.ThumbnailUrl)
+            ? video.ThumbnailUrl
+            : $"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/YouTube_Diamond_Play_Button.png/1200px-YouTube_Diamond_Play_Button.png";
+    }
+
+    private void NavigateToVideo(string videoId)
+    {
+        NavigationManager.NavigateTo($"/video/{videoId}");
+    }
+}
+

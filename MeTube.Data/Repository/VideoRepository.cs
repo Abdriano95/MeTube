@@ -21,6 +21,12 @@ namespace MeTube.Data.Repository
             await AddAsync(video);
         }
 
+        public async Task AddVideoWithoutSaveAsync(Video video)
+        {
+            // Uses Entity Framworks Change Tracker without saving changes to the database
+            await DbContext.Set<Video>().AddAsync(video);
+        }
+
         public void DeleteVideo(Video video)
         {
             Delete(video);
@@ -33,7 +39,15 @@ namespace MeTube.Data.Repository
 
         public async Task<Video?> GetVideoByIdAsync(int id)
         {
-            return await GetByIdAsync(id);
+            return await DbContext.Videos
+                        .AsNoTracking() // Prevents Entity Framework from tracking changes to the entity
+                        .FirstOrDefaultAsync(v => v.Id == id);
+        }
+
+        public async Task<Video?> GetVideoByIdWithTrackingAsync(int id)
+        {
+            return await DbContext.Videos
+                .FirstOrDefaultAsync(v => v.Id == id);
         }
 
         public async Task<IEnumerable<Video>> GetVideosByUserIdAsync(int userId)

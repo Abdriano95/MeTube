@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeTube.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250130112643_ModificationsUserandVideoEntity")]
-    partial class ModificationsUserandVideoEntity
+    [Migration("20250130143403_InititalCreate")]
+    partial class InititalCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -122,38 +122,6 @@ namespace MeTube.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Videos");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            DateUploaded = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "An introduction to C# programming for beginners.",
-                            Genre = "Education",
-                            Title = "Learning C# Basics",
-                            UserId = 1,
-                            VideoUrl = "https://example.com/video1"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            DateUploaded = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Learn advanced LINQ techniques to simplify your C# code.",
-                            Genre = "Tech",
-                            Title = "Advanced LINQ Tips",
-                            UserId = 1,
-                            VideoUrl = "https://example.com/video2"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            DateUploaded = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Explore .NET MAUI and learn how to build cross-platform apps.",
-                            Genre = "Education",
-                            Title = "Introduction to .NET MAUI",
-                            UserId = 2,
-                            VideoUrl = "https://example.com/video3"
-                        });
                 });
 
             modelBuilder.Entity("MeTube.Data.Entity.Video", b =>
