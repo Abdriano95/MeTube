@@ -2,6 +2,9 @@
 using MeTube.Client.Models;
 using MeTube.DTO.VideoDTOs;
 using Microsoft.JSInterop;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using static System.Net.WebRequestMethods;
 
@@ -24,9 +27,10 @@ namespace MeTube.Client.Services
             };
         }
 
-        public Task<bool> DeleteVideoAsync(int videoId)
+        public async Task<bool> DeleteVideoAsync(int videoId)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.DeleteAsync($"{Constants.VideoBaseUrl}/{videoId}");
+            return response.IsSuccessStatusCode;
         }
 
         public async Task<List<Video>?> GetAllVideosAsync()
@@ -60,9 +64,21 @@ namespace MeTube.Client.Services
         }
 
 
-        public Task<Video?> UpdateVideoAsync(Video video)
+        public async Task<Video?> UpdateVideoAsync(Video video)
         {
-            throw new NotImplementedException();
+            var videoDto = _mapper.Map<VideoDto>(video);
+            var content = new StringContent(
+                JsonSerializer.Serialize(videoDto, _serializerOptions),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await _httpClient.PutAsync($"{Constants.VideoBaseUrl}/{video.Id}", content);
+
+            if (!response.IsSuccessStatusCode) return null;
+
+            var updatedDto = await response.Content.ReadFromJsonAsync<VideoDto>(_serializerOptions);
+            return _mapper.Map<Video>(updatedDto);
         }
 
         public Task<Video?> UpdateVideoFileAsync(int videoId, Stream videoFileStream)
@@ -75,9 +91,25 @@ namespace MeTube.Client.Services
             throw new NotImplementedException();
         }
 
-        public Task<Video?> UploadVideoAsync(Video video, Stream videoFileStream, string userId)
+        public async Task<Video?> UploadVideoAsync(Video video, Stream videoFileStream, string fileName)
         {
-            throw new NotImplementedException();
+            var content = new MultipartFormDataContent();
+
+            // Metadata
+            var videoDto = _mapper.Map<VideoDto>(video);
+            content.Add(new StringContent(JsonSerializer.Serialize(videoDto)), "metadata");
+
+            // Video file
+            var videoContent = new StreamContent(videoFileStream);
+            videoContent.Headers.ContentType = new MediaTypeHeaderValue("video/mp4");
+            content.Add(videoContent, "file", fileName);
+
+            var response = await _httpClient.PostAsync(Constants.VideoBaseUrl, content);
+
+            if (!response.IsSuccessStatusCode) return null;
+
+            var createdDto = await response.Content.ReadFromJsonAsync<VideoDto>(_serializerOptions);
+            return _mapper.Map<Video>(createdDto);
         }
     }
 }
