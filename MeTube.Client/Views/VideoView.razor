@@ -1,6 +1,7 @@
 ﻿@page "/video/{VideoId:int}"
 @using MeTube.Client.Models
 @inject VideoViewModel ViewModel
+@inject IJSRuntime JSRuntime
 
 <link href="css/video_view.css" rel="stylesheet" />
 
@@ -25,8 +26,16 @@
             <!-- Video Section -->
             <div class="col-lg-8 col-md-12">
                 <div class="video-container">
-                    <video controls class="video-player" controlsList="nodownload">
-                        <source src="@ViewModel.CurrentVideo.VideoUrl" type="video/mp4">
+                    <video id="videoPlayer"
+                           controls
+                           class="video-player"
+                           controlsList="nodownload"
+                           preload="auto"
+                           crossorigin="anonymous"
+                           playsinline
+                           webkit-playsinline>
+                        <source src="@ViewModel.CurrentVideo.VideoUrl" type="video/mp4"
+                                codecs="avc1.42E01E, mp4a.40.2">
                         Din webbläsare stöder inte videouppspelning.
                     </video>
 
@@ -96,9 +105,38 @@
 
     private string _newComment = string.Empty;
 
+    private bool videoLoaded = false;
+
+    private ElementReference videoElement;
+
     protected override async Task OnParametersSetAsync()
     {
         await ViewModel.LoadVideoAsync(VideoId);
+    }
+
+    private async Task OnVideoLoaded()
+    {
+        if (!videoLoaded)
+        {
+            videoLoaded = true;
+            await JSRuntime.InvokeVoidAsync("initializeVideoPlayer", videoElement);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await Task.Delay(100); // Kort fördröjning för att säkerställa att DOM är redo
+                await JSRuntime.InvokeVoidAsync("initializeVideoPlayer");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error initializing video player: {ex.Message}");
+            }
+        }
     }
 
     private async Task PostComment()

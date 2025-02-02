@@ -18,31 +18,26 @@
         public static string ChangeRole = $"{BaseUrl}/user/changeRole/{{0}}";
 
         // Video endpoints
-        // Video GET endpoints
         public static string VideoBaseUrl = $"{BaseUrl}/Video";
-        public static string VideoGetByIdUrl = $"{VideoBaseUrl}";
-        public static string VideoStreamUrl = $"{VideoBaseUrl}/stream";
-        public static string VideoGetUsersVideos = $"{VideoBaseUrl}/user";
 
-        // Video POST endpoints
-        public static string VideoUploadUrl = VideoBaseUrl;
+        // GET
+        public static string VideoGetAllUrl = VideoBaseUrl; // GET api/Video
+        public static string VideoGetByIdUrl(int id) => $"{VideoBaseUrl}/{id}"; // GET api/Video/{id}
+        public static string VideoStreamUrl(int id) => $"{VideoBaseUrl}/stream/{id}"; // GET api/Video/stream/{id}
+        public static string VideoGetByUserUrl = $"{VideoBaseUrl}/user"; // GET api/Video/user
 
-        // Video PUT endpoints
-        public static string VideoUpdateUrl = $"{VideoBaseUrl}";
-        public static string VideoUpdateFileUrl = $"{VideoBaseUrl}";
-        public static string VideoUpdateThumbnailUrl = $"{VideoBaseUrl}";
-        public static string VideoResetThumbnailUrl = $"{VideoBaseUrl}/{0}/default-thumbnail";
+        // POST
+        public static string VideoUploadUrl = VideoBaseUrl; // POST api/Video
 
-        // Video DELETE endpoints
-        public static string VideoDeleteUrl = $"{VideoBaseUrl}/{0}";
+        // PUT
+        public static string VideoUpdateUrl(int id) => $"{VideoBaseUrl}/{id}"; // PUT api/Video/{id}
+        public static string VideoUpdateFileUrl(int id) => $"{VideoBaseUrl}/{id}/file"; // PUT api/Video/{id}/file
+        public static string VideoUpdateThumbnailUrl(int id) => $"{VideoBaseUrl}/{id}/thumbnail"; // PUT api/Video/{id}/thumbnail
+        public static string VideoResetThumbnailUrl(int id) => $"{VideoBaseUrl}/{id}/default-thumbnail"; // PUT api/Video/{id}/default-thumbnail
 
-        //public static string BaseUrl = $"{Constants.BaseUrl}/Video";
+        // DELETE
+        public static string VideoDeleteUrl(int id) => $"{VideoBaseUrl}/{id}"; // DELETE api/Video/{id}
 
-        //// GET endpoints
-        //public static string VideoGetAllUrl = BaseUrl;
-        //public static string VideoGetByIdUrl = $"{BaseUrl}/{0}";
-        //public static string VideoGetStreamUrl = $"{BaseUrl}/stream/{0}";
-        //public static string VideoGetByUserIdUrl = $"{BaseUrl}/user/{0}";
 
     }
 }

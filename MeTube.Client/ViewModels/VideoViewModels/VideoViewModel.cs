@@ -43,7 +43,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             try
             {
                 CurrentVideo = await _videoService.GetVideoByIdAsync(videoId);
-
+                CurrentVideo.VideoUrl = Constants.VideoStreamUrl(videoId);
 
 
                 if (CurrentVideo == null)

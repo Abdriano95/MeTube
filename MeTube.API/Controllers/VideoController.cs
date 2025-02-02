@@ -3,6 +3,7 @@ using MeTube.API.Services;
 using MeTube.Data.Entity;
 using MeTube.Data.Repository;
 using MeTube.DTO.VideoDTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -55,12 +56,14 @@ namespace MeTube.API.Controllers
         }
 
         // GET: api/Video/user}
+        [Authorize]
         [HttpGet("user")]
         public async Task<IActionResult> GetVideosByUserId()
         {
-            var requestFromUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            int userIdRequestedFromuser = int.Parse(requestFromUser);
-            var videos = await _unitOfWork.Videos.GetVideosByUserIdAsync(userIdRequestedFromuser);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (userId == 0)
+                return Unauthorized();
+            var videos = await _unitOfWork.Videos.GetVideosByUserIdAsync(userId);
             if (videos.Any())
             {
                 var videoDtos = _mapper.Map<IEnumerable<VideoDto>>(videos);
@@ -71,6 +74,7 @@ namespace MeTube.API.Controllers
         }
 
         // POST: api/Video
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> UploadVideo([FromForm] UploadVideoDto uploadVideoDto)
         {
@@ -80,6 +84,11 @@ namespace MeTube.API.Controllers
             // Validate the video file
             if (!ValidateVideoFile(uploadVideoDto.VideoFile))
                 return BadRequest(ModelState);
+
+            // Get the user ID from the token
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (userId == 0)
+                return Unauthorized();
 
             await using var transaction = await _unitOfWork.BeginTransactionAsync();
             try
@@ -109,6 +118,7 @@ namespace MeTube.API.Controllers
 
                 // 3. Save the metadata without committing the transaction
                 var video = _mapper.Map<Video>(uploadVideoDto);
+                video.UserId = userId;
                 video.BlobName = blobResponse.Blob.Name;
                 video.VideoUrl = blobResponse.Blob.Uri;
                 video.ThumbnailUrl = thumbnailUrl;
@@ -140,25 +150,100 @@ namespace MeTube.API.Controllers
             }
         }
 
-        // GET: api/Video/stream/{id}
         [HttpGet("stream/{id}")]
         public async Task<IActionResult> StreamVideo(int id)
         {
             var video = await _unitOfWork.Videos.GetVideoByIdAsync(id);
-            if (video == null || string.IsNullOrEmpty(video.BlobName)) return NotFound();
+            if (video == null || string.IsNullOrEmpty(video.BlobName))
+                return NotFound();
 
-            var blob = await _videoService.DownloadAsync(video.BlobName);
-            if (blob?.Content == null || blob.ContentType == null)
-                return NotFound("Blob content or content type is null");
+            var blob = await _videoService.GetBlobPropertiesAsync(video.BlobName);
+            if (blob == null)
+                return NotFound("Video blob not found");
 
-            Response.Headers.Append("Cache-Control", "public,max-age=31536000");
-            return File(blob.Content, blob.ContentType, enableRangeProcessing: true);
+            var contentLength = blob.ContentLength;
+            var contentType = "video/mp4"; // Explicit sätt content type till video/mp4
+
+            var rangeHeader = Request.Headers.Range.ToString();
+
+            // Sätt alla viktiga headers
+            Response.Headers.Append("Accept-Ranges", "bytes");
+            Response.Headers.Append("Cache-Control", "no-cache");
+            Response.Headers.Append("Connection", "keep-alive");
+            Response.Headers.Append("Access-Control-Allow-Origin", "*");
+            Response.Headers.Append("Access-Control-Allow-Headers", "Range");
+            Response.Headers.Append("Access-Control-Expose-Headers", "Accept-Ranges, Content-Encoding, Content-Length, Content-Range");
+
+            try
+            {
+                if (string.IsNullOrEmpty(rangeHeader))
+                {
+                    Response.StatusCode = 200;
+                    Response.ContentType = contentType;
+                    Response.Headers.Append("Content-Length", contentLength.ToString());
+
+                    return File(await _videoService.DownloadRangeAsync(video.BlobName, 0, contentLength - 1),
+                        contentType,
+                        enableRangeProcessing: true);
+                }
+
+                // Parse range
+                var rangeParts = rangeHeader.Replace("bytes=", "").Split('-');
+                var start = rangeParts.Length > 0 && long.TryParse(rangeParts[0], out var s) ? s : 0;
+                var end = rangeParts.Length > 1 && long.TryParse(rangeParts[1], out var e) ? e : contentLength - 1;
+
+                // Validate range
+                if (start >= contentLength)
+                {
+                    Response.Headers.Append("Content-Range", $"bytes */{contentLength}");
+                    return StatusCode(416);
+                }
+
+                // Adjust end if needed
+                if (end >= contentLength)
+                {
+                    end = contentLength - 1;
+                }
+
+                var length = end - start + 1;
+                Response.StatusCode = 206;
+                Response.ContentType = contentType;
+                Response.Headers.Append("Content-Length", length.ToString());
+                Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{contentLength}");
+
+                return File(await _videoService.DownloadRangeAsync(video.BlobName, start, end),
+                    contentType,
+                    enableRangeProcessing: true);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Streaming error: {ex.Message}");
+            }
         }
 
+        private int DetermineOptimalChunkSize(long fileSize)
+        {
+            // Adjust chunk size based on file size
+            if (fileSize > 1024 * 1024 * 1024) // > 1GB
+                return 10 * 1024 * 1024; // 10MB chunks
+            else if (fileSize > 512 * 1024 * 1024) // > 512MB
+                return 5 * 1024 * 1024; // 5MB chunks
+            else if (fileSize > 128 * 1024 * 1024) // > 128MB
+                return 2 * 1024 * 1024; // 2MB chunks
+            else
+                return 1 * 1024 * 1024; // 1MB chunks
+        }
+
+
         // PUT: api/Video/{id}
+        [Authorize]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateVideo(int id, [FromBody] UpdateVideoDto updateVideoDto)
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (userId == 0)
+                return Unauthorized();
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -168,6 +253,10 @@ namespace MeTube.API.Controllers
                 var video = await _unitOfWork.Videos.GetVideoByIdAsync(id);
                 if (video == null)
                     return NotFound();
+
+                // Verify that the user owns the video
+                if (video.UserId != userId)
+                    return Forbid();
 
                 // Prevents the blob from being overwritten
                 var originalBlobName = video.BlobName;
@@ -189,6 +278,7 @@ namespace MeTube.API.Controllers
 
 
         // PUT: api/Video/{id}/file
+        [Authorize]
         [HttpPut("{id:int}/file")]
         [Consumes("multipart/form-data")] // Explicit ange content-type
         public async Task<IActionResult> UpdateVideoFile(int id,IFormFile file)
@@ -232,6 +322,7 @@ namespace MeTube.API.Controllers
         }
 
         // PUT: api/Video/{id}/thumbnail
+        [Authorize]
         [HttpPut("{id:int}/thumbnail")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateThumbnail(int id, IFormFile thumbnailFile)
@@ -273,12 +364,20 @@ namespace MeTube.API.Controllers
 
 
         // DELETE: api/Video/{id}
+        [Authorize]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteVideo(int id)
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (userId == 0)
+                return Unauthorized();
+
             var video = await _unitOfWork.Videos.GetVideoByIdAsync(id);
             if (video == null)
                 return NotFound();
+
+            if (video.UserId != userId)
+                return Forbid();
 
             // Delete thumbnail if it's not the default thumbnail
             if (!string.IsNullOrEmpty(video.ThumbnailUrl) && !video.ThumbnailUrl.Contains("YouTube_Diamond_Play_Button.png"))
@@ -301,6 +400,7 @@ namespace MeTube.API.Controllers
         }
 
         // PUT: api/Video/{id}/default-thumbnail
+        [Authorize]
         [HttpPut("{id:int}/default-thumbnail")]
         public async Task<IActionResult> ResetToDefaultThumbnail(int id)
         {
@@ -341,7 +441,31 @@ namespace MeTube.API.Controllers
             return true;
         }
 
-        
+
+        private (long Start, long End, long Length) GetRangeFromHeader(string rangeHeader, long contentLength, int chunkSize)
+        {
+            if (string.IsNullOrEmpty(rangeHeader))
+            {
+                var endRangeDefault = Math.Min(chunkSize - 1, contentLength - 1);
+                return (0, endRangeDefault, endRangeDefault + 1);
+            }
+
+            var ranges = rangeHeader.Replace("bytes=", "").Split('-');
+            var start = ranges.Length > 0 && long.TryParse(ranges[0], out var s) ? s : 0;
+            var endRangeParsed = ranges.Length > 1 && long.TryParse(ranges[1], out var e) ? e : start + chunkSize - 1;
+
+            // Ensure end doesn't exceed content length
+            endRangeParsed = Math.Min(endRangeParsed, contentLength - 1);
+
+            // Ensure chunk size isn't too large
+            if (endRangeParsed - start + 1 > chunkSize)
+            {
+                endRangeParsed = start + chunkSize - 1;
+            }
+
+            return (start, endRangeParsed, endRangeParsed - start + 1);
+        }
+
 
     }
 }

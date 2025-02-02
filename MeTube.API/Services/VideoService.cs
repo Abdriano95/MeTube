@@ -1,9 +1,11 @@
-﻿using Azure.Storage;
+﻿using Azure;
+using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using MeTube.DTO.VideoDTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace MeTube.API.Services
 {
@@ -12,6 +14,8 @@ namespace MeTube.API.Services
         private readonly BlobContainerClient _videoContainerClient;
         private readonly BlobContainerClient _thumbnailContainerClient;
         private readonly IConfiguration _configuration;
+        private readonly MemoryCache _cache;
+        private readonly int _cacheTimeout = 300;
 
         public VideoService(IConfiguration configuration)
         {
@@ -32,6 +36,11 @@ namespace MeTube.API.Services
             _videoContainerClient = blobServiceClient.GetBlobContainerClient("videos");
             _thumbnailContainerClient = blobServiceClient.GetBlobContainerClient("thumbnails");
 
+            _cache = new MemoryCache(new MemoryCacheOptions
+            {
+                SizeLimit = 524288000 // 500MB cache limit
+            });
+
 
             _videoContainerClient.CreateIfNotExists();
             _thumbnailContainerClient.CreateIfNotExists();
@@ -39,8 +48,9 @@ namespace MeTube.API.Services
 
         public async Task<bool> BlobExistsAsync(string blobName)
         {
-            BlobClient client = _videoContainerClient.GetBlobClient(blobName);
-            return await client.ExistsAsync();
+            var blobClient = _videoContainerClient.GetBlobClient(blobName);
+            var response = await blobClient.ExistsAsync();
+            return response.Value;
         }
 
         public async Task<List<BlobDto>> ListAsync()
@@ -227,6 +237,83 @@ namespace MeTube.API.Services
                 response.Error = true;
             }
             return response;
+        }
+
+        public async Task<BlobProperties> GetBlobPropertiesAsync(string blobName)
+        {
+            var cacheKey = $"properties_{blobName}";
+
+            // Try to get properties from cache
+            if (_cache.TryGetValue(cacheKey, out BlobProperties properties))
+            {
+                return properties;
+            }
+
+            var blobClient = _videoContainerClient.GetBlobClient(blobName);
+            var response = await blobClient.GetPropertiesAsync();
+
+            // Cache the properties
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetSize(1) // Minimal size for metadata
+                .SetSlidingExpiration(TimeSpan.FromSeconds(_cacheTimeout));
+
+            _cache.Set(cacheKey, response.Value, cacheEntryOptions);
+
+            return response.Value;
+        }
+
+        public async Task<Stream> DownloadRangeAsync(string blobName, long start, long end)
+        {
+            var blobClient = _videoContainerClient.GetBlobClient(blobName);
+            var cacheKey = $"{blobName}_{start}_{end}";
+
+            // Optimera caching - bara cache små segment
+            const int MAX_CACHE_SIZE = 1 * 1024 * 1024; // 1MB max cache segment
+            bool shouldCache = (end - start) <= MAX_CACHE_SIZE;
+
+            if (shouldCache && _cache.TryGetValue(cacheKey, out byte[] cachedData))
+            {
+                return new MemoryStream(cachedData);
+            }
+
+            try
+            {
+                // Optimera nedladdningsalternativ för streaming
+                var downloadOptions = new BlobDownloadOptions
+                {
+                    Range = new HttpRange(start, end - start + 1),
+                    // Ta bort onödiga villkor för bättre prestanda
+                    Conditions = null
+                };
+
+                var download = await blobClient.DownloadStreamingAsync(downloadOptions);
+
+                if (shouldCache)
+                {
+                    // För små segment, använd caching
+                    var memoryStream = new MemoryStream();
+                    await download.Value.Content.CopyToAsync(memoryStream, 81920); // 80KB buffer
+
+                    var cacheEntryOptions = new MemoryCacheEntryOptions()
+                        .SetSize(memoryStream.Length)
+                        .SetSlidingExpiration(TimeSpan.FromSeconds(_cacheTimeout));
+
+                    _cache.Set(cacheKey, memoryStream.ToArray(), cacheEntryOptions);
+
+                    memoryStream.Position = 0;
+                    return memoryStream;
+                }
+                else
+                {
+                    // För stora segment, returnera direkt stream
+                    return download.Value.Content;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Logga felet om du har logging implementerat
+                throw;
+            }
         }
     }
 }
