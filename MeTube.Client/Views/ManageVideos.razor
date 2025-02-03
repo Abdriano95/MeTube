@@ -1,5 +1,8 @@
 ﻿@page "/videos/manage"
 @inject ManageVideosViewModel ViewModel
+@using MeTube.Client.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IUserService UserService
 
 <link href="css/manage_videos.css" rel="stylesheet" />
 
@@ -76,17 +79,20 @@
                             <td class="align-middle">@video.DateUploaded.ToString("MMM dd, yyyy")</td>
                             <td class="align-middle description-cell">
                                 @(video.Description?.Length > 100
-                                    ? video.Description.Substring(0, 97) + "..."
-                                    : video.Description)
+                                        ? video.Description.Substring(0, 97) + "..."
+                                        : video.Description)
                             </td>
                             <td class="align-middle">
                                 <div class="btn-group">
-                                    <button @onclick="() => ViewModel.NavigateToEdit(video.Id)"
-                                            class="btn btn-outline-primary btn-sm">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </button>
+                                    @if(IsAuthenticated && UserRole == "Admin")
+                                    {
+                                        <button @onclick="() => ViewModel.NavigateToEdit(video.Id)"
+                                        class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </button>
+                                    }
                                     <button @onclick="() => ViewModel.ShowDeleteConfirmation(video)"
-                                            class="btn btn-outline-danger btn-sm ms-2">
+                                    class="btn btn-outline-danger btn-sm ms-2">
                                         <i class="bi bi-trash"></i> Delete
                                     </button>
                                 </div>
@@ -124,8 +130,21 @@
 </div>
 
 @code {
+    private bool IsAuthenticated = false;
+    private string UserRole = string.Empty;
     protected override async Task OnInitializedAsync()
     {
-        await ViewModel.LoadUserVideosAsync();
+        Dictionary<string, string> response = await UserService.IsUserAuthenticated();
+        UserRole = response["Role"];
+        IsAuthenticated = Convert.ToBoolean(response["IsAuthenticated"]);
+
+        if(IsAuthenticated && UserRole != "Admin")
+        {
+            await ViewModel.LoadUserVideosAsync();
+        }
+        else if (IsAuthenticated && UserRole == "Admin")
+        {
+            await ViewModel.LoadAllVideos();
+        }
     }
 }
