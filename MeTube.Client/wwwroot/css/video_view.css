@@ -1,0 +1,37 @@
+﻿.video-container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+
+.video-player {
+    width: 100%;
+    border-radius: 8px;
+    aspect-ratio: 16/9;
+    background: #000;
+}
+
+.like-section button {
+    transition: transform 0.2s;
+}
+
+    .like-section button:hover {
+        transform: scale(1.05);
+    }
+
+.comment-box {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.comment-item {
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.bi-hand-thumbs-up {
+    margin-right: 8px;
+}

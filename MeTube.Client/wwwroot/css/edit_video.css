@@ -1,0 +1,129 @@
+﻿.edit-container {
+    background-color: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.video-preview {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.video-thumbnail {
+    width: 160px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 1rem;
+}
+
+.video-info {
+    flex: 1;
+}
+
+.edit-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.edit-section {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+    .edit-section h4 {
+        color: #1a73e8;
+        margin-bottom: 1.5rem;
+    }
+
+.upload-box {
+    position: relative;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .upload-box:hover {
+        border-color: #1a73e8;
+        background-color: rgba(26,115,232,0.04);
+    }
+
+    .upload-box.has-file {
+        border-color: #34a853;
+        background-color: rgba(52,168,83,0.04);
+    }
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-content {
+    pointer-events: none;
+}
+
+.video-upload {
+    min-height: 180px;
+}
+
+.thumbnail-upload {
+    min-height: 150px;
+}
+
+.thumbnail-options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Button styles */
+.btn-primary {
+    background-color: #1a73e8;
+    border-color: #1a73e8;
+}
+
+    .btn-primary:hover {
+        background-color: #1557b0;
+        border-color: #1557b0;
+    }
+
+/* Form control focus states */
+.form-control:focus {
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 0.2rem rgba(26,115,232,0.25);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .edit-container {
+        padding: 1rem;
+    }
+
+    .video-preview {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .video-thumbnail {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+
+    .edit-section {
+        padding: 1rem;
+    }
+}

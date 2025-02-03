@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MeTube.Data.Entity
+namespace MeTube.DTO
 {
-    public class Admin : User
+    public class UserIdDto
     {
-
+        public int Id { get; set; }
     }
 }

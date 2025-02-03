@@ -1,0 +1,127 @@
+﻿.upload-container {
+    background-color: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.upload-box {
+    position: relative;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .upload-box:hover {
+        border-color: #1a73e8;
+        background-color: rgba(26,115,232,0.04);
+    }
+
+    .upload-box.has-file {
+        border-color: #34a853;
+        background-color: rgba(52,168,83,0.04);
+    }
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-content {
+    pointer-events: none;
+}
+
+    .upload-content i {
+        color: #5f6368;
+    }
+
+.video-upload {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thumbnail-upload {
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Button styles */
+.btn-primary {
+    background-color: #1a73e8;
+    border-color: #1a73e8;
+    padding: 0.5rem 1.5rem;
+}
+
+    .btn-primary:hover {
+        background-color: #1557b0;
+        border-color: #1557b0;
+    }
+
+/* Form control focus states */
+.form-control:focus {
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 0.2rem rgba(26,115,232,0.25);
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.alert .btn-close {
+    padding: 0.75rem;
+}
+
+.alert .bi {
+    font-size: 1.1rem;
+    vertical-align: -2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .upload-container {
+        padding: 1rem;
+    }
+
+    .video-upload, .thumbnail-upload {
+        min-height: 120px;
+    }
+}

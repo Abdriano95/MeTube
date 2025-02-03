@@ -3,6 +3,14 @@ using MeTube.Data.Entity;
 using MeTube.Data.Repository;
 using MeTube.DTO;
 using AutoMapper;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using Microsoft.JSInterop;
 
 namespace MeTube.API.Controllers
 {
@@ -28,6 +36,34 @@ namespace MeTube.API.Controllers
                 return NotFound(new { Message = "User not found" });
             }
             return Ok(user);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("manageUsers")]
+        public async Task<IActionResult> GetAllusers()
+        {
+            var users = await _unitOfWork.Users.GetAllAsync();
+            if(!users.Any())
+                return NotFound(new { Message = "Users not found" });
+
+            var userDtos = _mapper.Map<IEnumerable<ManageUserDto>>(users);
+            return Ok(userDtos);
+        }
+
+        [HttpGet("userIdFromEmail")]
+        public async Task<IActionResult> GetUserIdByEmail([FromQuery] string email)
+        {
+            var user = await _unitOfWork.Users.GetUserIdByEmailAsync(email);
+
+            if (user == null)
+                return NotFound(new { Message = "User not found" });
+
+            var userIdDto = new UserIdDto 
+            { 
+                Id = user.Value 
+            };
+
+            return Ok(userIdDto);
         }
 
         [HttpPost("signup")]
@@ -56,6 +92,8 @@ namespace MeTube.API.Controllers
             return Ok(new { Message = "User signed up successfully" });
         }
 
+
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto request)
         {
@@ -63,6 +101,11 @@ namespace MeTube.API.Controllers
             {
                 return BadRequest(ModelState);
             }
+
+            var requestFromUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userIdRequestedFromuser = int.Parse(requestFromUser);
+            if (userIdRequestedFromuser == id)
+                return NotFound(new { Message = "Cant delete your own user" });
 
             var user = await _unitOfWork.Users.GetUserByIdAsync(id);
             if (user == null)
@@ -77,9 +120,15 @@ namespace MeTube.API.Controllers
             return Ok(new { Message = "User updated successfully" });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
+            var requestFromUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userIdRequestedFromuser = int.Parse(requestFromUser);
+            if (userIdRequestedFromuser == id)
+                return NotFound(new { Message = "Cant delete your own user" });
+
             var user = await _unitOfWork.Users.GetUserByIdAsync(id);
             if (user == null)
             {
@@ -89,7 +138,7 @@ namespace MeTube.API.Controllers
             _unitOfWork.Users.DeleteUser(user);
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new { Message = "User deleted successfully" });
+            return Ok(new { Message = "User deleted" });
         }
 
         [HttpPost("login")]
@@ -107,15 +156,61 @@ namespace MeTube.API.Controllers
                 {
                     return BadRequest(new { Message = "Invalid username or password" });
                 }
-
+                var token = GenerateJwtToken(user);
                 var userDto = _mapper.Map<UserDto>(user);
-                return Ok(userDto);
+
+                return Ok(new
+                {
+                    User = userDto,
+                    Token = token
+                });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { Error = "Could not log in", Message = ex.Message });
             }
+        }
 
+        [Authorize]
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            try
+            {
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+                if (string.IsNullOrEmpty(token))
+                    return BadRequest(new { Message = "Token is required." });
+
+                return Ok(new { Message = "User successfully logged out." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = "Could not log out", Message = ex.Message });
+            }
+        }
+
+        private string GenerateJwtToken(User user)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword"));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: "Customer",
+                audience: "User",
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

@@ -1,0 +1,144 @@
+﻿@page "/videos/edit/{VideoId:int}"
+@using MeTube.Client.ViewModels
+@inject EditVideoViewModel ViewModel
+
+<link href="css/edit_video.css" rel="stylesheet" />
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            @if (ViewModel.IsLoading)
+            {
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+            {
+                <div class="alert alert-danger">
+                    @ViewModel.ErrorMessage
+                </div>
+            }
+            else if (ViewModel.CurrentVideo == null)
+            {
+                <div class="alert alert-warning">
+                    Video not found.
+                </div>
+            }
+            else
+            {
+                <div class="edit-container">
+                    <h2 class="mb-4">Edit Video</h2>
+
+                    <div class="video-preview mb-4">
+                        <img src="@ViewModel.CurrentVideo.ThumbnailUrl" alt="@ViewModel.CurrentVideo.Title" class="video-thumbnail" />
+                        <div class="video-info">
+                            <h5>@ViewModel.CurrentVideo.Title</h5>
+                            <p class="text-muted">Uploaded on @ViewModel.CurrentVideo.DateUploaded.ToString("MMM dd, yyyy")</p>
+                        </div>
+                    </div>
+
+                    <div class="edit-sections">
+                        <!-- Metadata Section -->
+                        <div class="edit-section">
+                            <h4>Update Video Details</h4>
+                            <EditForm Model="ViewModel" OnValidSubmit="ViewModel.UpdateMetadataAsync">
+                                <DataAnnotationsValidator />
+
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Title</label>
+                                    <InputText @bind-Value="ViewModel.Title" class="form-control" id="title" />
+                                    <ValidationMessage For="@(() => ViewModel.Title)" class="text-danger" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <InputTextArea @bind-Value="ViewModel.Description" class="form-control" id="description" rows="4" />
+                                    <ValidationMessage For="@(() => ViewModel.Description)" class="text-danger" />
+                                </div>
+
+                                <button type="submit" class="btn btn-primary" disabled="@ViewModel.IsLoading">
+                                    <i class="bi bi-save"></i> Save Changes
+                                </button>
+                            </EditForm>
+                        </div>
+
+                        <!-- Video File Section -->
+                        <div class="edit-section">
+                            <h4>Update Video File</h4>
+                            <div class="upload-box video-upload @(ViewModel.NewVideoFile != null ? "has-file" : "")">
+                                <InputFile OnChange="@(async e => { ViewModel.NewVideoFile = e.File; await ViewModel.UpdateVideoFileAsync(); })"
+                                           accept=".mp4" class="file-input" />
+                                <div class="upload-content">
+                                    <i class="bi bi-film fs-1"></i>
+                                    <p class="mt-2">
+                                        @if (ViewModel.NewVideoFile != null)
+                                        {
+                                            <span>Selected: @ViewModel.NewVideoFile.Name</span>
+                                        }
+                                        else
+                                        {
+                                            <span>
+                                                Click to replace video file<br />
+                                                <small class="text-muted">MP4 format, max 500MB</small>
+                                            </span>
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thumbnail Section -->
+                        <div class="edit-section">
+                            <h4>Update Thumbnail</h4>
+                            <div class="thumbnail-options">
+                                <div class="upload-box thumbnail-upload @(ViewModel.NewThumbnailFile != null ? "has-file" : "")">
+                                    <InputFile OnChange="@(async e => { ViewModel.NewThumbnailFile = e.File; await ViewModel.UpdateThumbnailAsync(); })"
+                                               accept=".jpg,.jpeg,.png" class="file-input" />
+                                    <div class="upload-content">
+                                        <i class="bi bi-image fs-1"></i>
+                                        <p class="mt-2">
+                                            @if (ViewModel.NewThumbnailFile != null)
+                                            {
+                                                <span>Selected: @ViewModel.NewThumbnailFile.Name</span>
+                                            }
+                                            else
+                                            {
+                                                <span>
+                                                    Upload new thumbnail<br />
+                                                    <small class="text-muted">JPG or PNG, max 5MB</small>
+                                                </span>
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                                <button @onclick="ViewModel.ResetToDefaultThumbnailAsync"
+                                        class="btn btn-outline-secondary mt-3">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reset to Default Thumbnail
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex justify-content-between">
+                        <a href="/videos/manage" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Videos
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int VideoId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadVideoAsync(VideoId);
+    }
+}

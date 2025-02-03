@@ -1,0 +1,156 @@
+﻿@page "/video/{VideoId:int}"
+@using MeTube.Client.Models
+@inject VideoViewModel ViewModel
+@inject IJSRuntime JSRuntime
+
+<link href="css/video_view.css" rel="stylesheet" />
+
+<div class="container mt-4">
+    @if (ViewModel.IsLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Laddar...</span>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+    {
+        <div class="alert alert-danger">
+            @ViewModel.ErrorMessage
+        </div>
+    }
+    else if (ViewModel.CurrentVideo != null)
+    {
+        <div class="row justify-content-center">
+            <!-- Video Section -->
+            <div class="col-lg-8 col-md-12">
+                <div class="video-container">
+                    <video id="videoPlayer"
+                           controls
+                           class="video-player"
+                           controlsList="nodownload"
+                           preload="auto"
+                           crossorigin="anonymous"
+                           playsinline
+                           webkit-playsinline>
+                        <source src="@ViewModel.CurrentVideo.VideoUrl" type="video/mp4"
+                                codecs="avc1.42E01E, mp4a.40.2">
+                        Din webbläsare stöder inte videouppspelning.
+                    </video>
+
+                    <!-- Title and Metadata -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <h4 class="fw-bold mb-0">@ViewModel.CurrentVideo.Title</h4>
+                            <small class="text-muted">Uppladdad @ViewModel.CurrentVideo.DateUploaded.ToString("dd MMM yyyy")</small>
+                        </div>
+                        <div class="like-section">
+                            <button class="btn btn-outline-primary">
+                                <i class="bi bi-hand-thumbs-up"></i>
+                                <span>13</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mt-3">
+                        <p class="lead">@ViewModel.CurrentVideo.Description</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="col-lg-4 col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Kommentarer (@ViewModel.Comments.Count)</h5>
+
+                        <div class="comment-box">
+                            @foreach (var comment in ViewModel.Comments)
+                            {
+                                <div class="comment-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="d-flex justify-content-between">
+                                                <strong>@comment.Author</strong>
+                                                <small class="text-muted">@comment.Date.ToString("HH:mm dd MMM")</small>
+                                            </div>
+                                            <p class="mb-0">@comment.Text</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="input-group mt-3">
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="Skriv en kommentar..."
+                                   @bind="_newComment" />
+                            <button class="btn btn-primary" @onclick="PostComment">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int VideoId { get; set; }
+
+    private string _newComment = string.Empty;
+
+    private bool videoLoaded = false;
+
+    private ElementReference videoElement;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await ViewModel.LoadVideoAsync(VideoId);
+    }
+
+    private async Task OnVideoLoaded()
+    {
+        if (!videoLoaded)
+        {
+            videoLoaded = true;
+            await JSRuntime.InvokeVoidAsync("initializeVideoPlayer", videoElement);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await Task.Delay(100); // Kort fördröjning för att säkerställa att DOM är redo
+                await JSRuntime.InvokeVoidAsync("initializeVideoPlayer");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error initializing video player: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task PostComment()
+    {
+        if (!string.IsNullOrWhiteSpace(_newComment))
+        {
+            // TODO: Implementera API-anrop för att spara kommentar
+            ViewModel.Comments.Add(new Comment
+                {
+                    Author = "Current User", // Ersätt med inloggad användare
+                    Text = _newComment,
+                    Date = DateTime.Now
+                });
+            _newComment = string.Empty;
+        }
+    }
+}

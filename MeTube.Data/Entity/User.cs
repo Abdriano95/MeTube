@@ -22,7 +22,9 @@ namespace MeTube.Data.Entity
 
         [Required(ErrorMessage = "Email is required")]
         public required string Email { get; set; }
+        [Required(ErrorMessage = "Role is Required")]
+        public required string Role { get; set; } = "User";
 
-
+        public ICollection<Video> Videos { get; set; } = new List<Video>();
     }
 }

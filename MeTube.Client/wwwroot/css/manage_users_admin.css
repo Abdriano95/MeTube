@@ -1,0 +1,191 @@
+﻿.ManageUsers {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 60vh;
+    gap:40px;
+}
+
+.FormContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 400px;
+    background-color: #f9f9f9;
+    padding: 20px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.40);
+    border-radius: 8px;
+}
+
+
+label {
+    font-weight: lighter;
+    color: #555;
+}
+
+input {
+    width: 100%;
+    color: #333;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+input::placeholder {
+    color: #aaa;
+}
+
+.ManageUsersButtons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+}
+
+#saveButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+#saveButton:hover {
+    background-color: #0056b3;
+}
+
+#deleteButton, .edit-button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.SelectRole{
+    width:100%;
+    text-align:center;
+}
+
+.SelectRole select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.FormText {
+    color: #666;
+    text-align: center;
+}
+
+h1 {
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+    color: #007bff;
+}
+
+#Front {
+    text-align: center;
+    color: black;
+    padding:20px;
+    margin-top:30px;
+}
+
+.SearchContainer {
+    width:30%;
+    display: flex;
+    /*align-items: center;*/
+    gap: 10px;
+    padding:20px;
+    margin-bottom:20px;
+    margin-left: 200px;
+}
+.user-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    font-family: 'Times New Roman';
+}
+
+.user-row {
+    display: grid;
+    grid-template-columns: 1.2fr 2fr 1.5fr 1.2fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+    .user-row:first-child {
+        font-weight: bold;
+        background-color: #e9ecef;
+        padding: 14px;
+        border-bottom: 2px solid #ccc;
+    }
+
+label {
+    text-align: left;
+}
+
+.user-row > input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    border: none;
+    background: none;
+}
+
+span {
+    font-weight: bold;
+    color: #333;
+    padding: 5px 10px;
+    background-color: #f1f1f1;
+    border-radius: 4px;
+}
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.close-button {
+    background-color: gray;
+    color: white;
+    padding: 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+    .close-button:hover {
+        background-color: darkgray;
+    }
