@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MeTube.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class initialcreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,6 +52,85 @@ namespace MeTube.Data.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Comment",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    VideoId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    DateAdded = table.Column<DateTime>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comment", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Comment_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Comment_Videos_VideoId",
+                        column: x => x.VideoId,
+                        principalTable: "Videos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "History",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    VideoId = table.Column<int>(type: "int", nullable: false),
+                    DateWatched = table.Column<DateTime>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_History", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_History_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_History_Videos_VideoId",
+                        column: x => x.VideoId,
+                        principalTable: "Videos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Like",
+                columns: table => new
+                {
+                    VideoID = table.Column<int>(type: "int", nullable: false),
+                    UserID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Like", x => new { x.VideoID, x.UserID });
+                    table.ForeignKey(
+                        name: "FK_Like_Users_UserID",
+                        column: x => x.UserID,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Like_Videos_VideoID",
+                        column: x => x.VideoID,
+                        principalTable: "Videos",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -74,6 +153,31 @@ namespace MeTube.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Comment_UserId",
+                table: "Comment",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comment_VideoId",
+                table: "Comment",
+                column: "VideoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_History_UserId",
+                table: "History",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_History_VideoId",
+                table: "History",
+                column: "VideoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Like_UserID",
+                table: "Like",
+                column: "UserID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Videos_UserId",
                 table: "Videos",
                 column: "UserId");
@@ -82,6 +186,15 @@ namespace MeTube.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Comment");
+
+            migrationBuilder.DropTable(
+                name: "History");
+
+            migrationBuilder.DropTable(
+                name: "Like");
+
             migrationBuilder.DropTable(
                 name: "Videos");
 

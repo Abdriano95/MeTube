@@ -30,6 +30,11 @@ namespace MeTube.Data.Entity
         public string? ThumbnailUrl { get; set; }
         public string? BlobName { get; set; }
         public DateTime DateUploaded { get; set; }
+
+        // Navigation properties
         public User? User { get; set; }
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<Like> Likes { get; set; } = new List<Like>();
+        public ICollection<History> Histories { get; set; } = new List<History>();
     }
 }
