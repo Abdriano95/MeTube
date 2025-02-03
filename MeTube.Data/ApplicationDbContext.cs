@@ -7,7 +7,13 @@ namespace MeTube.Data
     public class ApplicationDbContext : DbContext
     {
         public virtual DbSet<User> Users { get; set; } = null!;
-        public virtual DbSet<Video> Videos { get; set; }
+        public virtual DbSet<Video> Videos { get; set; } = null!;
+        public virtual DbSet<History> Histories { get; set; } = null!;
+        public virtual DbSet<Comment> Comments { get; set; } = null!;
+        public virtual DbSet<Like> Likes { get; set; } = null!;
+
+
+
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -17,9 +23,6 @@ namespace MeTube.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-
-            
-
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -144,7 +147,6 @@ namespace MeTube.Data
                 VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/youtube_OUUlO8fQOfE_1920x1080_h264.mp4",
                 ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/whatisthefutureofblazor.jpg",
                 BlobName = "youtube_OUUlO8fQOfE_1920x1080_h264.mp4",
-                //2025-02-01 13:48:10
                 DateUploaded = new DateTime(2025, 2, 1) 
             };
 

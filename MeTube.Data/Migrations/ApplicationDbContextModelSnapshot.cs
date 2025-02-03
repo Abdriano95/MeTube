@@ -50,7 +50,7 @@ namespace MeTube.Data.Migrations
 
                     b.HasIndex("VideoId");
 
-                    b.ToTable("Comment");
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("MeTube.Data.Entity.History", b =>
@@ -76,7 +76,7 @@ namespace MeTube.Data.Migrations
 
                     b.HasIndex("VideoId");
 
-                    b.ToTable("History");
+                    b.ToTable("Histories");
                 });
 
             modelBuilder.Entity("MeTube.Data.Entity.Like", b =>
@@ -93,7 +93,7 @@ namespace MeTube.Data.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Like");
+                    b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("MeTube.Data.Entity.User", b =>
