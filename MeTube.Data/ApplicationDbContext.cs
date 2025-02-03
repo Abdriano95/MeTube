@@ -37,7 +37,13 @@ namespace MeTube.Data
                 entity.Property(entity => entity.Role).IsRequired().HasDefaultValue("User");
 
                 // Relation with videos
-                entity.HasMany(u => u.Videos).WithOne(v => v.User).HasForeignKey(v => v.UserId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(u => u.Videos).WithOne(v => v.User).HasForeignKey(v => v.UserId).OnDelete(DeleteBehavior.Restrict);
+                // Relation with histories
+                entity.HasMany(u => u.Histories).WithOne(h => h.User).HasForeignKey(h => h.UserId).OnDelete(DeleteBehavior.Restrict);
+                // Relation with comments
+                entity.HasMany(u => u.Comments).WithOne(c => c.User).HasForeignKey(c => c.UserId).OnDelete(DeleteBehavior.Restrict);
+                // Relation with likes
+                entity.HasMany(u => u.Likes).WithOne(l => l.User).HasForeignKey(l => l.UserID).OnDelete(DeleteBehavior.Restrict);
             });
 
 
@@ -55,7 +61,50 @@ namespace MeTube.Data
                 entity.Property(v => v.DateUploaded).IsRequired().HasColumnType("datetime");
 
                 // Relation with user
-                entity.HasOne(v => v.User).WithMany(u => u.Videos).HasForeignKey(v => v.UserId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(v => v.User).WithMany(u => u.Videos).HasForeignKey(v => v.UserId).IsRequired().OnDelete(DeleteBehavior.Restrict);
+                // Relation with comments
+                entity.HasMany(v => v.Comments).WithOne(c => c.Video).HasForeignKey(c => c.VideoId).OnDelete(DeleteBehavior.Restrict);
+                // Relation with likes
+                entity.HasMany(v => v.Likes).WithOne(l => l.Video).HasForeignKey(l => l.VideoID).OnDelete(DeleteBehavior.Restrict);
+                // Relation with history
+                entity.HasMany(v => v.Histories).WithOne(h => h.Video).HasForeignKey(h => h.VideoId).OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configure History entity
+            modelBuilder.Entity<History>(entity =>
+            {
+                entity.HasKey(h => h.Id);
+                entity.Property(h => h.Id).ValueGeneratedOnAdd();
+                entity.Property(h => h.DateWatched).IsRequired().HasColumnType("datetime");
+                // Relation with user
+                entity.HasOne(h => h.User).WithMany(u => u.Histories).HasForeignKey(h => h.UserId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+                // Relation with video
+                entity.HasOne(h => h.Video).WithMany(v => v.Histories).HasForeignKey(h => h.VideoId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure Comment entity
+            modelBuilder.Entity<Comment>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Id).ValueGeneratedOnAdd();
+                entity.Property(c => c.Content).IsRequired().HasMaxLength(255);
+                entity.Property(c => c.DateAdded).IsRequired().HasColumnType("datetime");
+                // Relation with user
+                entity.HasOne(c => c.User).WithMany(u => u.Comments).HasForeignKey(c => c.UserId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+                // Relation with video
+                entity.HasOne(c => c.Video).WithMany(v => v.Comments).HasForeignKey(c => c.VideoId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+            });
+
+
+            // Configure Like entity
+            modelBuilder.Entity<Like>(entity =>
+            {
+                entity.HasKey(l => new { l.VideoID, l.UserID });
+
+                // Relation with user
+                entity.HasOne(l => l.User).WithMany(u => u.Likes).HasForeignKey(l => l.UserID).IsRequired().OnDelete(DeleteBehavior.Cascade);
+                // Relation with video
+                entity.HasOne(l => l.Video).WithMany(v => v.Likes).HasForeignKey(l => l.VideoID).IsRequired().OnDelete(DeleteBehavior.Cascade);
             });
 
             SeedData(modelBuilder);

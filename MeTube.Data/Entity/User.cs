@@ -25,6 +25,10 @@ namespace MeTube.Data.Entity
         [Required(ErrorMessage = "Role is Required")]
         public required string Role { get; set; } = "User";
 
+        // Navigation properties
         public ICollection<Video> Videos { get; set; } = new List<Video>();
+        public ICollection<History> Histories { get; set; } = new List<History>();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<Like> Likes { get; set; } = new List<Like>();
     }
 }

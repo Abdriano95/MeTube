@@ -27,9 +27,19 @@ namespace MeTube.Data.Repository
             await DbContext.Set<Video>().AddAsync(video);
         }
 
-        public void DeleteVideo(Video video)
+        // Ta bort kommentarer, history och likes som tillhör videon
+        // Ta bort videon
+        public async Task DeleteVideo(Video video)
         {
-            Delete(video);
+            var videoToDelete = await DbContext.Videos.Include(v => v.Comments).FirstOrDefaultAsync(v => v.Id == video.Id);
+            if (videoToDelete != null)
+            {
+                // Delete related comments
+                DbContext.RemoveRange(videoToDelete.Comments);
+
+                // Delete the video
+                DbContext.Videos.Remove(videoToDelete);
+            }
         }
 
         public async Task<IEnumerable<Video>> GetAllVideosAsync()

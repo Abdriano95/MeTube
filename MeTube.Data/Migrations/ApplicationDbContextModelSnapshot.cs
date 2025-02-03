@@ -22,6 +22,80 @@ namespace MeTube.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("MeTube.Data.Entity.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VideoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("VideoId");
+
+                    b.ToTable("Comment");
+                });
+
+            modelBuilder.Entity("MeTube.Data.Entity.History", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateWatched")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VideoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("VideoId");
+
+                    b.ToTable("History");
+                });
+
+            modelBuilder.Entity("MeTube.Data.Entity.Like", b =>
+                {
+                    b.Property<int>("VideoID")
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    b.HasKey("VideoID", "UserID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("Like");
+                });
+
             modelBuilder.Entity("MeTube.Data.Entity.User", b =>
                 {
                     b.Property<int>("Id")
@@ -147,12 +221,69 @@ namespace MeTube.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("MeTube.Data.Entity.Comment", b =>
+                {
+                    b.HasOne("MeTube.Data.Entity.User", "User")
+                        .WithMany("Comments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MeTube.Data.Entity.Video", "Video")
+                        .WithMany("Comments")
+                        .HasForeignKey("VideoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Video");
+                });
+
+            modelBuilder.Entity("MeTube.Data.Entity.History", b =>
+                {
+                    b.HasOne("MeTube.Data.Entity.User", "User")
+                        .WithMany("Histories")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MeTube.Data.Entity.Video", "Video")
+                        .WithMany("Histories")
+                        .HasForeignKey("VideoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Video");
+                });
+
+            modelBuilder.Entity("MeTube.Data.Entity.Like", b =>
+                {
+                    b.HasOne("MeTube.Data.Entity.User", "User")
+                        .WithMany("Likes")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MeTube.Data.Entity.Video", "Video")
+                        .WithMany("Likes")
+                        .HasForeignKey("VideoID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Video");
+                });
+
             modelBuilder.Entity("MeTube.Data.Entity.Video", b =>
                 {
                     b.HasOne("MeTube.Data.Entity.User", "User")
                         .WithMany("Videos")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -160,7 +291,22 @@ namespace MeTube.Data.Migrations
 
             modelBuilder.Entity("MeTube.Data.Entity.User", b =>
                 {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Histories");
+
+                    b.Navigation("Likes");
+
                     b.Navigation("Videos");
+                });
+
+            modelBuilder.Entity("MeTube.Data.Entity.Video", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Histories");
+
+                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }
