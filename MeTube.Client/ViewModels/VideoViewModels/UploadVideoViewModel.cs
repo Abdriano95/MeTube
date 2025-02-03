@@ -25,6 +25,11 @@ namespace MeTube.Client.ViewModels
         private string description = string.Empty;
 
         [ObservableProperty]
+        [Required(ErrorMessage = "Genre is required")]
+        [StringLength(30, MinimumLength = 3, ErrorMessage = "Please select a genre")]
+        private string genre = string.Empty;
+
+        [ObservableProperty]
         private IBrowserFile? videoFile;
 
         [ObservableProperty]
@@ -35,6 +40,9 @@ namespace MeTube.Client.ViewModels
 
         [ObservableProperty]
         private string errorMessage = string.Empty;
+
+        [ObservableProperty]
+        private string successMessage = string.Empty;
 
         public UploadVideoViewModel(
             IVideoService videoService,
@@ -70,20 +78,38 @@ namespace MeTube.Client.ViewModels
                 IsUploading = true;
                 ErrorMessage = string.Empty;
 
+                // Create a memory stream from the video file
+                using var videoMS = new MemoryStream();
+                await VideoFile.OpenReadStream(500 * 1024 * 1024).CopyToAsync(videoMS);
+                videoMS.Position = 0;  // Reset stream position
+
+                // Handle thumbnail file if it exists
+                MemoryStream? thumbnailMS = null;
+                if (ThumbnailFile != null)
+                {
+                    thumbnailMS = new MemoryStream();
+                    await ThumbnailFile.OpenReadStream(5 * 1024 * 1024).CopyToAsync(thumbnailMS);
+                    thumbnailMS.Position = 0;
+                }
+
                 var video = new Video
                 {
                     Title = Title,
-                    Description = Description
+                    Description = Description,
+                    Genre = Genre
                 };
 
-                using var videoStream = VideoFile.OpenReadStream(500 * 1024 * 1024); // Max 500MB
-                using var thumbnailStream = ThumbnailFile?.OpenReadStream(5 * 1024 * 1024); // Max 5MB
-
-                var uploadedVideo = await _videoService.UploadVideoAsync(video, videoStream, VideoFile.Name);
+                var uploadedVideo = await _videoService.UploadVideoAsync(
+                    video,
+                    videoMS,
+                    VideoFile.Name,
+                    thumbnailMS,
+                    ThumbnailFile?.Name);
 
                 if (uploadedVideo != null)
                 {
-                    await _jsRuntime.InvokeVoidAsync("alert", "Video uploaded successfully!");
+                    SuccessMessage = "Video uploaded successfully!";
+                    await Task.Delay(2000); 
                     _navigationManager.NavigateTo("/videos/manage");
                 }
                 else
@@ -91,9 +117,9 @@ namespace MeTube.Client.ViewModels
                     ErrorMessage = "Failed to upload video. Please try again.";
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ErrorMessage = "An error occurred during upload. Please try again.";
+                ErrorMessage = $"Upload error: {ex.Message}";
             }
             finally
             {

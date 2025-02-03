@@ -7,8 +7,8 @@ namespace MeTube.Client.Services
         Task<List<Video>?> GetAllVideosAsync();
         Task<Video?> GetVideoByIdAsync(int id);
         Task<List<Video>?> GetVideosByUserIdAsync();
-        Task<Video?> UploadVideoAsync(Video video, Stream videoFileStream, string userId);
-
+        Task<Video?> UploadVideoAsync(Video video, MemoryStream videoStream, string videoFileName,
+                                     MemoryStream? thumbnailStream = null, string? thumbnailFileName = null);
         Task<Video?> UpdateVideoAsync(Video video);
 
         Task<Video?> UpdateVideoFileAsync(int videoId, Stream videoFileStream, string fileName);

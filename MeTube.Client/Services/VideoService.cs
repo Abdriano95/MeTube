@@ -173,30 +173,51 @@ namespace MeTube.Client.Services
             }
         }
 
-        public async Task<Video?> UploadVideoAsync(Video video, Stream videoFileStream, string fileName)
+        public async Task<Video?> UploadVideoAsync(Video video, MemoryStream videoStream, string videoFileName,
+    MemoryStream? thumbnailStream = null, string? thumbnailFileName = null)
         {
             await AddAuthorizationHeader();
             try
             {
                 var content = new MultipartFormDataContent();
-                var videoDto = _mapper.Map<VideoDto>(video);
+
+                // Video fil
+                var videoContent = new ByteArrayContent(videoStream.ToArray());
+                videoContent.Headers.ContentType = new MediaTypeHeaderValue("video/mp4");
+                content.Add(videoContent, "VideoFile", videoFileName);
+
+                // Thumbnail om den finns
+                if (thumbnailStream != null && thumbnailFileName != null)
+                {
+                    var thumbnailContent = new ByteArrayContent(thumbnailStream.ToArray());
+                    thumbnailContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+                    content.Add(thumbnailContent, "ThumbnailFile", thumbnailFileName);
+                }
 
                 // Metadata
-                content.Add(new StringContent(JsonSerializer.Serialize(videoDto)), "metadata");
-
-                // Video file
-                var videoContent = new StreamContent(videoFileStream);
-                videoContent.Headers.ContentType = new MediaTypeHeaderValue("video/mp4");
-                content.Add(videoContent, "file", fileName);
+                content.Add(new StringContent(video.Title), "Title");
+                content.Add(new StringContent(video.Description), "Description");
+                content.Add(new StringContent(video.Genre), "Genre");
 
                 var response = await _httpClient.PostAsync(Constants.VideoUploadUrl, content);
-                response.EnsureSuccessStatusCode();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Upload failed with status {response.StatusCode}. Error: {errorContent}");
+                    return null;
+                }
 
                 var createdDto = await response.Content.ReadFromJsonAsync<VideoDto>(_serializerOptions);
                 return _mapper.Map<Video>(createdDto);
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Upload error: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
                 return null;
             }
         }

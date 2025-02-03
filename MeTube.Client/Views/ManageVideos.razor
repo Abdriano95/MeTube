@@ -11,6 +11,24 @@
         </a>
     </div>
 
+    @if (!string.IsNullOrEmpty(ViewModel.SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            @ViewModel.SuccessMessage
+            <button type="button" class="btn-close" @onclick="() => ViewModel.SuccessMessage = string.Empty"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>
+            @ViewModel.ErrorMessage
+            <button type="button" class="btn-close" @onclick="() => ViewModel.ErrorMessage = string.Empty"></button>
+        </div>
+    }
+
     @if (ViewModel.IsLoading)
     {
         <div class="text-center">
@@ -67,7 +85,7 @@
                                             class="btn btn-outline-primary btn-sm">
                                         <i class="bi bi-pencil"></i> Edit
                                     </button>
-                                    <button @onclick="() => ViewModel.DeleteVideoAsync(video)"
+                                    <button @onclick="() => ViewModel.ShowDeleteConfirmation(video)"
                                             class="btn btn-outline-danger btn-sm ms-2">
                                         <i class="bi bi-trash"></i> Delete
                                     </button>
@@ -77,6 +95,30 @@
                     }
                 </tbody>
             </table>
+        </div>
+    }
+    @if (ViewModel.ShowDeleteConfirmationBool)
+    {
+        <div class="modal-backdrop fade show"></div>
+        <div class="modal fade show" tabindex="-1" style="display: block;">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Delete</h5>
+                        <button type="button" class="btn-close" @onclick="ViewModel.HideDeleteConfirmation"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete the video "@(ViewModel.VideoToDelete?.Title)"?</p>
+                        <p class="text-muted small">This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="ViewModel.HideDeleteConfirmation">Cancel</button>
+                        <button type="button" class="btn btn-danger" @onclick="ViewModel.ConfirmDeleteVideoAsync">
+                            <i class="bi bi-trash"></i> Delete Video
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     }
 </div>

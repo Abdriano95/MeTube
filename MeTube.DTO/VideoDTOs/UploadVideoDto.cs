@@ -17,9 +17,8 @@ namespace MeTube.DTO.VideoDTOs
         [StringLength(30, MinimumLength = 3)]
         public string Genre { get; set; }
 
-        public string VideoUrl { get; set; }
+        public string? VideoUrl { get; set; }
 
-        [Required]
         public int UserId { get; set; }
 
         [Required]

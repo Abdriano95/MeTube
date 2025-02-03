@@ -19,6 +19,15 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         [ObservableProperty]
         private string errorMessage = string.Empty;
 
+        [ObservableProperty]
+        private bool showDeleteConfirmationBool;
+
+        [ObservableProperty]
+        private Video? videoToDelete;
+
+        [ObservableProperty]
+        private string successMessage = string.Empty;
+
         public ObservableCollection<Video> UserVideos { get; } = new();
 
         public ManageVideosViewModel(IVideoService videoService, NavigationManager navigationManager, IJSRuntime jsRuntime)
@@ -60,23 +69,36 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             _navigationManager.NavigateTo($"/videos/edit/{videoId}");
         }
 
-        public async Task DeleteVideoAsync(Video video)
+        public void ShowDeleteConfirmation(Video video)
         {
-            bool confirmed = await _jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this video?");
-            if (!confirmed) return;
+            VideoToDelete = video;
+            ShowDeleteConfirmationBool = true;
+        }
+
+        public void HideDeleteConfirmation()
+        {
+            VideoToDelete = null;
+            ShowDeleteConfirmationBool = false;
+        }
+
+        public async Task ConfirmDeleteVideoAsync()
+        {
+            if (VideoToDelete == null) return;
 
             try
             {
                 IsLoading = true;
-                var success = await _videoService.DeleteVideoAsync(video.Id);
+                var success = await _videoService.DeleteVideoAsync(VideoToDelete.Id);
                 if (success)
                 {
-                    UserVideos.Remove(video);
-                    await _jsRuntime.InvokeVoidAsync("alert", "Video successfully deleted!");
+                    UserVideos.Remove(VideoToDelete);
+                    SuccessMessage = "Video successfully deleted!";
+                    await Task.Delay(2000); // Visa meddelandet i 2 sekunder
+                    SuccessMessage = string.Empty;
                 }
                 else
                 {
-                    await _jsRuntime.InvokeVoidAsync("alert", "Failed to delete video. Please try again.");
+                    ErrorMessage = "Failed to delete video. Please try again.";
                 }
             }
             catch (Exception)
@@ -85,6 +107,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             }
             finally
             {
+                HideDeleteConfirmation();
                 IsLoading = false;
             }
         }
