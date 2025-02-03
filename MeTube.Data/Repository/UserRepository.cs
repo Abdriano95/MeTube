@@ -20,6 +20,11 @@ namespace MeTube.Data.Repository
             await AddAsync(user);
         }
 
+        // if user has videos: Delete comments, likes, history for each video, then delete each video
+        // else just delete the user
+        // Ta först bort kommentarer, likes, history för varje video som användaren har
+        // Sedan ta bort varje video
+        // Sedan ta bort användaren
         public void DeleteUser(User user)
         {
             Delete(user);
