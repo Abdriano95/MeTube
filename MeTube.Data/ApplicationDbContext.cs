@@ -23,9 +23,6 @@ namespace MeTube.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-
-            
-
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -150,7 +147,6 @@ namespace MeTube.Data
                 VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/youtube_OUUlO8fQOfE_1920x1080_h264.mp4",
                 ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/whatisthefutureofblazor.jpg",
                 BlobName = "youtube_OUUlO8fQOfE_1920x1080_h264.mp4",
-                //2025-02-01 13:48:10
                 DateUploaded = new DateTime(2025, 2, 1) 
             };
 
