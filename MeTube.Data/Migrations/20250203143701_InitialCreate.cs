@@ -56,7 +56,7 @@ namespace MeTube.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Comment",
+                name: "Comments",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -68,15 +68,15 @@ namespace MeTube.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Comment", x => x.Id);
+                    table.PrimaryKey("PK_Comments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Comment_Users_UserId",
+                        name: "FK_Comments_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Comment_Videos_VideoId",
+                        name: "FK_Comments_Videos_VideoId",
                         column: x => x.VideoId,
                         principalTable: "Videos",
                         principalColumn: "Id",
@@ -84,7 +84,7 @@ namespace MeTube.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "History",
+                name: "Histories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -95,15 +95,15 @@ namespace MeTube.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_History", x => x.Id);
+                    table.PrimaryKey("PK_Histories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_History_Users_UserId",
+                        name: "FK_Histories_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_History_Videos_VideoId",
+                        name: "FK_Histories_Videos_VideoId",
                         column: x => x.VideoId,
                         principalTable: "Videos",
                         principalColumn: "Id",
@@ -111,7 +111,7 @@ namespace MeTube.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Like",
+                name: "Likes",
                 columns: table => new
                 {
                     VideoID = table.Column<int>(type: "int", nullable: false),
@@ -119,15 +119,15 @@ namespace MeTube.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Like", x => new { x.VideoID, x.UserID });
+                    table.PrimaryKey("PK_Likes", x => new { x.VideoID, x.UserID });
                     table.ForeignKey(
-                        name: "FK_Like_Users_UserID",
+                        name: "FK_Likes_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Like_Videos_VideoID",
+                        name: "FK_Likes_Videos_VideoID",
                         column: x => x.VideoID,
                         principalTable: "Videos",
                         principalColumn: "Id",
@@ -153,28 +153,28 @@ namespace MeTube.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comment_UserId",
-                table: "Comment",
+                name: "IX_Comments_UserId",
+                table: "Comments",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comment_VideoId",
-                table: "Comment",
+                name: "IX_Comments_VideoId",
+                table: "Comments",
                 column: "VideoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_History_UserId",
-                table: "History",
+                name: "IX_Histories_UserId",
+                table: "Histories",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_History_VideoId",
-                table: "History",
+                name: "IX_Histories_VideoId",
+                table: "Histories",
                 column: "VideoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Like_UserID",
-                table: "Like",
+                name: "IX_Likes_UserID",
+                table: "Likes",
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
@@ -187,13 +187,13 @@ namespace MeTube.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Comment");
+                name: "Comments");
 
             migrationBuilder.DropTable(
-                name: "History");
+                name: "Histories");
 
             migrationBuilder.DropTable(
-                name: "Like");
+                name: "Likes");
 
             migrationBuilder.DropTable(
                 name: "Videos");

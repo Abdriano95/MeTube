@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeTube.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250203135447_InitialCreate")]
+    [Migration("20250203143701_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -53,7 +53,7 @@ namespace MeTube.Data.Migrations
 
                     b.HasIndex("VideoId");
 
-                    b.ToTable("Comment");
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("MeTube.Data.Entity.History", b =>
@@ -79,7 +79,7 @@ namespace MeTube.Data.Migrations
 
                     b.HasIndex("VideoId");
 
-                    b.ToTable("History");
+                    b.ToTable("Histories");
                 });
 
             modelBuilder.Entity("MeTube.Data.Entity.Like", b =>
@@ -96,7 +96,7 @@ namespace MeTube.Data.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Like");
+                    b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("MeTube.Data.Entity.User", b =>
