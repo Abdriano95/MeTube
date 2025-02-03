@@ -236,14 +236,10 @@ namespace MeTube.API.Controllers
 
 
         // PUT: api/Video/{id}
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateVideo(int id, [FromBody] UpdateVideoDto updateVideoDto)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            if (userId == 0)
-                return Unauthorized();
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -254,10 +250,6 @@ namespace MeTube.API.Controllers
                 if (video == null)
                     return NotFound();
 
-                // Verify that the user owns the video
-                if (video.UserId != userId)
-                    return Forbid();
-
                 // Prevents the blob from being overwritten
                 var originalBlobName = video.BlobName;
                 _mapper.Map(updateVideoDto, video);
@@ -266,8 +258,8 @@ namespace MeTube.API.Controllers
                 _unitOfWork.Videos.UpdateVideo(video);
                 await _unitOfWork.SaveChangesAsync();
                 await transaction.CommitAsync();
-
-                return NoContent();
+                var updatedVideoDto = _mapper.Map<VideoDto>(video);
+                return Ok(updatedVideoDto);
             }
             catch (Exception ex)
             {

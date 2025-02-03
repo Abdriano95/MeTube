@@ -15,7 +15,7 @@ namespace MeTube.DTO.VideoDTOs
         public string VideoUrl { get; set; }
         public string? ThumbnailUrl { get; set; }
         public DateTime DateUploaded { get; set; }
-        public string UserId { get; set; }
+        public int UserId { get; set; }
 
         public bool BlobExists { get; set; }
     }
