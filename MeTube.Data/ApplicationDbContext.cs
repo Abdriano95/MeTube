@@ -7,7 +7,13 @@ namespace MeTube.Data
     public class ApplicationDbContext : DbContext
     {
         public virtual DbSet<User> Users { get; set; } = null!;
-        public virtual DbSet<Video> Videos { get; set; }
+        public virtual DbSet<Video> Videos { get; set; } = null!;
+        public virtual DbSet<History> Histories { get; set; } = null!;
+        public virtual DbSet<Comment> Comments { get; set; } = null!;
+        public virtual DbSet<Like> Likes { get; set; } = null!;
+
+
+
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
