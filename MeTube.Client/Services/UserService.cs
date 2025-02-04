@@ -58,12 +58,6 @@ namespace MeTube.Client.Services
             return response?.Token ?? string.Empty;
         }
 
-        //public async Task<bool> IsUserAuthenticated()
-        //{
-        //    var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "jwtToken");
-        //    return !string.IsNullOrEmpty(token);
-        //}
-
         public async Task<Dictionary<string, string>> IsUserAuthenticated()
         {
             var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "jwtToken");
@@ -97,6 +91,15 @@ namespace MeTube.Client.Services
             return await _clientService.UpdateUserAsync(id, updateUserDto);
         }
 
-        
+        public async Task<Dictionary<string, string>> DoesUserExistAsync(string username, string email)
+        {
+            var userData = new Dictionary<string, string>
+            {
+                { "username", username },
+                { "email", email}
+            };
+            return await _clientService.DoesUserExistAsync(userData);
+        }
+
     }
 }
