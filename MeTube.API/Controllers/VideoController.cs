@@ -304,7 +304,7 @@ namespace MeTube.API.Controllers
                 await _unitOfWork.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return NoContent();
+                return Ok(video);
             }
             catch (Exception ex)
             {

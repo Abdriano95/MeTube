@@ -169,7 +169,6 @@ namespace MeTube.Client.Services
 
                 var updatedDto = await response.Content.ReadFromJsonAsync<VideoDto>(_serializerOptions);
                 return _mapper.Map<Video>(updatedDto);
-                //return new Video { Id = videoId, ThumbnailUrl = Constants.VideoUpdateThumbnailUrl(videoId) };
             }
             catch
             {
