@@ -6,6 +6,7 @@ namespace MeTube.Data.Repository
     {
         IUserRepository Users { get; }
         IVideoRepository Videos { get; }
+        ICommentRepository Comments { get; }
 
         Task<int> SaveChangesAsync();
 
