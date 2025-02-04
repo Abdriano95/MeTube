@@ -24,6 +24,7 @@ namespace MeTube.Data.Repository
         public void Delete(TEntity entity)
         {
             Context.Set<TEntity>().Remove(entity);
+            Context.SaveChanges();
         }
 
         public async Task<IEnumerable<TEntity>> GetAllAsync()

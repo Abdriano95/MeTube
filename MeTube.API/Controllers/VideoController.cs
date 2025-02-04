@@ -270,7 +270,7 @@ namespace MeTube.API.Controllers
 
 
         // PUT: api/Video/{id}/file
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}/file")]
         [Consumes("multipart/form-data")] // Explicit ange content-type
         public async Task<IActionResult> UpdateVideoFile(int id,IFormFile file)
@@ -314,7 +314,7 @@ namespace MeTube.API.Controllers
         }
 
         // PUT: api/Video/{id}/thumbnail
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}/thumbnail")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateThumbnail(int id, IFormFile thumbnailFile)
@@ -361,15 +361,16 @@ namespace MeTube.API.Controllers
         public async Task<IActionResult> DeleteVideo(int id)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            if (userId == 0)
-                return Unauthorized();
+            //if (userId == 0)
+            //    return Unauthorized();
+           
 
-            var video = await _unitOfWork.Videos.GetVideoByIdAsync(id);
+                var video = await _unitOfWork.Videos.GetVideoByIdAsync(id);
             if (video == null)
                 return NotFound();
 
-            if (video.UserId != userId)
-                return Forbid();
+            //if (video.UserId != userId)
+            //    return Forbid();
 
             // Delete thumbnail if it's not the default thumbnail
             if (!string.IsNullOrEmpty(video.ThumbnailUrl) && !video.ThumbnailUrl.Contains("YouTube_Diamond_Play_Button.png"))
@@ -378,17 +379,15 @@ namespace MeTube.API.Controllers
                 await _videoService.DeleteThumbnailAsync(thumbnailName);
             }
 
-
             // Delete blob from Azure Blob Storage
             var deleteResponse = await _videoService.DeleteAsync(video.BlobName);
             if (deleteResponse.Error)
                 return BadRequest(deleteResponse.Status);
 
             // Delete video from database
-            _unitOfWork.Videos.DeleteVideo(video);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.Videos.DeleteVideo(video);
 
-            return NoContent();
+            return Ok();
         }
 
         // PUT: api/Video/{id}/default-thumbnail
