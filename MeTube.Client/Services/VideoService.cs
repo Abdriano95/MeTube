@@ -2,6 +2,7 @@
 using MeTube.Client.Models;
 using MeTube.DTO.VideoDTOs;
 using Microsoft.JSInterop;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -159,13 +160,16 @@ namespace MeTube.Client.Services
                 var content = new MultipartFormDataContent();
                 var thumbnailContent = new StreamContent(thumbnailFileStream);
                 thumbnailContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-                content.Add(thumbnailContent, "thumbnail", fileName);
+                content.Add(thumbnailContent, "thumbnailFile", fileName);
 
                 var response = await _httpClient.PutAsync(Constants.VideoUpdateThumbnailUrl(videoId), content);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
                 if (!response.IsSuccessStatusCode) return null;
 
                 var updatedDto = await response.Content.ReadFromJsonAsync<VideoDto>(_serializerOptions);
                 return _mapper.Map<Video>(updatedDto);
+                //return new Video { Id = videoId, ThumbnailUrl = Constants.VideoUpdateThumbnailUrl(videoId) };
             }
             catch
             {
