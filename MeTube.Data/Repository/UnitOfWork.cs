@@ -8,12 +8,14 @@ namespace MeTube.Data.Repository
         private IDbContextTransaction _currentTransaction;
         public IUserRepository Users { get; private set; }
         public IVideoRepository Videos { get; private set; }
+        public ILikeRepository Likes { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
             this.context = context;
             Users = new UserRepository(context);
             Videos = new VideoRepository(context);
+            Likes = new LikeRepository(context);
         }
         public void Dispose()
         {
