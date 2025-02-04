@@ -75,8 +75,18 @@ namespace MeTube.Client.ViewModels.LoginViewModels
 
         public async Task Logout()
         {
-            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "jwtToken");
-            _navigation.NavigateTo("/login", forceLoad: true);
+            bool secureLogoff = await _jsRuntime.InvokeAsync<bool>("confirm", $"You sure you want to log-off?");
+            if (secureLogoff)
+            {
+                await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "jwtToken");
+                _navigation.NavigateTo("/login", forceLoad: true);
+                await _jsRuntime.InvokeAsync<bool>("alert", "User loged-off!");
+            }
+            else
+            {
+                _navigation.NavigateTo(_navigation.Uri, forceLoad: true);
+                await _jsRuntime.InvokeAsync<bool>("alert", "Unable to succesfully log-off user!");
+            }
         }
     }
 }
