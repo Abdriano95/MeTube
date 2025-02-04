@@ -356,21 +356,18 @@ namespace MeTube.API.Controllers
 
 
         // DELETE: api/Video/{id}
-        [Authorize]
+        [Authorize(Roles = "Admin,User")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteVideo(int id)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            //if (userId == 0)
-            //    return Unauthorized();
-           
+            if (userId == 0)
+                return Unauthorized();
 
-                var video = await _unitOfWork.Videos.GetVideoByIdAsync(id);
+
+            var video = await _unitOfWork.Videos.GetVideoByIdAsync(id);
             if (video == null)
                 return NotFound();
-
-            //if (video.UserId != userId)
-            //    return Forbid();
 
             // Delete thumbnail if it's not the default thumbnail
             if (!string.IsNullOrEmpty(video.ThumbnailUrl) && !video.ThumbnailUrl.Contains("YouTube_Diamond_Play_Button.png"))
