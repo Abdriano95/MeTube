@@ -12,6 +12,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
     {
         private readonly IUserService _userService;
         private readonly IJSRuntime _jsRuntime;
+        private readonly NavigationManager _navigation;
 
         [ObservableProperty]
         private string search = string.Empty;
@@ -43,10 +44,11 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
         public ObservableCollection<User> FilteredUsers { get; set; } = new ObservableCollection<User>();
 
         public List<string> Roles = new() { "User", "Admin" };
-        public ManageUsersViewModel(IUserService userService, IJSRuntime jsRuntime) 
+        public ManageUsersViewModel(IUserService userService, IJSRuntime jsRuntime, NavigationManager navigation) 
         {
             _userService = userService;
             _jsRuntime = jsRuntime;
+            _navigation = navigation;
         }
         public async Task LoadUsers()
         {
@@ -70,6 +72,11 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
         {
             ShowUserCard = false;
             SelectedUser = null;
+        }
+
+        public void CreateUserAccount()
+        {
+            _navigation.NavigateTo("/signup", forceLoad: true);
         }
         private async Task<int> GetUserId(User user)
         {
