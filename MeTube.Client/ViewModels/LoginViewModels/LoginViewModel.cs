@@ -59,11 +59,16 @@ namespace MeTube.Client.ViewModels.LoginViewModels
                 string token = await _userService.GetTokenAsync(Username, Password);
                 if (!string.IsNullOrEmpty(token))
                     await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "jwtToken", token);
-
+                await _jsRuntime.InvokeAsync<bool>("alert", "Login succesfull!");
                 ClearAllFields();
                 IsUserLoggedIn = true;
                 _navigation.NavigateTo("/", forceLoad: true);
                 return;
+            }
+            else
+            {
+                 await _jsRuntime.InvokeVoidAsync("alert", "Wrong username or password!");
+                 ClearAllFields();
             }
 
         }
