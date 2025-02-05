@@ -51,6 +51,7 @@ namespace MeTube.Client
 
             builder.Services.AddSingleton<ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
+            builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<IVideoService, VideoService>();
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -62,6 +63,7 @@ namespace MeTube.Client
             //builder.Services.AddSingleton<IHttpsClientHandlerService, HttpsClientHandlerService>();
 
             builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+            builder.Services.AddScoped<ICommentService, CommentService>();
 
             await builder.Build().RunAsync();
         }

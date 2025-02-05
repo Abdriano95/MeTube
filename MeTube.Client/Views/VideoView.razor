@@ -1,7 +1,11 @@
 ﻿@page "/video/{VideoId:int}"
 @using MeTube.Client.Models
+@using MeTube.Client.Services
+@using MeTube.DTO
 @inject VideoViewModel ViewModel
 @inject IJSRuntime JSRuntime
+@inject ICommentService CommentService
+@inject UserService UserService
 
 <link href="css/video_view.css" rel="stylesheet" />
 
@@ -10,7 +14,7 @@
     {
         <div class="text-center">
             <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Laddar...</span>
+                <span class="visually-hidden">Loading...</span>
             </div>
         </div>
     }
@@ -27,23 +31,23 @@
             <div class="col-lg-8 col-md-12">
                 <div class="video-container">
                     <video id="videoPlayer"
-                           controls
-                           class="video-player"
-                           controlsList="nodownload"
-                           preload="auto"
-                           crossorigin="anonymous"
-                           playsinline
-                           webkit-playsinline>
+                    controls
+                    class="video-player"
+                    controlsList="nodownload"
+                    preload="auto"
+                    crossorigin="anonymous"
+                    playsinline
+                    webkit-playsinline>
                         <source src="@ViewModel.CurrentVideo.VideoUrl" type="video/mp4"
-                                codecs="avc1.42E01E, mp4a.40.2">
-                        Din webbläsare stöder inte videouppspelning.
+                        codecs="avc1.42E01E, mp4a.40.2">
+                        Your browser does not support video playback.
                     </video>
 
                     <!-- Title and Metadata -->
                     <div class="d-flex justify-content-between align-items-center mt-3">
                         <div>
                             <h4 class="fw-bold mb-0">@ViewModel.CurrentVideo.Title</h4>
-                            <small class="text-muted">Uppladdad @ViewModel.CurrentVideo.DateUploaded.ToString("dd MMM yyyy")</small>
+                            <small class="text-muted">Uploaded @ViewModel.CurrentVideo.DateUploaded.ToString("dd MMM yyyy")</small>
                         </div>
                         <div class="like-section">
                             <button class="btn btn-outline-primary">
@@ -64,31 +68,48 @@
             <div class="col-lg-4 col-md-12">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Kommentarer (@ViewModel.Comments.Count)</h5>
+                        <h5 class="card-title">Comments (@ViewModel.Comments.Count)</h5>
 
-                        <div class="comment-box">
-                            @foreach (var comment in ViewModel.Comments)
-                            {
-                                <div class="comment-item mb-3">
-                                    <div class="d-flex align-items-start">
-                                        <div class="flex-grow-1 ms-3">
-                                            <div class="d-flex justify-content-between">
-                                                <strong>@comment.Author</strong>
-                                                <small class="text-muted">@comment.Date.ToString("HH:mm dd MMM")</small>
+                        @if (!string.IsNullOrEmpty(ViewModel.CommentErrorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                @ViewModel.CommentErrorMessage
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="comment-box">
+                                @foreach (var comment in ViewModel.Comments)
+                                {
+                                    <div class="comment-item mb-3">
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-grow-1 ms-3">
+                                                <div class="d-flex justify-content-between">
+                                                    <strong>@comment.UserId</strong>
+                                                    <small class="text-muted">@comment.DateAdded.ToString("HH:mm dd MMM")</small>
+                                                </div>
+                                                <p class="mb-0">@comment.Content</p>
                                             </div>
-                                            <p class="mb-0">@comment.Text</p>
+                                            <div>
+                                                <!-- Edit Button -->
+                                                <button class="btn btn-warning btn-sm" @onclick="() => StartEditingComment(comment)">Edit</button>
+
+                                                <!-- Delete Button -->
+                                                <button class="btn btn-danger btn-sm" @onclick="() => DeleteComment(comment)">Delete</button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            }
-                        </div>
+                                }
+                            </div>
+                        }
 
                         <div class="input-group mt-3">
                             <input type="text"
-                                   class="form-control"
-                                   placeholder="Skriv en kommentar..."
-                                   @bind="_newComment" />
+                            class="form-control"
+                            placeholder="Write a comment..."
+                            @bind="_newComment" />
                             <button class="btn btn-primary" @onclick="PostComment">
+                                Post
                                 <i class="bi bi-send"></i>
                             </button>
                         </div>
@@ -96,6 +117,17 @@
                 </div>
             </div>
         </div>
+
+        @if (_isEditingComment)
+        {
+            <div class="comment-edit-popup">
+                <div class="input-group">
+                    <input type="text" class="form-control" @bind="_commentToEdit.Content" placeholder="Edit your comment..." />
+                    <button class="btn btn-primary" @onclick="SaveCommentChanges">Save</button>
+                    <button class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+                </div>
+            </div>
+        }
     }
 </div>
 
@@ -104,38 +136,39 @@
     public int VideoId { get; set; }
 
     private string _newComment = string.Empty;
-
     private bool videoLoaded = false;
-
-    private ElementReference videoElement;
+    private bool _isEditingComment = false;
+    private Comment _commentToEdit;
 
     protected override async Task OnParametersSetAsync()
     {
         await ViewModel.LoadVideoAsync(VideoId);
+        await LoadCommentsAsync(); // Fetch comments when the video is loaded
     }
 
-    private async Task OnVideoLoaded()
+    private async Task LoadCommentsAsync()
     {
-        if (!videoLoaded)
+        try
         {
-            videoLoaded = true;
-            await JSRuntime.InvokeVoidAsync("initializeVideoPlayer", videoElement);
+            var comments = await CommentService.GetCommentsByVideoIdAsync(VideoId);
+            ViewModel.Comments.Clear();
+
+            if (comments != null && comments.Any())
+            {
+                foreach (var comment in comments)
+                {
+                    ViewModel.Comments.Add(comment);
+                }
+            }
+            else
+            {
+                Console.WriteLine("No comments found.");
+            }
         }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
+        catch (Exception ex)
         {
-            try
-            {
-                await Task.Delay(100); // Kort fördröjning för att säkerställa att DOM är redo
-                await JSRuntime.InvokeVoidAsync("initializeVideoPlayer");
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error initializing video player: {ex.Message}");
-            }
+            ViewModel.ErrorMessage = "Failed to load comments. Please try again later.";
+            Console.Error.WriteLine($"Error loading comments: {ex.Message}");
         }
     }
 
@@ -143,14 +176,76 @@
     {
         if (!string.IsNullOrWhiteSpace(_newComment))
         {
-            // TODO: Implementera API-anrop för att spara kommentar
-            ViewModel.Comments.Add(new Comment
+            try
+            {
+                int user = 1; // This should be dynamically fetched after user authentication
+
+                // Create a new Comment DTO
+                var newCommentDto = new CommentDto
+                    {
+                        VideoId = VideoId,
+                        UserId = user,
+                        Content = _newComment,
+                        DateAdded = DateTime.Now
+                    };
+
+                // Post the new comment to the API
+                var postedComment = await CommentService.AddCommentAsync(newCommentDto);
+
+                if (postedComment != null)
                 {
-                    Author = "Current User", // Ersätt med inloggad användare
-                    Text = _newComment,
-                    Date = DateTime.Now
-                });
-            _newComment = string.Empty;
+                    // Reload the comments after posting the new comment
+                    await LoadCommentsAsync();
+
+                    // Clear the input field
+                    _newComment = string.Empty;
+                }
+                else
+                {
+                    ViewModel.CommentErrorMessage = "Failed to post your comment. Please try again.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewModel.CommentErrorMessage = "An error occurred while posting the comment. Please try again.";
+                Console.Error.WriteLine($"Error posting comment: {ex.Message}");
+            }
+        }
+        else
+        {
+            ViewModel.CommentErrorMessage = "Comment cannot be empty.";
+        }
+    }
+
+    private void StartEditingComment(Comment comment)
+    {
+        _commentToEdit = comment;  // Store the comment to edit
+        _isEditingComment = true;  // Show the input field for editing
+    }
+
+    private async Task SaveCommentChanges()
+    {
+        if (!string.IsNullOrEmpty(_commentToEdit.Content))
+        {
+            // Save the edited comment
+            await ViewModel.EditCommentAsync(_commentToEdit);
+            _isEditingComment = false;  // Hide the editing input field
+            await LoadCommentsAsync();
+        }
+    }
+
+    private void CancelEdit()
+    {
+        _isEditingComment = false;  // Hide the editing input field
+    }
+
+    private async Task DeleteComment(Comment comment)
+    {
+        var confirmation = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this comment?");
+        if (confirmation)
+        {
+            await ViewModel.DeleteCommentAsync(comment);
+            await LoadCommentsAsync();
         }
     }
 }
