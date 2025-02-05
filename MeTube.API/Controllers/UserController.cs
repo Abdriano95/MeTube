@@ -212,6 +212,26 @@ namespace MeTube.API.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        [HttpGet("exists")]
+        public async Task<IActionResult> CheckIfUserExists([FromQuery] string username, [FromQuery] string email)
+        {
+            bool usernameExists = await _unitOfWork.Users.UsernameExistsAsync(username);
+            bool emailExists = await _unitOfWork.Users.EmailExistsAsync(email);
+
+            if (!usernameExists && !emailExists)
+                return Ok(new Dictionary<string, object> { { "Exists", false }, { "message", "User does not exist" } });
+
+            var errorMessages = new List<string>();
+            if (usernameExists) errorMessages.Add("Username already exists\n");
+            if (emailExists) errorMessages.Add("Email already exists");
+
+            return BadRequest(new Dictionary<string, object>
+            {
+                { "Exists", true },
+                { "message", string.Join("", errorMessages)}
+            });
+        }
     }
 }
 

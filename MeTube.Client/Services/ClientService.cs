@@ -6,6 +6,7 @@ using Microsoft.JSInterop;
 using Microsoft.VisualBasic;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -208,6 +209,41 @@ namespace MeTube.Client.Services
             return true;
         }
 
+        public async Task<Dictionary<string, string>> DoesUserExistAsync(Dictionary<string, string> userData)
+        {
+            try
+            {
+                if (!userData.TryGetValue("username", out var username) || !userData.TryGetValue("email", out var email))
+                    return new Dictionary<string, string> { { "true", "Invalid input data." } };
+
+                Uri uri = new Uri($"{Constants.CheckUserExistsUrl}?username={username}&email={email}");
+                var response = await _client.GetAsync(uri);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"📡 Response Status: {response.StatusCode}");
+                Console.WriteLine($"📡 Response Content: '{responseContent}'");
+
+                var result = new Dictionary<string, string>();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result["false"] = "";
+                    return result;
+                }
+                var jsonResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
+
+                if (!jsonResponse.TryGetValue("Exists", out var existsObj) || !jsonResponse.TryGetValue("message", out var messageObj))
+                    return new Dictionary<string, string> { { "true", "API response is missing expected keys." } };
+                string exists = existsObj.ToString();
+                string message = messageObj.ToString();
+
+                return new Dictionary<string, string> {{ exists, message }};
+            }
+            catch (JsonException jsonEx)
+            {
+                return new Dictionary<string, string> { { "true", "invalid jsonformat" } };
+            }
+        }
         public async Task AddAuthorizationHeader()
         {
             var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "jwtToken");
