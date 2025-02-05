@@ -36,6 +36,9 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
 
         [ObservableProperty]
         private User selectedUser = null;
+
+        [ObservableProperty]
+        private int chosenUserId;
         public ObservableCollection<User> AllUsers { get; set; } = new ObservableCollection<User>();
         public ObservableCollection<User> FilteredUsers { get; set; } = new ObservableCollection<User>();
 
@@ -56,10 +59,11 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             }
         }
 
-        public void EditUserButton(User user)
+        public async Task EditUserButton(User user)
         {
             ShowUserCard = true;
             SelectedUser = user;
+            ChosenUserId = await GetUserId(user);
         }
 
         public void CloseUserCard()
@@ -81,15 +85,36 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             {
                 bool response = await _userService.DeleteUserAsync(userId);
                 if (response)
-                    await _jsRuntime.InvokeAsync<bool>("alert", "User succesfully deleted!");
+                    await _jsRuntime.InvokeVoidAsync("alert", "User succesfully deleted!");
                 else
-                    await _jsRuntime.InvokeAsync<bool>("alert", "Unable to succesfully delete user!");
+                    await _jsRuntime.InvokeVoidAsync("alert", "Unable to succesfully delete user!");
             }
+        }
+
+        private async Task<bool> CheckIfUserExist(User user)
+        {
+            Dictionary<string, string> response = await _userService.DoesUserExistAsync(user.Username, user.Email);
+            string userExists = response.Keys.FirstOrDefault();
+            string responseMessage = response[userExists];
+            bool userDoExist = Convert.ToBoolean(userExists);
+            await _jsRuntime.InvokeVoidAsync("alert", responseMessage);
+            if (userDoExist)
+                return true;
+            else
+                return false;
         }
 
         public async Task SaveChangesButton(User user)
         {
-            int userId = await GetUserId(user);
+            var emailCount = AllUsers.Where(a => a.Email.Equals(user.Email));
+            var usernameCount = AllUsers.Where(a => a.Username.Equals(user.Username));
+            if (emailCount.Count() > 1 || usernameCount.Count() > 1)
+            {
+                var userExist = await CheckIfUserExist(user);
+                if (userExist)
+                    return;
+            }
+
             UpdateUserDto dto = new UpdateUserDto
             {
                 Username = user.Username,
@@ -97,15 +122,19 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
                 Password = user.Password,
                 Role = user.Role,
             };
+            
             bool secureupdate = await _jsRuntime.InvokeAsync<bool>("confirm", "You sure you want to update this user?");
             if (secureupdate)
             {
-                bool response = await _userService.UpdateUserAsync(userId, dto);
+                bool response = await _userService.UpdateUserAsync(ChosenUserId, dto);
                 string message = string.Empty;
                 if(response)
-                    await _jsRuntime.InvokeAsync<bool>("alert", "User succesfully saved!");
+                { 
+                    await _jsRuntime.InvokeVoidAsync("alert", "User succesfully saved!");
+                    CloseUserCard();
+                }
                 else
-                    await _jsRuntime.InvokeAsync<bool>("alert", "Unable to succesfully update user!");
+                    await _jsRuntime.InvokeVoidAsync("alert", "Unable to succesfully update user!");
             }
         }
         public void SearchButton()
