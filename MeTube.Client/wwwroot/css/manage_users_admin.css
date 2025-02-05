@@ -7,6 +7,7 @@
 }
 
 .FormContainer {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
@@ -216,25 +217,19 @@ span {
     align-items: center;
 }
 
-/*.modal {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 400px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    text-align: center;
-}*/
-
-.close-button {
-    background-color: gray;
-    color: white;
-    padding: 10px;
-    border-radius: 20px;
+.closeCard {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
     cursor: pointer;
-    margin-top: 10px;
+    color: #ff4d4d;
 }
 
-.close-button:hover {
-    background-color: darkgray;
+.loseCard:hover {
+    color: darkred;
 }
 
