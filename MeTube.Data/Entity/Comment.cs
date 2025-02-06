@@ -12,6 +12,9 @@ namespace MeTube.Data.Entity
     {
         [Key]
         public int Id { get; set; }
+
+        [Required]
+        public string Username { get; set; } = string.Empty;
         [ForeignKey("Video")]
         public required int VideoId { get; set; }
         [ForeignKey("User")]

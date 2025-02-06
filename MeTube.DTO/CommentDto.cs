@@ -5,6 +5,7 @@ namespace MeTube.DTO
     public class CommentDto
     {
         public int Id { get; init; }
+        public string Username { get; set; } = string.Empty;
         public int VideoId { get; init; }
         public int UserId { get; init; }
         public string Content { get; set; } = string.Empty;

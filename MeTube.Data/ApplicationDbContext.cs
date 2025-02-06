@@ -90,6 +90,7 @@ namespace MeTube.Data
             {
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.Id).ValueGeneratedOnAdd();
+                entity.Property(c => c.Username).IsRequired().HasMaxLength(30);
                 entity.Property(c => c.Content).IsRequired().HasMaxLength(255);
                 entity.Property(c => c.DateAdded).IsRequired().HasColumnType("datetime");
                 // Relation with user
@@ -97,7 +98,6 @@ namespace MeTube.Data
                 // Relation with video
                 entity.HasOne(c => c.Video).WithMany(v => v.Comments).HasForeignKey(c => c.VideoId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             });
-
 
             // Configure Like entity
             modelBuilder.Entity<Like>(entity =>
