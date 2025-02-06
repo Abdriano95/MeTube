@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeTube.Client", "MeTube.Cli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeTube.Test", "MeTube.Test\MeTube.Test.csproj", "{DC4A6230-CD98-41BE-B911-ED576015A36B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metube.Data.UnitTest", "Metube.Data.UnitTest\Metube.Data.UnitTest.csproj", "{3F0E0632-EBF9-4F22-AFF6-3AFE626EBA86}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{DC4A6230-CD98-41BE-B911-ED576015A36B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC4A6230-CD98-41BE-B911-ED576015A36B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC4A6230-CD98-41BE-B911-ED576015A36B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F0E0632-EBF9-4F22-AFF6-3AFE626EBA86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F0E0632-EBF9-4F22-AFF6-3AFE626EBA86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F0E0632-EBF9-4F22-AFF6-3AFE626EBA86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F0E0632-EBF9-4F22-AFF6-3AFE626EBA86}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
