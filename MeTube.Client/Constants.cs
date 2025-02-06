@@ -40,5 +40,19 @@
         public static string VideoDeleteUrl(int id) => $"{VideoBaseUrl}/{id}"; // DELETE api/Video/{id}
 
 
+        // Like endpoints
+        public static string LikeBaseUrl = $"{BaseUrl}/Like";
+
+        // GET
+        public static string LikeGetAllUrl = LikeBaseUrl;
+        public static string LikeGetByVideoIdUrl(int videoId) => $"{LikeBaseUrl}/{videoId}";
+        public static string LikeGetForVideoUrl(int videoId) => $"{LikeBaseUrl}/video/{videoId}";
+
+        // POST
+        public static string LikeAddUrl = LikeBaseUrl;
+
+        // DELETE
+        public static string LikeRemoveUrl = LikeBaseUrl;
+
     }
 }
