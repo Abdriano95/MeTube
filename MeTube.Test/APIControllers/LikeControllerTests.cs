@@ -6,6 +6,8 @@ using MeTube.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System.Security.Claims;
 
 
@@ -173,8 +175,9 @@ namespace MeTube.Test.APIControllers
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedLikes = Assert.IsAssignableFrom<IEnumerable<LikeDto>>(okResult.Value);
-            Assert.Equal(2, returnedLikes.Count());
+            var response = okResult.Value as LikesForVideoResponseDto;
+            Assert.NotNull(response);
+            Assert.Equal(2, response.Likes.Count());
         }
     }
 }

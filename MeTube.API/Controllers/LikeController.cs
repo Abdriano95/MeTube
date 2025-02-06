@@ -31,7 +31,7 @@ namespace MeTube.API.Controllers
             return Ok(likeDtos);
         }
 
-        // POST: api/Like
+        // POST: api/Like/{videoId}
         [Authorize]
         [HttpGet("{videoId}")]
         public async Task<IActionResult> GetLike(int videoId)
@@ -40,23 +40,29 @@ namespace MeTube.API.Controllers
             if (userId == 0)
                 return Unauthorized();
 
-            var likes = await _unitOfWork.Likes.GetAllAsync();
+            var likes = await _unitOfWork.Likes.GetAllLikesAsync();
             var like = likes.FirstOrDefault(l => l.VideoID == videoId && l.UserID == userId);
 
             if (like == null)
-                return NotFound();
+                return Ok(new { hasLiked = false });
 
-            return Ok(_mapper.Map<LikeDto>(like));
+            return Ok(new { hasLiked = true, like = _mapper.Map<LikeDto>(like) });
         }
 
         // GET: api/Like/video/{videoId}
         [HttpGet("video/{videoId}")]
         public async Task<IActionResult> GetLikesForVideo(int videoId)
         {
-            var likes = await _unitOfWork.Likes.GetAllAsync();
-            var videoLikes = likes.Where(l => l.VideoID == videoId);
+            var likes = await _unitOfWork.Likes.GetAllLikesAsync();
+            var videoLikes = likes.Where(l => l.VideoID == videoId).ToList();
 
-            return Ok(_mapper.Map<IEnumerable<LikeDto>>(videoLikes));
+            var response = new LikesForVideoResponseDto
+            {
+                Count = videoLikes.Count,
+                Likes = _mapper.Map<IEnumerable<LikeDto>>(videoLikes)
+            };
+
+            return Ok(response);
         }
 
 
@@ -81,7 +87,7 @@ namespace MeTube.API.Controllers
                 await _unitOfWork.Likes.AddLikeAsync(like);
                 await _unitOfWork.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetLike), new { id = like.VideoID }, _mapper.Map<LikeDto>(like));
+                return CreatedAtAction(nameof(GetLike), new { videoId = like.VideoID }, _mapper.Map<LikeDto>(like));
 
             }
             catch (ArgumentException ex)

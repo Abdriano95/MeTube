@@ -51,16 +51,17 @@ namespace MeTube.Client
             builder.Services.AddSingleton<ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
             builder.Services.AddScoped<IVideoService, VideoService>();
+            builder.Services.AddScoped<ILikeService, LikeService>();
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddAuthorizationCore();
             builder.Services.AddAutoMapper(typeof(User));
             builder.Services.AddAutoMapper(typeof(Video));
+            builder.Services.AddAutoMapper(typeof(Like));
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
             builder.Services.AddTransient<HttpClient>();
+
             //builder.Services.AddSingleton<IHttpsClientHandlerService, HttpsClientHandlerService>();
-
-
 
             await builder.Build().RunAsync();
         }
