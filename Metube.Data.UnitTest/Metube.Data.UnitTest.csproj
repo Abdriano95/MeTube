@@ -21,7 +21,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MeTube.API\MeTube.API.csproj" />
+    <ProjectReference Include="..\MeTube.Client\MeTube.Client.csproj" />
     <ProjectReference Include="..\MeTube.Data\Metube.Data.csproj" />
+    <ProjectReference Include="..\MeTube.DTO\MeTube.DTO.csproj" />
+    <ProjectReference Include="..\MeTube.Test\MeTube.Test.csproj" />
   </ItemGroup>
 
 </Project>
