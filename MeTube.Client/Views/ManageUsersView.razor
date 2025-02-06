@@ -7,9 +7,14 @@
 
 <h1 id="Front">MANAGE ACCOUNTS</h1>
 <div class="SearchContainer">
-    <input placeholder="Search users" @bind="ViewModel.Search">
-    <button id="saveButton" @onclick="() => ViewModel.SearchButton()" type="button">Search</button>
-    @* <button id="saveButton" @onclick="() => ViewModel.SearchButton()" type="button">+ ADD USER</button> *@
+    <div class="SearchBox">
+        <input placeholder="Search users" @bind="ViewModel.Search">
+        <button id="saveButton" @onclick="() => ViewModel.SearchButton()" type="button">Search</button>
+    </div>
+
+    <div class="AddUserBox">
+        <button id="saveButton" @onclick="() => ViewModel.CreateUserAccount()" type="button">+ ADD USER</button>
+    </div>
 </div>
 <div class="user-container">
     <div class="user-row">
@@ -35,6 +40,7 @@
 {
     <div class="ManageUsers">
         <form class="FormContainer">
+            <button class="closeCard" @onclick="() => ViewModel.CloseUserCard()">X</button>
             <div class="FormText">
                 <h1>User</h1>
             </div>

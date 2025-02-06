@@ -7,6 +7,7 @@
 }
 
 .FormContainer {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
@@ -101,14 +102,62 @@ h1 {
 }
 
 .SearchContainer {
-    width:30%;
     display: flex;
-    /*align-items: center;*/
-    gap: 10px;
-    padding:20px;
-    margin-bottom:20px;
-    margin-left: 200px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 20px;
 }
+
+.SearchBox {
+    display: flex;
+    gap: 10px;
+}
+
+.SearchBox input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#searchButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#searchButton:hover {
+    background-color: #0056b3;
+}
+
+.AddUserBox {
+    margin-left: auto;
+}
+
+#addUserButton {
+    background-color: white;
+    color: black;
+    text-decoration: none;
+    border: 2px solid black;
+    padding: 10px 15px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#addUserButton:hover {
+    background-color: black;
+    color: white;
+}
+
 .user-container {
     width: 100%;
     max-width: 800px;
@@ -129,12 +178,12 @@ h1 {
     border-bottom: 1px solid #ddd;
 }
 
-    .user-row:first-child {
-        font-weight: bold;
-        background-color: #e9ecef;
-        padding: 14px;
-        border-bottom: 2px solid #ccc;
-    }
+.user-row:first-child {
+    font-weight: bold;
+    background-color: #e9ecef;
+    padding: 14px;
+    border-bottom: 2px solid #ccc;
+}
 
 label {
     text-align: left;
@@ -168,24 +217,19 @@ span {
     align-items: center;
 }
 
-.modal {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 400px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    text-align: center;
-}
-
-.close-button {
-    background-color: gray;
-    color: white;
-    padding: 10px;
-    border-radius: 20px;
+.closeCard {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
     cursor: pointer;
-    margin-top: 10px;
+    color: #ff4d4d;
 }
 
-    .close-button:hover {
-        background-color: darkgray;
-    }
+.loseCard:hover {
+    color: darkred;
+}
+

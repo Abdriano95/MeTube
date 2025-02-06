@@ -9,8 +9,10 @@ namespace MeTube.Client.Services
         Task<LoginResponse?> LoginAsync(string username, string password);
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<int?> GetUserIdByEmailAsync(string email);
+        Task<User> GetUserByIdAsync(int id);
         Task<bool> DeleteUser(int id);
         Task<bool> UpdateUserAsync(int id, UpdateUserDto updateUserDto);
         Task AddAuthorizationHeader();
+        Task<Dictionary<string, string>> DoesUserExistAsync(Dictionary<string, string> userData);
     }
 }
