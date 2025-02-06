@@ -101,5 +101,10 @@ namespace MeTube.Client.Services
             return await _clientService.DoesUserExistAsync(userData);
         }
 
+        public async Task<User> GetUserByIdAsync(int id)
+        {
+            return await _clientService.GetUserByIdAsync(id);
+        }
+
     }
 }

@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
 using Microsoft.JSInterop;
+using Azure.Core;
 
 namespace MeTube.API.Controllers
 {
@@ -35,7 +36,8 @@ namespace MeTube.API.Controllers
             {
                 return NotFound(new { Message = "User not found" });
             }
-            return Ok(user);
+            var userDto = _mapper.Map<UserDto>(user);
+            return Ok(userDto);
         }
 
         [Authorize(Roles = "Admin")]

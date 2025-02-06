@@ -220,9 +220,6 @@ namespace MeTube.Client.Services
                 var response = await _client.GetAsync(uri);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
-                Console.WriteLine($"📡 Response Status: {response.StatusCode}");
-                Console.WriteLine($"📡 Response Content: '{responseContent}'");
-
                 var result = new Dictionary<string, string>();
 
                 if (response.IsSuccessStatusCode)
@@ -250,6 +247,29 @@ namespace MeTube.Client.Services
             if (!string.IsNullOrEmpty(token))
             {
                 _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
+        }
+
+        public async Task<User> GetUserByIdAsync(int id)
+        {
+            try
+            {
+                Uri uri = new Uri(string.Format(Constants.GetUserUrl, id));
+                var response = await _client.GetAsync(uri);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine($"Failed to fetch user ID: {response.StatusCode}");
+                    return null;
+                }
+
+                var userDto = await response.Content.ReadFromJsonAsync<UserDto>(_serializerOptions);
+                return _mapper.Map<User>(userDto);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error fetching users: {ex.Message}");
+                return null;
             }
         }
 
