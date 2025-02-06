@@ -69,7 +69,7 @@ namespace MeTube.Data.UnitTest
 
             // Assert
             videos.Should().NotBeNull();
-            videos.Should().HaveCount(2); // Eftersom vi seeded två videos i konstruktorn
+            videos.Should().HaveCount(2); // för at vi sseedade  2 videos 
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace MeTube.Data.UnitTest
 
             // Assert - Kontrollera att den INTE längre finns i databasen
             var deletedVideo = await _dbContext.Videos.FindAsync(1);
-            deletedVideo.Should().BeNull(); // Borde vara null om den är borttagen
+            deletedVideo.Should().BeNull(); 
         }
     }
 }
