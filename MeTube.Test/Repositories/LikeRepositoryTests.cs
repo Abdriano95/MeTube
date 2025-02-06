@@ -97,22 +97,31 @@ namespace MeTube.Test.Repositories
         }
 
         [Fact]
-        public async Task GetAllLikes_ShouldReturnAllLikes()
+        public async Task GetAllWithDetails_ShouldReturnLikesWithDetails()
         {
             // Arrange
             var likes = new List<Like>
             {
-                new Like { UserID = 1, VideoID = 1 },
-                new Like { UserID = 2, VideoID = 1 }
+                new Like
+                {
+                    UserID = 1,
+                    VideoID = 1,
+                    User = new User { Id = 1, Username = "TestUser", Email = "Test@example.se", Password = "example123", Role = "Admin" },
+                    Video = new Video { Id = 1, Title = "TestVideo", Description = "Test description", Genre = "Test Genre" }
+                }
             };
-            _mockLikeRepo.Setup(repo => repo.GetAllAsync()).ReturnsAsync(likes);
+
+            _mockLikeRepo.Setup(repo => repo.GetAllLikesAsync())
+                         .ReturnsAsync(likes);
 
             // Act
-            var result = await _mockLikeRepo.Object.GetAllAsync();
+            var result = await _mockLikeRepo.Object.GetAllLikesAsync();
 
             // Assert
-            Assert.Equal(2, result.Count());
-            _mockLikeRepo.Verify(repo => repo.GetAllAsync(), Times.Once);
+            _mockLikeRepo.Verify(repo => repo.GetAllLikesAsync(), Times.Once);
+            var like = result.First();
+            Assert.Equal("TestUser", like.User.Username);
+            Assert.Equal("TestVideo", like.Video.Title);
         }
     }
 }

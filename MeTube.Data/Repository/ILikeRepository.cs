@@ -11,5 +11,6 @@ namespace MeTube.Data.Repository
     {
         Task AddLikeAsync(Like like);
         Task RemoveLikeAsync(Like like);
+        Task<IEnumerable<Like>> GetAllLikesAsync();
     }
 }

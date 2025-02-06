@@ -1,4 +1,5 @@
 ﻿using MeTube.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,14 @@ namespace MeTube.Data.Repository
                 throw new ArgumentException("Like does not exist.");
 
             DbContext.Likes.Remove(existingLike);
+        }
+
+        public async Task<IEnumerable<Like>> GetAllLikesAsync()
+        {
+            return await DbContext.Likes
+                .Include(l => l.User)
+                .Include(l => l.Video)
+                .ToListAsync();
         }
 
     }
