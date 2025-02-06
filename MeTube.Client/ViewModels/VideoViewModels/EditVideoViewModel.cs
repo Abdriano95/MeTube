@@ -185,8 +185,16 @@ namespace MeTube.Client.ViewModels
                 if (!confirmed) return;
 
                 // Implementation needed based on your requirements
-                await _videoService.UpdateVideoAsync(CurrentVideo);
-                await _jsRuntime.InvokeVoidAsync("alert", "Reset to default thumbnail successful!");
+                bool resetOk = await _videoService.ResetThumbnail(CurrentVideo.Id);
+                if(resetOk)
+                {
+                    await _jsRuntime.InvokeVoidAsync("alert", "Reset to default thumbnail successful!");
+                    NewThumbnailFile = null;
+                    await LoadVideoAsync(CurrentVideo.Id);
+                }
+                else
+                    await _jsRuntime.InvokeVoidAsync("alert", "Reset to default thumbnail not successful!");
+
             }
             catch (Exception)
             {

@@ -176,6 +176,26 @@ namespace MeTube.Client.Services
             }
         }
 
+        public async Task<bool> ResetThumbnail(int videoId)
+        {
+            await AddAuthorizationHeader();
+            try
+            {
+                Uri uri = new Uri(Constants.VideoResetThumbnailUrl(videoId));
+
+                var response = await _httpClient.PutAsync(Constants.VideoResetThumbnailUrl(videoId), new StringContent(""));
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode) return false;
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async Task<Video?> UploadVideoAsync(Video video, MemoryStream videoStream, string videoFileName,
     MemoryStream? thumbnailStream = null, string? thumbnailFileName = null)
         {
