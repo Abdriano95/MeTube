@@ -13,6 +13,6 @@ namespace MeTube.Data.Repository
         //Task<bool> ChangeUserRoleAsync(int userId, string newRole);
         Task AddUserAsync(User user);
         void UpdateUser(User user);
-        void DeleteUser(User user);
+        Task DeleteUser(User user);
     }
 }

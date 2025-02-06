@@ -137,11 +137,12 @@ namespace MeTube.API.Controllers
                 return NotFound(new { Message = "User not found" });
             }
 
-            _unitOfWork.Users.DeleteUser(user);
+            await _unitOfWork.Users.DeleteUser(user);
             await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { Message = "User deleted" });
         }
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto request)

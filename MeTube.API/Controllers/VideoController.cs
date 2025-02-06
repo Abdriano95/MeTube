@@ -236,14 +236,10 @@ namespace MeTube.API.Controllers
 
 
         // PUT: api/Video/{id}
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateVideo(int id, [FromBody] UpdateVideoDto updateVideoDto)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            if (userId == 0)
-                return Unauthorized();
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -254,10 +250,6 @@ namespace MeTube.API.Controllers
                 if (video == null)
                     return NotFound();
 
-                // Verify that the user owns the video
-                if (video.UserId != userId)
-                    return Forbid();
-
                 // Prevents the blob from being overwritten
                 var originalBlobName = video.BlobName;
                 _mapper.Map(updateVideoDto, video);
@@ -266,8 +258,8 @@ namespace MeTube.API.Controllers
                 _unitOfWork.Videos.UpdateVideo(video);
                 await _unitOfWork.SaveChangesAsync();
                 await transaction.CommitAsync();
-
-                return NoContent();
+                var updatedVideoDto = _mapper.Map<VideoDto>(video);
+                return Ok(updatedVideoDto);
             }
             catch (Exception ex)
             {
@@ -278,7 +270,7 @@ namespace MeTube.API.Controllers
 
 
         // PUT: api/Video/{id}/file
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}/file")]
         [Consumes("multipart/form-data")] // Explicit ange content-type
         public async Task<IActionResult> UpdateVideoFile(int id,IFormFile file)
@@ -312,7 +304,7 @@ namespace MeTube.API.Controllers
                 await _unitOfWork.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return NoContent();
+                return Ok(video);
             }
             catch (Exception ex)
             {
@@ -322,7 +314,7 @@ namespace MeTube.API.Controllers
         }
 
         // PUT: api/Video/{id}/thumbnail
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}/thumbnail")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateThumbnail(int id, IFormFile thumbnailFile)
@@ -353,7 +345,7 @@ namespace MeTube.API.Controllers
                 await _unitOfWork.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return NoContent();
+                return Ok(video);
             }
             catch (Exception ex)
             {
@@ -364,7 +356,7 @@ namespace MeTube.API.Controllers
 
 
         // DELETE: api/Video/{id}
-        [Authorize]
+        [Authorize(Roles = "Admin,User")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteVideo(int id)
         {
@@ -372,12 +364,10 @@ namespace MeTube.API.Controllers
             if (userId == 0)
                 return Unauthorized();
 
+
             var video = await _unitOfWork.Videos.GetVideoByIdAsync(id);
             if (video == null)
                 return NotFound();
-
-            if (video.UserId != userId)
-                return Forbid();
 
             // Delete thumbnail if it's not the default thumbnail
             if (!string.IsNullOrEmpty(video.ThumbnailUrl) && !video.ThumbnailUrl.Contains("YouTube_Diamond_Play_Button.png"))
@@ -386,17 +376,15 @@ namespace MeTube.API.Controllers
                 await _videoService.DeleteThumbnailAsync(thumbnailName);
             }
 
-
             // Delete blob from Azure Blob Storage
             var deleteResponse = await _videoService.DeleteAsync(video.BlobName);
             if (deleteResponse.Error)
                 return BadRequest(deleteResponse.Status);
 
             // Delete video from database
-            _unitOfWork.Videos.DeleteVideo(video);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.Videos.DeleteVideo(video);
 
-            return NoContent();
+            return Ok();
         }
 
         // PUT: api/Video/{id}/default-thumbnail

@@ -64,6 +64,33 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             }
         }
 
+        public async Task LoadAllVideos()
+        {
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = string.Empty;
+                UserVideos.Clear();
+
+                var videos = await _videoService.GetAllVideosAsync();
+                if (videos != null)
+                {
+                    foreach (var video in videos.OrderByDescending(v => v.DateUploaded))
+                    {
+                        UserVideos.Add(video);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                ErrorMessage = "Failed to load videos. Please try again.";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
         public void NavigateToEdit(int videoId)
         {
             _navigationManager.NavigateTo($"/videos/edit/{videoId}");
