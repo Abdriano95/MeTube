@@ -9,6 +9,7 @@ namespace MeTube.Data.Repository
         public IUserRepository Users { get; private set; }
         public IVideoRepository Videos { get; private set; }
         public ILikeRepository Likes { get; private set; }
+        public ICommentRepository Comments { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -16,6 +17,7 @@ namespace MeTube.Data.Repository
             Users = new UserRepository(context);
             Videos = new VideoRepository(context);
             Likes = new LikeRepository(context);
+            Comments = new CommentRepository(context);
         }
         public void Dispose()
         {

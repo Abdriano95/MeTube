@@ -11,7 +11,10 @@ namespace MeTube.Data.Entity
     public class Comment
     {
         [Key]
-        public required int Id { get; set; }
+        public int Id { get; set; }
+
+        [Required]
+        public string Username { get; set; } = string.Empty;
         [ForeignKey("Video")]
         public required int VideoId { get; set; }
         [ForeignKey("User")]
@@ -24,7 +27,7 @@ namespace MeTube.Data.Entity
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
-        public Video? Video { get; set; }
-        public User? User { get; set; }
+        public virtual Video? Video { get; set; }
+        public virtual User? User { get; set; }
     }
 }

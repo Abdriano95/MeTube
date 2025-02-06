@@ -1,7 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using AutoMapper;
+using Azure.Identity;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
+using MeTube.DTO;
 using Microsoft.AspNetCore.Components;
 using System.Collections.ObjectModel;
 using System.Net;
@@ -14,14 +17,44 @@ namespace MeTube.Client.ViewModels.VideoViewModels
     {
         private readonly IVideoService _videoService;
         private readonly ILikeService _likeService;
+        private readonly ICommentService _commentService;
+        private readonly UserService _userService;
         private readonly NavigationManager _navigationManager;
+        private readonly IMapper _mapper;
 
-        public VideoViewModel(IVideoService videoService, ILikeService likeService, NavigationManager navigationManager)
+        [ObservableProperty]
+        private string _commentErrorMessage;
+
+        [ObservableProperty]
+        private bool _isAuthenticated;
+
+        [ObservableProperty]
+        private string _userRole = "Customer";
+
+        [ObservableProperty]
+        public string _username = "Guest";
+
+        public VideoViewModel(IVideoService videoService, ICommentService commentService, UserService userService, NavigationManager navigationManager, IMapper mapper, ILikeService likeService)
         {
             _videoService = videoService;
+            _commentService = commentService;
+            _userService = userService;
             _likeService = likeService;
             _navigationManager = navigationManager;
+            _mapper = mapper;
             Comments = new ObservableCollection<Comment>();
+        }
+
+        /// <summary>
+        /// Returns true if the user is authenticated and not a "Customer".
+        /// </summary>
+        public bool CanPostComment => IsAuthenticated && UserRole != "Customer";
+       
+        public async Task InitializeAsync()
+        {
+            var authData = await _userService.IsUserAuthenticated();
+            IsAuthenticated = authData["IsAuthenticated"] == "true";
+            UserRole = authData["Role"];
         }
 
         [ObservableProperty]
@@ -63,7 +96,13 @@ namespace MeTube.Client.ViewModels.VideoViewModels
 
                 if (CurrentVideo == null)
                 {
-                    ErrorMessage = "Video kunde inte hittas";
+                    CurrentVideo.VideoUrl = Constants.VideoStreamUrl(videoId);
+                    // Load comments from the API
+                    await LoadCommentsAsync(videoId);
+                }
+                else
+                {
+                    ErrorMessage = "Video could not be found";
                     _navigationManager.NavigateTo("/");
                     return;
                 }
@@ -77,7 +116,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Ett fel uppstod: {ex.Message}";
+                ErrorMessage = $"An error occurred: {ex.Message}";
             }
             finally
             {
@@ -87,17 +126,74 @@ namespace MeTube.Client.ViewModels.VideoViewModels
 
         private async Task LoadCommentsAsync(int videoId)
         {
-            // Implementera när du har kommentars-API
-            var mockComments = new List<Comment>
-            {
-                new Comment { Author = "Användare1", Text = "Bra video!", Date = DateTime.Now.AddHours(-2) },
-                new Comment { Author = "Användare2", Text = "Mycket informativt", Date = DateTime.Now.AddHours(-1) }
-            };
-
+            var commentDtos = await _commentService.GetCommentsByVideoIdAsync(videoId);
             Comments.Clear();
-            foreach (var comment in mockComments)
+
+            if (commentDtos != null)
             {
-                Comments.Add(comment);
+                foreach (var commentDto in commentDtos)
+                {
+                    var comment = _mapper.Map<Comment>(commentDto);
+                    Comments.Add(comment);
+                }
+            }
+        }
+
+        [RelayCommand]
+        public async Task EditCommentAsync(Comment comment)
+        {
+            try
+            {
+                var updatedCommentDto = new CommentDto
+                {
+                    Id = comment.Id,
+                    VideoId = comment.VideoId,
+                    UserId = comment.UserId,
+                    Content = comment.Content,
+                    DateAdded = comment.DateAdded
+                };
+
+                var updatedComment = await _commentService.UpdateCommentAsync(updatedCommentDto);
+
+                if (updatedComment != null)
+                {
+                    var index = Comments.IndexOf(comment);
+                    if (index >= 0)
+                    {
+                        Comments[index] = updatedComment;
+                    }
+                }
+                else
+                {
+                    CommentErrorMessage = "Failed to edit comment. Please try again.";
+                }
+            }
+            catch (Exception ex)
+            {
+                CommentErrorMessage = "An error occurred while editing the comment. Please try again.";
+                Console.Error.WriteLine($"Error editing comment: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        public async Task DeleteCommentAsync(Comment comment)
+        {
+            try
+            {
+                var result = await _commentService.DeleteCommentAsync(comment.Id);
+                if (result)
+                {
+                    Comments.Remove(comment);
+                }
+                else
+                {
+                    CommentErrorMessage = "Failed to delete the comment. Please try again.";
+                }
+            }
+            catch (Exception ex)
+            {
+                CommentErrorMessage = "An error occurred while deleting the comment. Please try again.";
+                Console.Error.WriteLine($"Error deleting comment: {ex.Message}");
             }
         }
 
