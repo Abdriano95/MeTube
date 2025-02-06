@@ -2,6 +2,8 @@
 using CommunityToolkit.Mvvm.Input;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using static System.Net.Mime.MediaTypeNames;
@@ -11,15 +13,18 @@ namespace MeTube.Client.ViewModels.SignupViewModels
     public partial class SignupViewModel : ObservableValidator
     {
         private readonly IUserService _userService;
+        private readonly IJSRuntime _jsRuntime;
+        private readonly NavigationManager _navigation;
 
         [ObservableProperty]
         [Required(ErrorMessage = "Username is required.")]
-        [StringLength(20, ErrorMessage = "Username must be 3-20 characters")]
+        [StringLength(20, MinimumLength = 3, ErrorMessage = "Username must be 3-20 characters")]
         public string username = string.Empty;
 
         [ObservableProperty]
         [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "Invalid email address.")]
+        [EmailAddress(ErrorMessage = "Invalid email format.")]
+        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Invalid format. Must be using ****@****.***")]
         public string email = string.Empty;
 
         [ObservableProperty]
@@ -36,11 +41,17 @@ namespace MeTube.Client.ViewModels.SignupViewModels
         [ObservableProperty]
         private string emailError = string.Empty;
 
-        private static readonly Regex EmailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+        [ObservableProperty]
+        public string errorMessage = string.Empty;
 
-        public SignupViewModel(IUserService userService) 
+        [ObservableProperty]
+        public string successMessage = string.Empty;
+
+        public SignupViewModel(IUserService userService, IJSRuntime jSRuntime, NavigationManager navigation) 
         {
             _userService = userService;
+            _jsRuntime = jSRuntime;
+            _navigation = navigation;
         }
 
         private void ClearAllFields()
@@ -50,10 +61,24 @@ namespace MeTube.Client.ViewModels.SignupViewModels
             Password = string.Empty;
         }
 
+        private async Task<bool> CheckIfUserExist()
+        {
+            Dictionary<string, string> response = await _userService.DoesUserExistAsync(Username, Email);
+            string userExists = response.Keys.FirstOrDefault();
+            string responseMessage = response[userExists];
+            if (Convert.ToBoolean(userExists))
+            {
+                await _jsRuntime.InvokeAsync<bool>("alert", responseMessage);
+                return true;
+            }
+            else
+                return false;
+        }
+
         public async Task SignupButton()
         {
             ValidateAllProperties();
-            PasswordError = string.Empty;
+            OnPropertyChanged(nameof(Email));
             if (HasErrors)
             {
                 var usernameErrors = GetErrors(nameof(Username)).OfType<ValidationResult>().Select(e => e.ErrorMessage);
@@ -65,6 +90,10 @@ namespace MeTube.Client.ViewModels.SignupViewModels
                 return;
             }
 
+            var userExist = await CheckIfUserExist();
+            if (userExist)
+                return;
+
             var newUser = new User
             {
                 Username = Username,
@@ -75,11 +104,15 @@ namespace MeTube.Client.ViewModels.SignupViewModels
             var success = await _userService.RegisterUserAsync(newUser);
             if (!success)
             {
-                //await Application.Current.MainPage.DisplayAlert("Error", "Registration failed", "OK");
+                await _jsRuntime.InvokeAsync<bool>("alert", "Unable to signup!");
                 return;
             }
             else
+            {
+                await _jsRuntime.InvokeAsync<bool>("alert", "Account succesfully created!");
                 ClearAllFields();
+                _navigation.NavigateTo("/login", forceLoad: true);
+            }
         }
     }
 }

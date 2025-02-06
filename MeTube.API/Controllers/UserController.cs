@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
 using Microsoft.JSInterop;
+using Azure.Core;
 
 namespace MeTube.API.Controllers
 {
@@ -35,7 +36,8 @@ namespace MeTube.API.Controllers
             {
                 return NotFound(new { Message = "User not found" });
             }
-            return Ok(user);
+            var userDto = _mapper.Map<UserDto>(user);
+            return Ok(userDto);
         }
 
         [Authorize(Roles = "Admin")]
@@ -211,6 +213,26 @@ namespace MeTube.API.Controllers
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        [HttpGet("exists")]
+        public async Task<IActionResult> CheckIfUserExists([FromQuery] string username, [FromQuery] string email)
+        {
+            bool usernameExists = await _unitOfWork.Users.UsernameExistsAsync(username);
+            bool emailExists = await _unitOfWork.Users.EmailExistsAsync(email);
+
+            if (!usernameExists && !emailExists)
+                return Ok(new Dictionary<string, object> { { "Exists", false }, { "message", "User does not exist" } });
+
+            var errorMessages = new List<string>();
+            if (usernameExists) errorMessages.Add("Username already exists\n");
+            if (emailExists) errorMessages.Add("Email already exists");
+
+            return BadRequest(new Dictionary<string, object>
+            {
+                { "Exists", true },
+                { "message", string.Join("", errorMessages)}
+            });
         }
     }
 }
