@@ -18,13 +18,13 @@ namespace MeTube.Client.ViewModels
         private Video? currentVideo;
 
         [ObservableProperty]
-        [Required(ErrorMessage = "Title is required")]
-        [StringLength(100, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 100 characters")]
+        //[Required(ErrorMessage = "Title is required")]
+        [StringLength(100, MinimumLength = 0, ErrorMessage = "Title must be between 3 and 100 characters")]
         private string title = string.Empty;
 
         [ObservableProperty]
-        [Required(ErrorMessage = "Description is required")]
-        [StringLength(1000, MinimumLength = 10, ErrorMessage = "Description must be between 10 and 1000 characters")]
+        //[Required(ErrorMessage = "Description is required")]
+        [StringLength(1000, MinimumLength = 0, ErrorMessage = "Description must be between 10 and 1000 characters")]
         private string description = string.Empty;
 
         [ObservableProperty]
@@ -185,8 +185,16 @@ namespace MeTube.Client.ViewModels
                 if (!confirmed) return;
 
                 // Implementation needed based on your requirements
-                await _videoService.UpdateVideoAsync(CurrentVideo);
-                await _jsRuntime.InvokeVoidAsync("alert", "Reset to default thumbnail successful!");
+                bool resetOk = await _videoService.ResetThumbnail(CurrentVideo.Id);
+                if(resetOk)
+                {
+                    await _jsRuntime.InvokeVoidAsync("alert", "Reset to default thumbnail successful!");
+                    NewThumbnailFile = null;
+                    await LoadVideoAsync(CurrentVideo.Id);
+                }
+                else
+                    await _jsRuntime.InvokeVoidAsync("alert", "Reset to default thumbnail not successful!");
+
             }
             catch (Exception)
             {

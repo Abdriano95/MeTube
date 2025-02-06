@@ -31,16 +31,23 @@ namespace MeTube.Data.Repository
         // Ta bort videon
         public async Task DeleteVideo(Video video)
         {
-            var videoToDelete = await DbContext.Videos.Include(v => v.Comments).FirstOrDefaultAsync(v => v.Id == video.Id);
-            if (videoToDelete != null)
+            await using var transaction = await DbContext.Database.BeginTransactionAsync();
+            try
             {
-                // Delete related comments
-                DbContext.RemoveRange(videoToDelete.Comments);
-
-                // Delete the video
-                DbContext.Videos.Remove(videoToDelete);
+                await DbContext.Comments.Where(a => a.VideoId == video.Id).ExecuteDeleteAsync();
+                await DbContext.Histories.Where(b => b.VideoId == video.Id).ExecuteDeleteAsync();
+                await DbContext.Likes.Where(c => c.VideoID == video.Id).ExecuteDeleteAsync();
+                DbContext.Videos.Remove(video);
+                DbContext.SaveChanges();
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception("Kunde inte radera videon.", ex);
             }
         }
+
 
         public async Task<IEnumerable<Video>> GetAllVideosAsync()
         {
