@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text;
 using System.Net;
 using Microsoft.AspNetCore.Components;
+using MeTube.Client.Models;
 
 namespace MeTube.Client.Services
 {
@@ -120,6 +121,23 @@ namespace MeTube.Client.Services
             {
                 return 0;
             }
+        }
+
+        public async Task<IEnumerable<Like>> GetLikesForVideoManagementAsync(int videoId)
+        {
+            await AddAuthorizationHeader();
+            var response = await _httpClient.GetAsync(Constants.LikeBaseUrl + $"/manage/{videoId}");
+            response.EnsureSuccessStatusCode();
+            var likeDtos = await response.Content.ReadFromJsonAsync<IEnumerable<LikeDto>>();
+            return _mapper.Map<IEnumerable<Like>>(likeDtos);
+        }
+
+        // Removing likes for a video as an admin
+        public async Task RemoveLikesForVideoAsync(int videoId)
+        {
+            await AddAuthorizationHeader();
+            var response = await _httpClient.DeleteAsync(Constants.LikeBaseUrl + $"/video/{videoId}");
+            response.EnsureSuccessStatusCode();
         }
     }
 }

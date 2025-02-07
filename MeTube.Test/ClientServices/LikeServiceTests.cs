@@ -106,6 +106,43 @@ namespace MeTube.Test.ClientServices
                 });
         }
 
+        [Fact]
+        public async Task RemoveLikesForVideoAsync_ReturnsSuccessfully_WhenVideoExists()
+        {
+            // Arrange
+            int videoId = 1;
+            SetupSuccessfulHttpResponse();
+
+            // Act
+            await _likeService.RemoveLikesForVideoAsync(videoId);
+
+            // Assert
+            VerifyHttpRequestSent(HttpMethod.Delete, $"/video/{videoId}");
+        }
+
+        [Fact]
+        public async Task RemoveLikesForVideoAsync_ThrowsException_WhenRequestFails()
+        {
+            // Arrange
+            int videoId = 1;
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    Content = new StringContent("Failed to remove likes")
+                });
+
+            // Act & Assert
+            await Assert.ThrowsAsync<HttpRequestException>(() =>
+                _likeService.RemoveLikesForVideoAsync(videoId));
+        }
+
         private void VerifyHttpRequestSent(HttpMethod method, string url)
         {
             _mockHttpMessageHandler.Protected().Verify(

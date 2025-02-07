@@ -11,6 +11,7 @@ namespace MeTube.Client.ViewModels
     public partial class EditVideoViewModel : ObservableValidator
     {
         private readonly IVideoService _videoService;
+        private readonly ILikeService _likeService;
         private readonly NavigationManager _navigationManager;
         private readonly IJSRuntime _jsRuntime;
 
@@ -39,14 +40,31 @@ namespace MeTube.Client.ViewModels
         [ObservableProperty]
         private string errorMessage = string.Empty;
 
+        [ObservableProperty]
+        private IEnumerable<Like> likes;
+
         public EditVideoViewModel(
             IVideoService videoService,
             NavigationManager navigationManager,
-            IJSRuntime jsRuntime)
+            IJSRuntime jsRuntime,
+            ILikeService likeService)
         {
             _videoService = videoService;
             _navigationManager = navigationManager;
             _jsRuntime = jsRuntime;
+            _likeService = likeService;
+        }
+
+        public async Task LoadLikesAsync(int videoId)
+        {
+            try
+            {
+                Likes = await _likeService.GetLikesForVideoManagementAsync(videoId);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "Failed to load likes: " + ex.Message;
+            }
         }
 
         public async Task LoadVideoAsync(int videoId)
@@ -74,6 +92,20 @@ namespace MeTube.Client.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        public async Task RemoveLike(int videoId)
+        {
+            try
+            {
+                await _likeService.RemoveLikesForVideoAsync(videoId);
+                // Update the list of likes after a like has been removed
+                await LoadLikesAsync(CurrentVideo.Id);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "Failed to remove like: " + ex.Message;
             }
         }
 

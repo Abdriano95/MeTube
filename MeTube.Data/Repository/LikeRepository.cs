@@ -42,5 +42,21 @@ namespace MeTube.Data.Repository
                 .ToListAsync();
         }
 
+        public async Task<List<Like>> GetLikesForVideoAsync(int videoId)
+        {
+            return await DbContext.Likes
+                .Include(l => l.User)
+                .Include(l => l.Video)
+                .Where(l => l.VideoID == videoId)
+                .ToListAsync();
+        }
+
+        public async Task RemoveLikesForVideoAsync(int videoId)
+        {
+            var likes = await DbContext.Likes
+                .Where(l => l.VideoID == videoId)
+                .ToListAsync();
+            DbContext.Likes.RemoveRange(likes);
+        }
     }
 }
