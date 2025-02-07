@@ -17,5 +17,6 @@ namespace MeTube.Data.Repository
         Task AddVideoWithoutSaveAsync(Video video);
         void UpdateVideo(Video video);
         Task DeleteVideo(Video video);
+        Task<string> GetVideoUploaderUsernameAsync(int videoId);
     }
 }

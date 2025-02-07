@@ -42,6 +42,8 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         [ObservableProperty]
         private bool _showLoginPrompt;
 
+        [ObservableProperty]
+        private string _uploaderUsername;
 
         public ObservableCollection<Comment> Comments { get; }
 
@@ -69,6 +71,9 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                 }
                 CurrentVideo.VideoUrl = Constants.VideoStreamUrl(videoId);
 
+
+
+                UploaderUsername = await _videoService.GetUploaderUsernameAsync(videoId);
                 HasUserLiked = await _likeService.HasUserLikedVideoAsync(videoId);
                 LikeCount = await _likeService.GetLikeCountForVideoAsync(videoId);
 

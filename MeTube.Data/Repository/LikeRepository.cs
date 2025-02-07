@@ -58,5 +58,10 @@ namespace MeTube.Data.Repository
                 .ToListAsync();
             DbContext.Likes.RemoveRange(likes);
         }
+
+        public async Task<Like> GetLikeAsync(int videoId, int userId)
+        {
+            return await DbContext.Likes.FindAsync(videoId, userId);
+        }
     }
 }

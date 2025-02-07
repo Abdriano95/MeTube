@@ -66,17 +66,22 @@
                         </div>
 
                         <!-- Like management section-->
-                        <div class="edit-sections">
-                            <div class="edit-section">
-                                <h4>Manage Likes</h4>
-
-                                @if (ViewModel.Likes != null)
-                                {
+                        <!-- Likes Section -->
+                        <div class="edit-section">
+                            <h4>Manage Likes</h4>
+                            @if (ViewModel.Likes == null || !ViewModel.Likes.Any())
+                            {
+                                <p>No likes yet.</p>
+                            }
+                            else
+                            {
+                                <div class="likes-list">
+                                    <p>Total likes: @ViewModel.Likes.Count()</p>
                                     <table class="table">
                                         <thead>
                                             <tr>
                                                 <th>User</th>
-                                                <th>Actions</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -85,20 +90,17 @@
                                                 <tr>
                                                     <td>@like.UserName</td>
                                                     <td>
-                                                        <button class="btn btn-danger" @onclick="@(() => ViewModel.RemoveLike(like.VideoID))">
-                                                            <i class="bi bi-trash"></i> Remove
+                                                        <button @onclick="@(() => ViewModel.RemoveLikeAsAdmin(like.UserID))"
+                                                                class="btn btn-danger btn-sm">
+                                                            <i class="bi bi-trash"></i> Delete
                                                         </button>
                                                     </td>
                                                 </tr>
                                             }
                                         </tbody>
                                     </table>
-                                }
-                                else
-                                {
-                                    <p>No likes found.</p>
-                                }
-                            </div>
+                                </div>
+                            }
                         </div>
 
 

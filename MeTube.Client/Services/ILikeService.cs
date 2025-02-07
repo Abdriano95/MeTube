@@ -11,6 +11,7 @@ namespace MeTube.Client.Services
         Task<IEnumerable<Like>> GetLikesForVideoManagementAsync(int videoId);
 
         // Removing likes for a video as an admin
-        Task RemoveLikesForVideoAsync(int videoId);
+        Task RemoveLikesForVideoAsync(int videoId, int userId);
+
     }
 }

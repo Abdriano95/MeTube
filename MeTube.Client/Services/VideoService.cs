@@ -244,5 +244,19 @@ namespace MeTube.Client.Services
                 return null;
             }
         }
+
+        public async Task<string?> GetUploaderUsernameAsync(int videoId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(Constants.VideoGetUploaderUsernameUrl(videoId));
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

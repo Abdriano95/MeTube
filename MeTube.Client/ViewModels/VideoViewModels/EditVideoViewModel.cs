@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
+using MeTube.DTO;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
@@ -41,7 +42,7 @@ namespace MeTube.Client.ViewModels
         private string errorMessage = string.Empty;
 
         [ObservableProperty]
-        private IEnumerable<Like> likes;
+        private IEnumerable<Like>? likes;
 
         public EditVideoViewModel(
             IVideoService videoService,
@@ -75,6 +76,7 @@ namespace MeTube.Client.ViewModels
                 ErrorMessage = string.Empty;
 
                 CurrentVideo = await _videoService.GetVideoByIdAsync(videoId);
+                await LoadLikesAsync(videoId);
                 if (CurrentVideo != null)
                 {
                     Title = CurrentVideo.Title;
@@ -95,17 +97,27 @@ namespace MeTube.Client.ViewModels
             }
         }
 
-        public async Task RemoveLike(int videoId)
+        public async Task RemoveLikeAsAdmin(int userId)
         {
+            if (CurrentVideo == null) return;
+
             try
             {
-                await _likeService.RemoveLikesForVideoAsync(videoId);
-                // Update the list of likes after a like has been removed
+                var confirmed = await _jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this like?");
+                if (!confirmed) return;
+
+                var likeDto = new LikeDto
+                {
+                    VideoID = CurrentVideo.Id,
+                    UserID = userId
+                };
+
+                await _likeService.RemoveLikesForVideoAsync(CurrentVideo.Id, userId);
                 await LoadLikesAsync(CurrentVideo.Id);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ErrorMessage = "Failed to remove like: " + ex.Message;
+                ErrorMessage = "Failed to remove like.";
             }
         }
 
