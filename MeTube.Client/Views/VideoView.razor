@@ -175,12 +175,40 @@
     private string _newComment = string.Empty;
     private bool _isEditingComment = false;
     private Comment _commentToEdit;
+    private bool videoLoaded = false;
+    private ElementReference videoElement;
 
     protected override async Task OnParametersSetAsync()
     {
         await ViewModel.LoadVideoAsync(VideoId);
         await ViewModel.InitializeAsync();
         await LoadCommentsAsync();
+    }
+
+    private async Task OnVideoLoaded()
+    {
+        if (!videoLoaded)
+        {
+            videoLoaded = true;
+            await JSRuntime.InvokeVoidAsync("initializeVideoPlayer", videoElement);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await Task.Delay(100);
+                await JSRuntime.InvokeVoidAsync("initializeVideoPlayer");
+                await JSRuntime.InvokeVoidAsync("eval", "document.head.insertAdjacentHTML('beforeend', '<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\">')");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error initializing video player: {ex.Message}");
+            }
+        }
     }
 
     private async Task LoadCommentsAsync()
@@ -204,16 +232,7 @@
         }
         catch (Exception ex)
         {
-            try
-            {
-                await Task.Delay(100);
-                await JSRuntime.InvokeVoidAsync("initializeVideoPlayer");
-                await JSRuntime.InvokeVoidAsync("eval", "document.head.insertAdjacentHTML('beforeend', '<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\">')");
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error initializing video player: {ex.Message}");
-            }
+            Console.Error.WriteLine($"Error initializing video player: {ex.Message}");
             ViewModel.ErrorMessage = "Failed to load comments. Please try again later.";
             Console.Error.WriteLine($"Error loading comments: {ex.Message}");
         }
