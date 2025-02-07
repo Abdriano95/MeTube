@@ -125,19 +125,42 @@ namespace MeTube.Client.Services
 
         public async Task<IEnumerable<Like>> GetLikesForVideoManagementAsync(int videoId)
         {
-            await AddAuthorizationHeader();
-            var response = await _httpClient.GetAsync(Constants.LikeBaseUrl + $"/manage/{videoId}");
-            response.EnsureSuccessStatusCode();
-            var likeDtos = await response.Content.ReadFromJsonAsync<IEnumerable<LikeDto>>();
-            return _mapper.Map<IEnumerable<Like>>(likeDtos);
+            try
+            {
+                var response = await _httpClient.GetAsync(Constants.LikeGetForVideoUrl(videoId));
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<LikesForVideoResponseDto>(jsonResponse,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    return _mapper.Map<IEnumerable<Like>>(result.Likes);
+                }
+                return Enumerable.Empty<Like>();
+            }
+            catch
+            {
+                return Enumerable.Empty<Like>();
+            }
         }
 
+
+
         // Removing likes for a video as an admin
-        public async Task RemoveLikesForVideoAsync(int videoId)
+        public async Task RemoveLikesForVideoAsync(int videoId, int userId)
         {
             await AddAuthorizationHeader();
-            var response = await _httpClient.DeleteAsync(Constants.LikeBaseUrl + $"/video/{videoId}");
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                var response = await _httpClient.DeleteAsync(Constants.LikeRemoveAdminUrl(videoId, userId));
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception("Failed to remove likes for video.");
+                }
+            }
+            catch
+            {
+                throw new Exception("Failed to remove likes for video.");
+            }
         }
     }
 }

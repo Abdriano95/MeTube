@@ -26,6 +26,7 @@
         public static string VideoGetByIdUrl(int id) => $"{VideoBaseUrl}/{id}"; // GET api/Video/{id}
         public static string VideoStreamUrl(int id) => $"{VideoBaseUrl}/stream/{id}"; // GET api/Video/stream/{id}
         public static string VideoGetByUserUrl = $"{VideoBaseUrl}/user"; // GET api/Video/user
+        public static string VideoGetUploaderUsernameUrl(int videoId) => $"{VideoBaseUrl}/username/{videoId}";
 
         // POST
         public static string VideoUploadUrl = VideoBaseUrl; // POST api/Video
@@ -38,6 +39,8 @@
 
         // DELETE
         public static string VideoDeleteUrl(int id) => $"{VideoBaseUrl}/{id}"; // DELETE api/Video/{id}
+
+        public static string LikeRemoveAdminUrl(int videoId, int userId) => $"{LikeBaseUrl}/{videoId}/{userId}";
 
 
         // Like endpoints

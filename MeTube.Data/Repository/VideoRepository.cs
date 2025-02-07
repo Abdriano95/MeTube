@@ -76,5 +76,13 @@ namespace MeTube.Data.Repository
         {
             DbContext.Videos.Update(video);
         }
+
+        public async Task<string> GetVideoUploaderUsernameAsync(int videoId)
+        {
+            return await DbContext.Videos
+                .Where(v => v.Id == videoId)
+                .Select(v => v.User.Username)
+                .FirstOrDefaultAsync();
+        }
     }
 }
