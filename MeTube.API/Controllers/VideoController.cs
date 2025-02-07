@@ -388,7 +388,7 @@ namespace MeTube.API.Controllers
         }
 
         // PUT: api/Video/{id}/default-thumbnail
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}/default-thumbnail")]
         public async Task<IActionResult> ResetToDefaultThumbnail(int id)
         {
