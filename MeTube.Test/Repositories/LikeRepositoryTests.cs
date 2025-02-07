@@ -123,5 +123,30 @@ namespace MeTube.Test.Repositories
             Assert.Equal("TestUser", like.User.Username);
             Assert.Equal("TestVideo", like.Video.Title);
         }
+
+        [Fact]
+        public async Task RemoveLikesForVideo_ShouldRemoveAllLikesForVideo()
+        {
+            // Arrange
+            var videoId = 1;
+            var likes = new List<Like>
+                        {
+                            new Like { UserID = 1, VideoID = videoId },
+                            new Like { UserID = 2, VideoID = videoId }
+                        };
+
+            _mockLikeRepo.Setup(repo => repo.RemoveLikesForVideoAsync(videoId))
+                         .Returns(Task.CompletedTask);
+            _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync())
+                           .ReturnsAsync(1);
+
+            // Act
+            await _mockLikeRepo.Object.RemoveLikesForVideoAsync(videoId);
+            await _mockUnitOfWork.Object.SaveChangesAsync();
+
+            // Assert
+            _mockLikeRepo.Verify(repo => repo.RemoveLikesForVideoAsync(videoId), Times.Once);
+            _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Once);
+        }
     }
 }

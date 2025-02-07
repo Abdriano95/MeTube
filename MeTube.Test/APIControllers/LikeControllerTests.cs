@@ -179,5 +179,42 @@ namespace MeTube.Test.APIControllers
             Assert.NotNull(response);
             Assert.Equal(2, response.Likes.Count());
         }
+
+        [Fact]
+        public async Task RemoveLikesForVideo_ReturnsNoContent_WhenSuccessful()
+        {
+            // Arrange
+            int videoId = 1;
+            _mockUnitOfWork.Setup(uow => uow.Likes.RemoveLikesForVideoAsync(videoId))
+                .Returns(Task.CompletedTask);
+            _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            // Act
+            var result = await _controller.RemoveLikesForVideo(videoId);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+            _mockUnitOfWork.Verify(uow => uow.Likes.RemoveLikesForVideoAsync(videoId), Times.Once);
+            _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task RemoveLikesForVideo_ReturnsBadRequest_WhenExceptionOccurs()
+        {
+            // Arrange
+            int videoId = 1;
+            var errorMessage = "Failed to remove likes";
+            _mockUnitOfWork.Setup(uow => uow.Likes.RemoveLikesForVideoAsync(videoId))
+                .ThrowsAsync(new Exception(errorMessage));
+
+            // Act
+            var result = await _controller.RemoveLikesForVideo(videoId);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(errorMessage, badRequestResult.Value);
+            _mockUnitOfWork.Verify(uow => uow.Likes.RemoveLikesForVideoAsync(videoId), Times.Once);
+        }
     }
 }

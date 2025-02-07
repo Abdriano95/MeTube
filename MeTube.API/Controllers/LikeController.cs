@@ -31,6 +31,16 @@ namespace MeTube.API.Controllers
             return Ok(likeDtos);
         }
 
+        // GET: api/Like/manage/{videoId}
+        [Authorize(Roles = "Admin")]
+        [HttpGet("manage/{videoId}")]
+        public async Task<IActionResult> GetLikesForVideoManagement(int videoId)
+        {
+            var likes = await _unitOfWork.Likes.GetLikesForVideoAsync(videoId);
+            var likeDtos = _mapper.Map<IEnumerable<LikeDto>>(likes);
+            return Ok(likeDtos);
+        }
+
         // POST: api/Like/{videoId}
         [Authorize]
         [HttpGet("{videoId}")]
@@ -118,6 +128,23 @@ namespace MeTube.API.Controllers
             catch (ArgumentException ex)
             {
                 return NotFound(ex.Message);
+            }
+        }
+
+        // DELETE: api/Like/video/{videoId}
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("video/{videoId}")]
+        public async Task<IActionResult> RemoveLikesForVideo(int videoId)
+        {
+            try
+            {
+                await _unitOfWork.Likes.RemoveLikesForVideoAsync(videoId);
+                await _unitOfWork.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

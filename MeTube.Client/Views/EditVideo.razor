@@ -65,6 +65,43 @@
                             </EditForm>
                         </div>
 
+                        <!-- Like management section-->
+                        <div class="edit-sections">
+                            <div class="edit-section">
+                                <h4>Manage Likes</h4>
+
+                                @if (ViewModel.Likes != null)
+                                {
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var like in ViewModel.Likes)
+                                            {
+                                                <tr>
+                                                    <td>@like.UserName</td>
+                                                    <td>
+                                                        <button class="btn btn-danger" @onclick="@(() => ViewModel.RemoveLike(like.VideoID))">
+                                                            <i class="bi bi-trash"></i> Remove
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                }
+                                else
+                                {
+                                    <p>No likes found.</p>
+                                }
+                            </div>
+                        </div>
+
+
                         <!-- Video File Section -->
                         <div class="edit-section">
                             <h4>Update Video File</h4>
@@ -140,5 +177,6 @@
     protected override async Task OnInitializedAsync()
     {
         await ViewModel.LoadVideoAsync(VideoId);
+        await ViewModel.LoadLikesAsync(VideoId);
     }
 }
