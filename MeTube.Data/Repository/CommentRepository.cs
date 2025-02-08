@@ -50,5 +50,13 @@ namespace MeTube.Data.Repository
         {
             Update(comment);
         }
+
+        public async Task<string> GetPosterUsernameAsync(int userId)
+        {
+            return await DbContext.Comments
+                .Where(u => u.Id == userId)
+                .Select(u => u.User.Username)
+                .FirstOrDefaultAsync();
+        }
     }
 }

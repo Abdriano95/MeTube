@@ -133,5 +133,31 @@ namespace MeTube.Client.Services
                 return false;
             }
         }
+
+        public async Task<string?> GetPosterUsernameAsync(int userId)
+        {
+            try
+            {
+                var requestUri = new Uri($"https://localhost:5001/api/comments/username/{userId}");
+                var response = await _httpClient.GetAsync(requestUri);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.Error.WriteLine($"Failed to fetch username for userId {userId}. StatusCode: {response.StatusCode}");
+                    return null;
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Fetched username: {content}");
+
+                return content;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error fetching poster username: {ex.Message}");
+                return null;
+            }
+        }
+
     }
 }

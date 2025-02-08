@@ -9,5 +9,6 @@ namespace MeTube.Client.Services
         Task<Comment?> AddCommentAsync(CommentDto commentDto);
         Task<Comment?> UpdateCommentAsync(CommentDto commentDto);
         Task<bool> DeleteCommentAsync(int commentId);
+        Task<string?> GetPosterUsernameAsync(int userId);
     }
 }

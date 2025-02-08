@@ -15,5 +15,6 @@ namespace MeTube.Data.Repository
         Task AddCommentAsync(Comment comment);
         void UpdateComment(Comment comment);
         void DeleteComment(Comment comment);
+        Task<string> GetPosterUsernameAsync(int userId);
     }
 }
