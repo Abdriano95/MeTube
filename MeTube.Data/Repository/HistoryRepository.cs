@@ -20,6 +20,7 @@ namespace MeTube.Data.Repository
         {
             return await DbContext.Histories
            .Include(h => h.Video)
+           .Include(h => h.User)
            .Where(h => h.UserId == userId)
            .OrderByDescending(h => h.DateWatched)
            .ToListAsync();
