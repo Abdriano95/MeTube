@@ -1,0 +1,38 @@
+﻿@page "/history"
+@using MeTube.Client.ViewModels.HistoryViewModels
+@inject UserHistoryViewModel ViewModel
+
+<h3>History View</h3>
+
+@if (ViewModel.UserHistory.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Video</th>
+                <th>Date Watched</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var history in ViewModel.UserHistory)
+            {
+                <tr>
+                    <td>@history.VideoTitle</td>
+                    <td>@history.DateWatched.ToString("yyyy-MM-dd HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No videos watched yet.</p>
+}
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadUserHistoryAsync();
+    }
+}
