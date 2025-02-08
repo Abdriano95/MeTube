@@ -16,6 +16,7 @@
         public static string DeleteUser = $"{BaseUrl}/user";
         public static string UpdateUser = $"{BaseUrl}/user";
         public static string ChangeRole = $"{BaseUrl}/user/changeRole/{{0}}";
+        public static string CheckUserExistsUrl = $"{BaseUrl}/User/exists";
 
         // Video endpoints
         public static string VideoBaseUrl = $"{BaseUrl}/Video";

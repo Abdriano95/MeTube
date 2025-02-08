@@ -59,12 +59,17 @@ namespace MeTube.Client.ViewModels.LoginViewModels
                 string token = await _userService.GetTokenAsync(Username, Password);
                 if (!string.IsNullOrEmpty(token))
                     await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "jwtToken", token);
-
+                await _jsRuntime.InvokeVoidAsync("alert", "Login succesfull!");
                 ClearAllFields();
                 IsUserLoggedIn = true;
-                _navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                 await _jsRuntime.InvokeVoidAsync("alert", "Wrong username or password!");
+                 ClearAllFields();
                 return;
             }
+            _navigation.NavigateTo("", forceLoad: true);
 
         }
         private void ClearAllFields()
@@ -75,8 +80,18 @@ namespace MeTube.Client.ViewModels.LoginViewModels
 
         public async Task Logout()
         {
-            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "jwtToken");
-            _navigation.NavigateTo("/login", forceLoad: true);
+            bool secureLogoff = await _jsRuntime.InvokeAsync<bool>("confirm", $"You sure you want to log-off?");
+            if (secureLogoff)
+            {
+                await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "jwtToken");
+                await _jsRuntime.InvokeVoidAsync("alert", "User loged-off!");
+                _navigation.NavigateTo("/login", forceLoad: true);
+            }
+            else
+            {
+                await _jsRuntime.InvokeVoidAsync("alert", "Unable to succesfully log-off user!");
+                _navigation.NavigateTo(_navigation.Uri, forceLoad: true);
+            }
         }
     }
 }
