@@ -143,5 +143,22 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             }
         }
 
+        public async Task RecordHistoryAsync(int videoId)
+        {
+            try
+            {
+                History history = new History
+                {
+                    VideoId = videoId,
+                    DateWatched = DateTime.Now,
+                    VideoTitle = CurrentVideo.Title
+
+                };
+
+                await _historyService.AddHistoryAsync(history);
+            }
+            catch { } // quietly ignore errors
+        }
+
     }
 }

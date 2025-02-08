@@ -1,7 +1,9 @@
 ﻿@page "/video/{VideoId:int}"
 @using MeTube.Client.Models
+@using MeTube.Client.ViewModels.VideoViewModels
 @inject VideoViewModel ViewModel
 @inject IJSRuntime JSRuntime
+
 
 <link href="css/video_view.css" rel="stylesheet" />
 
@@ -27,6 +29,7 @@
             <div class="col-lg-8 col-md-12">
                 <div class="video-container">
                     <video id="videoPlayer"
+                           @ref="videoElement"
                            controls
                            class="video-player"
                            controlsList="nodownload"
@@ -134,6 +137,10 @@
 
     private ElementReference videoElement;
 
+    private DotNetObjectReference<VideoView> _dotNetHelper;
+
+    private bool _historyRecorded;
+
     protected override async Task OnParametersSetAsync()
     {
         await ViewModel.LoadVideoAsync(VideoId);
@@ -154,8 +161,12 @@
         {
             try
             {
+                _dotNetHelper = DotNetObjectReference.Create(this);
                 await Task.Delay(100);
-                await JSRuntime.InvokeVoidAsync("initializeVideoPlayer");
+                await JSRuntime.InvokeVoidAsync(
+                "initializeVideoPlayer",
+                _dotNetHelper 
+            );
                 await JSRuntime.InvokeVoidAsync("eval", "document.head.insertAdjacentHTML('beforeend', '<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\">')");
             }
             catch (Exception ex)
@@ -165,6 +176,20 @@
         }
     }
 
+    [JSInvokable]
+    public async Task HandleVideoPlay()
+    {
+        if (!_historyRecorded && ViewModel.CurrentVideo != null)
+        {
+            await ViewModel.RecordHistoryAsync(ViewModel.CurrentVideo.Id);
+            _historyRecorded = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        _dotNetHelper?.Dispose();
+    }
 
     private async Task PostComment()
     {

@@ -1,4 +1,4 @@
-﻿window.initializeVideoPlayer = async () => {
+﻿window.initializeVideoPlayer = async (dotNetHelper) => {
     try {
         await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -55,6 +55,11 @@
         video.addEventListener('canplay', () => {
             console.log('Video can start playing');
         });
+
+        video.addEventListener('play', async () => {
+            await dotNetHelper.invokeMethodAsync('HandleVideoPlay');
+        });
+
 
         console.log('Video player initialized successfully');
     } catch (error) {
