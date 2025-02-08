@@ -11,7 +11,6 @@ namespace MeTube.Client.Profiles
             // Map CommentDto to Comment
             CreateMap<CommentDto, Comment>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
                 .ForMember(dest => dest.VideoId, opt => opt.MapFrom(src => src.VideoId))
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
                 .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content))
@@ -20,7 +19,6 @@ namespace MeTube.Client.Profiles
             // Map Comment to CommentDto
             CreateMap<Comment, CommentDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
                 .ForMember(dest => dest.VideoId, opt => opt.MapFrom(src => src.VideoId))
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
                 .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content))

@@ -31,15 +31,15 @@
             <div class="col-lg-8 col-md-12">
                 <div class="video-container">
                     <video id="videoPlayer"
-                           controls
-                           class="video-player"
-                           controlsList="nodownload"
-                           preload="auto"
-                           crossorigin="anonymous"
-                           playsinline
-                           webkit-playsinline>
+                    controls
+                    class="video-player"
+                    controlsList="nodownload"
+                    preload="auto"
+                    crossorigin="anonymous"
+                    playsinline
+                    webkit-playsinline>
                         <source src="@ViewModel.CurrentVideo.VideoUrl" type="video/mp4"
-                                codecs="avc1.42E01E, mp4a.40.2">
+                        codecs="avc1.42E01E, mp4a.40.2">
                         Your browser does not support video playback.
                     </video>
 
@@ -85,18 +85,17 @@
                                         <div class="d-flex align-items-start">
                                             <div class="flex-grow-1 ms-3">
                                                 <div class="d-flex justify-content-between">
-                                                    <strong>@comment.Username</strong>
+                                                    <strong>@comment.UserId</strong>
                                                     <small class="text-muted">@comment.DateAdded.ToString("HH:mm dd MMM")</small>
                                                 </div>
                                                 <p class="mb-0">@comment.Content</p>
                                             </div>
                                             <div>
-                                                @* Only Admins or regular Users (with a non-Customer role) can edit/delete *@
-                                                @if (ViewModel.UserRole == "Admin")
-                                                {
-                                                    <button class="btn btn-warning btn-sm" @onclick="() => StartEditingComment(comment)">Edit</button>
-                                                    <button class="btn btn-danger btn-sm" @onclick="() => DeleteComment(comment)">Delete</button>
-                                                }
+                                                <!-- Edit Button -->
+                                                <button class="btn btn-warning btn-sm" @onclick="() => StartEditingComment(comment)">Edit</button>
+
+                                                <!-- Delete Button -->
+                                                <button class="btn btn-danger btn-sm" @onclick="() => DeleteComment(comment)">Delete</button>
                                             </div>
                                         </div>
                                     </div>
@@ -104,25 +103,16 @@
                             </div>
                         }
 
-                        @if (ViewModel.IsAuthenticated)
-                        {
-                            <div class="input-group mt-3">
-                                <input type="text"
-                                       class="form-control"
-                                       placeholder="Write a comment..."
-                                       @bind="_newComment" />
-                                <button class="btn btn-primary"
-                                        @onclick="PostComment"
-                                        disabled="@(ViewModel.CanPostComment == false)">
-                                    Post
-                                    <i class="bi bi-send"></i>
-                                </button>
-                            </div>
-                        }
-                        else
-                        {
-                            <p class="text-muted">Log in to post a comment.</p>
-                        }
+                        <div class="input-group mt-3">
+                            <input type="text"
+                            class="form-control"
+                            placeholder="Write a comment..."
+                            @bind="_newComment" />
+                            <button class="btn btn-primary" @onclick="PostComment">
+                                Post
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -132,10 +122,7 @@
         {
             <div class="comment-edit-popup">
                 <div class="input-group">
-                    <input type="text"
-                           class="form-control"
-                           @bind="_commentToEdit.Content"
-                           placeholder="Edit your comment..." />
+                    <input type="text" class="form-control" @bind="_commentToEdit.Content" placeholder="Edit your comment..." />
                     <button class="btn btn-primary" @onclick="SaveCommentChanges">Save</button>
                     <button class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
                 </div>
@@ -149,14 +136,14 @@
     public int VideoId { get; set; }
 
     private string _newComment = string.Empty;
+    private bool videoLoaded = false;
     private bool _isEditingComment = false;
     private Comment _commentToEdit;
 
     protected override async Task OnParametersSetAsync()
     {
         await ViewModel.LoadVideoAsync(VideoId);
-        await ViewModel.InitializeAsync();
-        await LoadCommentsAsync();
+        await LoadCommentsAsync(); // Fetch comments when the video is loaded
     }
 
     private async Task LoadCommentsAsync()
@@ -191,20 +178,26 @@
         {
             try
             {
+                int user = 1; // This should be dynamically fetched after user authentication
 
+                // Create a new Comment DTO
                 var newCommentDto = new CommentDto
                     {
                         VideoId = VideoId,
-                        UserId = 0, // this is checked in the API properly
+                        UserId = user,
                         Content = _newComment,
                         DateAdded = DateTime.Now
                     };
 
+                // Post the new comment to the API
                 var postedComment = await CommentService.AddCommentAsync(newCommentDto);
 
                 if (postedComment != null)
                 {
+                    // Reload the comments after posting the new comment
                     await LoadCommentsAsync();
+
+                    // Clear the input field
                     _newComment = string.Empty;
                 }
                 else
@@ -226,23 +219,24 @@
 
     private void StartEditingComment(Comment comment)
     {
-        _commentToEdit = comment;
-        _isEditingComment = true;
+        _commentToEdit = comment;  // Store the comment to edit
+        _isEditingComment = true;  // Show the input field for editing
     }
 
     private async Task SaveCommentChanges()
     {
         if (!string.IsNullOrEmpty(_commentToEdit.Content))
         {
+            // Save the edited comment
             await ViewModel.EditCommentAsync(_commentToEdit);
-            _isEditingComment = false;
+            _isEditingComment = false;  // Hide the editing input field
             await LoadCommentsAsync();
         }
     }
 
     private void CancelEdit()
     {
-        _isEditingComment = false;
+        _isEditingComment = false;  // Hide the editing input field
     }
 
     private async Task DeleteComment(Comment comment)

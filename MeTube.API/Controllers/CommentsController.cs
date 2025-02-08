@@ -2,9 +2,7 @@
 using MeTube.Data.Entity;
 using MeTube.Data.Repository;
 using MeTube.DTO;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace MeTube.API.Controllers
 {
@@ -15,12 +13,14 @@ namespace MeTube.API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
+        // Inject IUnitOfWork and IMapper
         public CommentsController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
+        // GET: api/comments/video/{videoId}
         [HttpGet("video/{videoId}")]
         public async Task<IActionResult> GetCommentsByVideo(int videoId)
         {
@@ -28,9 +28,12 @@ namespace MeTube.API.Controllers
             if (!comments.Any())
                 return NotFound(new { Message = "No comments found for this video." });
 
-            return Ok(_mapper.Map<IEnumerable<CommentDto>>(comments));
+            // Map the list of comments to DTOs
+            var commentDtos = _mapper.Map<IEnumerable<CommentDto>>(comments);
+            return Ok(commentDtos);
         }
 
+        // GET: api/comments/user/{userId}
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetCommentsByUser(int userId)
         {
@@ -38,28 +41,31 @@ namespace MeTube.API.Controllers
             if (!comments.Any())
                 return NotFound(new { Message = "No comments found for this user." });
 
-            return Ok(_mapper.Map<IEnumerable<CommentDto>>(comments));
+            // Map the list of comments to DTOs
+            var commentDtos = _mapper.Map<IEnumerable<CommentDto>>(comments);
+            return Ok(commentDtos);
         }
 
-        [Authorize(Roles = "Admin,User")]
+        // POST: api/comments
         [HttpPost]
         public async Task<IActionResult> AddComment([FromBody] CommentDto commentDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var username = User.FindFirst(ClaimTypes.Name)?.Value ?? "Guest";
-
+            // Fetch Video and User from the database using the IDs
             var video = await _unitOfWork.Videos.GetByIdAsync(commentDto.VideoId);
-            if (video == null)
-                return BadRequest(new { Message = "Invalid VideoId" });
+            var user = await _unitOfWork.Users.GetByIdAsync(commentDto.UserId);
 
+            // Validate that the video and user exist
+            if (video == null || user == null)
+                return BadRequest(new { Message = "Invalid VideoId or UserId" });
+
+            // Map DTO to entity
             var comment = new Comment
             {
                 VideoId = commentDto.VideoId,
-                UserId = userId,
-                Username = username,
+                UserId = commentDto.UserId,
                 Content = commentDto.Content,
                 DateAdded = DateTime.UtcNow
             };
@@ -70,7 +76,7 @@ namespace MeTube.API.Controllers
             return Ok(new { Message = "Comment added successfully." });
         }
 
-        [Authorize(Roles = "Admin")]
+        // DELETE: api/comments/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComment(int id)
         {
@@ -84,7 +90,7 @@ namespace MeTube.API.Controllers
             return Ok(new { Message = "Comment deleted successfully." });
         }
 
-        [Authorize(Roles = "Admin")]
+        // PUT: api/comments/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateComment(int id, [FromBody] UpdateCommentDto updateCommentDto)
         {
@@ -95,7 +101,9 @@ namespace MeTube.API.Controllers
             if (existingComment == null)
                 return NotFound(new { Message = "Comment not found." });
 
+            // Use AutoMapper to update only the allowed properties
             _mapper.Map(updateCommentDto, existingComment);
+
             await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { Message = "Comment updated successfully." });

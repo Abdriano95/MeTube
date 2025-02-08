@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Azure.Identity;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MeTube.Client.Models;
@@ -15,42 +14,19 @@ namespace MeTube.Client.ViewModels.VideoViewModels
     {
         private readonly IVideoService _videoService;
         private readonly ICommentService _commentService;
-        private readonly UserService _userService;
         private readonly NavigationManager _navigationManager;
         private readonly IMapper _mapper;
 
         [ObservableProperty]
         private string _commentErrorMessage;
 
-        [ObservableProperty]
-        private bool _isAuthenticated;
-
-        [ObservableProperty]
-        private string _userRole = "Customer";
-
-        [ObservableProperty]
-        public string _username = "Guest";
-
-        public VideoViewModel(IVideoService videoService, ICommentService commentService, UserService userService, NavigationManager navigationManager, IMapper mapper)
+        public VideoViewModel(IVideoService videoService, ICommentService commentService, NavigationManager navigationManager, IMapper mapper)
         {
             _videoService = videoService;
             _commentService = commentService;
-            _userService = userService;
             _navigationManager = navigationManager;
             _mapper = mapper;
             Comments = new ObservableCollection<Comment>();
-        }
-
-        /// <summary>
-        /// Returns true if the user is authenticated and not a "Customer".
-        /// </summary>
-        public bool CanPostComment => IsAuthenticated && UserRole != "Customer";
-       
-        public async Task InitializeAsync()
-        {
-            var authData = await _userService.IsUserAuthenticated();
-            IsAuthenticated = authData["IsAuthenticated"] == "true";
-            UserRole = authData["Role"];
         }
 
         [ObservableProperty]
@@ -73,17 +49,17 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             try
             {
                 CurrentVideo = await _videoService.GetVideoByIdAsync(videoId);
-                if (CurrentVideo != null)
-                {
-                    CurrentVideo.VideoUrl = Constants.VideoStreamUrl(videoId);
-                    // Load comments from the API
-                    await LoadCommentsAsync(videoId);
-                }
-                else
+                CurrentVideo.VideoUrl = Constants.VideoStreamUrl(videoId);
+
+                if (CurrentVideo == null)
                 {
                     ErrorMessage = "Video could not be found";
                     _navigationManager.NavigateTo("/");
+                    return;
                 }
+
+                // Load comments from the API
+                await LoadCommentsAsync(videoId);
             }
             catch (Exception ex)
             {
@@ -115,12 +91,13 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         {
             try
             {
+                // Skapa en DTO med den nya kommentarens innehåll
                 var updatedCommentDto = new CommentDto
                 {
                     Id = comment.Id,
                     VideoId = comment.VideoId,
                     UserId = comment.UserId,
-                    Content = comment.Content,
+                    Content = comment.Content, // Här kan du lägga till logik för att hantera den nya texten
                     DateAdded = comment.DateAdded
                 };
 
@@ -128,10 +105,11 @@ namespace MeTube.Client.ViewModels.VideoViewModels
 
                 if (updatedComment != null)
                 {
+                    // Uppdatera kommentaren i listan
                     var index = Comments.IndexOf(comment);
                     if (index >= 0)
                     {
-                        Comments[index] = updatedComment;
+                        Comments[index] = updatedComment;  // Uppdatera den gamla kommentaren med den nya
                     }
                 }
                 else
@@ -154,6 +132,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                 var result = await _commentService.DeleteCommentAsync(comment.Id);
                 if (result)
                 {
+                    // Ta bort kommentaren från listan
                     Comments.Remove(comment);
                 }
                 else
@@ -167,5 +146,6 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                 Console.Error.WriteLine($"Error deleting comment: {ex.Message}");
             }
         }
+
     }
 }
