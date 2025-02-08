@@ -57,5 +57,9 @@
         // DELETE
         public static string LikeRemoveUrl = LikeBaseUrl;
 
+        // History endpoints
+        public static string HistoryBaseUrl = $"{BaseUrl}/History";
+        public static string HistoryGetAllUrl = HistoryBaseUrl;
+
     }
 }

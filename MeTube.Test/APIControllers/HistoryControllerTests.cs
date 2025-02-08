@@ -6,13 +6,7 @@ using MeTube.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MeTube.Test.APIControllers
 {
@@ -116,6 +110,65 @@ namespace MeTube.Test.APIControllers
             };
             // Act
             var result = await _controller.GetAllHistory();
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+        }
+
+        [Fact]
+        public async Task AddHistory_ReturnsOk_WhenHistoryIsAdded()
+        {
+            // Arrange
+            var historyDto = new HistoryDto { VideoId = 1 };
+            var history = new History { VideoId = 1, UserId = 1 };
+
+            // Mocka mappningen från DTO till History
+            _mockMapper.Setup(m => m.Map<History>(historyDto)).Returns(history);
+
+            // Mocka AddAsync och SaveChangesAsync för att returnera "klar" utan undantag
+            _mockUnitOfWork.Setup(u => u.Histories.AddAsync(It.IsAny<History>()))
+                          .Returns(Task.CompletedTask);
+            _mockUnitOfWork.Setup(u => u.SaveChangesAsync())
+                          .ReturnsAsync(1);
+
+            // Act
+            var result = await _controller.AddHistory(historyDto);
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task AddHistory_ReturnsBadRequest_WhenHistoryIsNotAdded()
+        {
+            // Arrange
+            var historyDto = new HistoryDto { VideoId = 1 };
+            var history = new History { VideoId = 1, UserId = 1 };
+            _mockMapper.Setup(m => m.Map<History>(historyDto)).Returns(history);
+            _mockUnitOfWork.Setup(uow => uow.Histories.AddAsync(history)).Throws(new Exception("Error adding history"));
+            // Act
+            var result = await _controller.AddHistory(historyDto);
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task AddHistory_ReturnsUnauthorized_WhenUserIdIsZero()
+        {
+            // Arrange
+            _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal();
+            // Act
+            var result = await _controller.AddHistory(new HistoryDto());
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+        }
+
+        [Fact]
+        public async Task AddHistory_ReturnsUnauthorized_WhenUserIdIsNotSet()
+        {
+            // Arrange
+            _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
+            // Act
+            var result = await _controller.AddHistory(new HistoryDto());
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
         }
