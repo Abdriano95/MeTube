@@ -34,17 +34,24 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
             {
                 UserHistory.Clear();
                 var history = await _historyService.GetUserHistoryAsync();
+
                 if (history != null)
                 {
+                    
                     foreach (var item in history.OrderByDescending(h => h.DateWatched))
                     {
-                        UserHistory.Add(item);
+                        var video = await _videoService.GetVideoByIdAsync(item.VideoId);
+                        if (video != null)
+                        {
+                            item.Video = video; 
+                        }
                     }
+                    UserHistory = history.ToList();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Console.WriteLine("Failed to load history. Please try again.");
+                Console.WriteLine($"Error loading history: {ex.Message}");
             }
         }
 

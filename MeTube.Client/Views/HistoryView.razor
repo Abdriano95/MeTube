@@ -2,35 +2,57 @@
 @using MeTube.Client.ViewModels.HistoryViewModels
 @inject UserHistoryViewModel ViewModel
 
-<h3>History View</h3>
+<link href="css/history.css" rel="stylesheet" />
 
-@if (ViewModel.UserHistory.Any())
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Video</th>
-                <th>Date Watched</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var history in ViewModel.UserHistory)
-            {
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Viewing History</h2>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover video-table">
+            <thead>
                 <tr>
-                    <td>@history.VideoTitle</td>
-                    <td>@history.DateWatched.ToString("yyyy-MM-dd HH:mm")</td>
+                    <th>Thumbnail</th>
+                    <th>Title</th>
+                    <th>Date Watched</th>
+                    <th>Description</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <p>No videos watched yet.</p>
-}
+            </thead>
+            <tbody>
+                @foreach (var historyItem in ViewModel.UserHistory)
+                {
+                    <tr>
+                        <td class="thumbnail-cell">
+                            <img src="@historyItem.Video?.ThumbnailUrl"
+                                 alt="@historyItem.Video?.Title"
+                                 class="video-thumbnail" />
+                        </td>
+                        <td class="align-middle">
+                            <a href="/video/@historyItem.VideoId"
+                               class="video-title">
+                                @historyItem.Video?.Title
+                            </a>
+                        </td>
+                        <td class="align-middle">
+                            @historyItem.DateWatched.ToString("MMM dd, yyyy HH:mm")
+                        </td>
+                        <td class="align-middle description-cell">
+                            @if (!string.IsNullOrEmpty(historyItem.Video?.Description))
+                            {
+                                @(historyItem.Video.Description.Length > 100
+                                    ? historyItem.Video.Description[..97] + "..."
+                                    : historyItem.Video.Description)
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 
 @code {
-
     protected override async Task OnInitializedAsync()
     {
         await ViewModel.LoadUserHistoryAsync();
