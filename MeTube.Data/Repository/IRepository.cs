@@ -11,6 +11,7 @@ namespace MeTube.Data.Repository
         Task<IEnumerable<TEntity>> GetAllAsync();
         Task<TEntity?> GetByIdAsync(int id);
         Task AddAsync(TEntity entity);
+        Task RemoveAsync(TEntity entity);
         void Update(TEntity entity);
         void Delete(TEntity entity);
     }

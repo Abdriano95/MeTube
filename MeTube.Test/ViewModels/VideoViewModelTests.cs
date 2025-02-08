@@ -115,6 +115,5 @@ namespace MeTube.Test.ViewModels
             Assert.Contains("Test error", _viewModel.ErrorMessage);
         }
 
-
     }
 }
