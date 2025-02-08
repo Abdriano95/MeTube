@@ -85,7 +85,7 @@
                                         <div class="d-flex align-items-start">
                                             <div class="flex-grow-1 ms-3">
                                                 <div class="d-flex justify-content-between">
-                                                    <strong>@comment.PosterUsername @comment.UserId</strong>
+                                                    <strong>@comment.PosterUsername</strong>
                                                     <small class="text-muted">@comment.DateAdded.ToString("HH:mm dd MMM")</small>
                                                 </div>
                                                 <p class="mb-0">@comment.Content</p>
@@ -170,6 +170,7 @@
             {
                 foreach (var comment in comments)
                 {
+                    comment.PosterUsername = await CommentService.GetPosterUsernameAsync(comment.UserId);
                     ViewModel.Comments.Add(comment);
                 }
             }
