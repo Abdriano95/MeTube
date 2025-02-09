@@ -66,6 +66,22 @@
         // POST
         public static string HistoryAddUrl = HistoryBaseUrl;
 
+        // History endpoints for Admin
+        public static string HistoryAdminBaseUrl = $"{BaseUrl}/History/admin";
+        // GET
+        public static string HistoryAdminGetByUserIdUrl(int userId) => $"{HistoryAdminBaseUrl}/user/{userId}";
+
+        // POST
+        public static string HistoryAdminAddUrl = HistoryAdminBaseUrl;
+
+        // PUT
+        public static string HistoryAdminUpdateUrl(int historyId) => $"{HistoryAdminBaseUrl}/{historyId}";
+
+        // DELETE
+        public static string HistoryAdminDeleteUrl(int historyId) => $"{HistoryAdminBaseUrl}/{historyId}";
+
+
+
 
 
     }

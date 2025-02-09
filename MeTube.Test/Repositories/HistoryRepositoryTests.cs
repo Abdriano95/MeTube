@@ -266,5 +266,83 @@ namespace MeTube.Test.Repositories
             // Assert
             Assert.Empty(result);
         }
+
+        [Fact]
+        public async Task GetHistoryWithRelationsAsync_ShouldReturnHistory()
+        {
+            // Arrange
+            var historyId = 1;
+            var history = new History { Id = 1, UserId = 1, VideoId = 1 };
+            _mockHistoryRepo.Setup(repo => repo.GetHistoryWithRelationsAsync(historyId)).ReturnsAsync(history);
+            // Act
+            var result = await _mockHistoryRepo.Object.GetHistoryWithRelationsAsync(historyId);
+            // Assert
+            Assert.Equal(history, result);
+        }
+
+        [Fact]
+        public async Task GetHistoryWithRelationsAsync_NonExistingHistory_ShouldReturnNull()
+        {
+            // Arrange
+            var historyId = 1;
+            History? history = null;
+            _mockHistoryRepo.Setup(repo => repo.GetHistoryWithRelationsAsync(historyId)).ReturnsAsync(history);
+            // Act
+            var result = await _mockHistoryRepo.Object.GetHistoryWithRelationsAsync(historyId);
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task GetHistoryWithRelationsAsync_ShouldReturnHistoryWithDetails()
+        {
+            // Arrange
+            var historyId = 1;
+            var history = new History { Id = 1, UserId = 1, VideoId = 1, Video = new Video { Id = 1, Title = "Video 1", Description = "Video description", Genre = "Video genre" } };
+            _mockHistoryRepo.Setup(repo => repo.GetHistoryWithRelationsAsync(historyId)).ReturnsAsync(history);
+            // Act
+            var result = await _mockHistoryRepo.Object.GetHistoryWithRelationsAsync(historyId);
+            // Assert
+            Assert.Equal(history, result);
+        }
+
+        [Fact]
+        public async Task GetHistoryWithRelationsAsync_NonExistingHistory_ShouldReturnNullWithDetails()
+        {
+            // Arrange
+            var historyId = 1;
+            History? history = null;
+            _mockHistoryRepo.Setup(repo => repo.GetHistoryWithRelationsAsync(historyId)).ReturnsAsync(history);
+            // Act
+            var result = await _mockHistoryRepo.Object.GetHistoryWithRelationsAsync(historyId);
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task GetHistoryWithRelationsAsync_ShouldReturnHistoryWithDetailsOrderedByDateWatched()
+        {
+            // Arrange
+            var historyId = 1;
+            var history = new History { Id = 1, UserId = 1, VideoId = 1, DateWatched = DateTime.UtcNow, Video = new Video { Id = 1, Title = "Video 1", Description = "Video description", Genre = "Video genre" } };
+            _mockHistoryRepo.Setup(repo => repo.GetHistoryWithRelationsAsync(historyId)).ReturnsAsync(history);
+            // Act
+            var result = await _mockHistoryRepo.Object.GetHistoryWithRelationsAsync(historyId);
+            // Assert
+            Assert.Equal(history, result);
+        }
+
+        [Fact]
+        public async Task GetHistoryWithRelationsAsync_NonExistingHistory_ShouldReturnNullWithDetailsOrderedByDateWatched()
+        {
+            // Arrange
+            var historyId = 1;
+            History? history = null;
+            _mockHistoryRepo.Setup(repo => repo.GetHistoryWithRelationsAsync(historyId)).ReturnsAsync(history);
+            // Act
+            var result = await _mockHistoryRepo.Object.GetHistoryWithRelationsAsync(historyId);
+            // Assert
+            Assert.Null(result);
+        }
     }
 }

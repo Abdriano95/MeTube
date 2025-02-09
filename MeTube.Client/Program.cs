@@ -56,6 +56,7 @@ namespace MeTube.Client
             builder.Services.AddScoped<ILikeService, LikeService>();
             builder.Services.AddScoped<IHistoryService, HistoryService>();
             builder.Services.AddScoped<ICommentService, CommentService>();
+            builder.Services.AddScoped<IAdminHistoryService, AdminHistoryService>();
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddAuthorizationCore();
