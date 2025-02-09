@@ -1,7 +1,12 @@
 # MeTube
 
 ## Description
-A simple YouTube-inspired web application that demonstrates core video streaming concepts—uploading, searching, and playing videos—while focusing on clean design and user-friendly interactions.
+This is our group project for our Object Oriented Design course.
+
+It's a simple YouTube-inspired web application that demonstrates core video streaming concepts—uploading, searching, and playing videos—while focusing on clean design and user-friendly interactions.
+
+Authors: Ali Behrooz, Ronnie, Abdulla Mehdi, Oskar, Sebastian Svensson - Loop Legion
+
 
 ## Table of Contents
 - [Documentation](#documentation)
