@@ -14,6 +14,8 @@ namespace MeTube.Test.ViewModels
     public class VideoViewModelTests
     {
         private readonly Mock<IVideoService> _mockVideoService;
+        private readonly Mock<IHistoryService> _mockHistoryService;
+
         private readonly Mock<ILikeService> _mockLikeService;
         private readonly Mock<IHistoryService> _mockHistoryService;
         private readonly Mock<NavigationManager> _mockNavigationManager;

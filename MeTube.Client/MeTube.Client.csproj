@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MeTube.Data\MeTube.Data.csproj" />
     <ProjectReference Include="..\MeTube.DTO\MeTube.DTO.csproj" />
   </ItemGroup>
 

@@ -8,6 +8,7 @@ namespace MeTube.Data.Repository
         IVideoRepository Videos { get; }
         ILikeRepository Likes { get; }
         IHistoryRepository Histories { get; }
+        ICommentRepository Comments { get; }
 
         Task<int> SaveChangesAsync();
 

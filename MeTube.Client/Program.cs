@@ -7,8 +7,6 @@ using MeTube.Client.ViewModels.ManageUsersViewModels;
 using MeTube.Client.ViewModels.SignupViewModels;
 using MeTube.Client.ViewModels.VideoViewModels;
 using MeTube.Client.Views;
-using MeTube.DTO;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,9 +51,11 @@ namespace MeTube.Client
 
             builder.Services.AddSingleton<ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
+            builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<IVideoService, VideoService>();
             builder.Services.AddScoped<ILikeService, LikeService>();
             builder.Services.AddScoped<IHistoryService, HistoryService>();
+            builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<IAdminHistoryService, AdminHistoryService>();
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();

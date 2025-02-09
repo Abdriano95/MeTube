@@ -1,9 +1,15 @@
-﻿namespace MeTube.Client.Models
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
+
+namespace MeTube.Client.Models
 {
-    public class Comment
+    public class Comment : ObservableObject
     {
-        public string Author { get; set; }
-        public string Text { get; set; }
-        public DateTime Date { get; set; }
+        public int Id { get; set; }
+        public int VideoId { get; set; }
+        public int UserId { get; set; }
+        public string Content { get; set; } = string.Empty;
+        public DateTime DateAdded { get; set; }
+        public string PosterUsername { get; set; }
     }
 }
