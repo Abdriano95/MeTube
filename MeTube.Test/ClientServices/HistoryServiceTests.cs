@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
-using MeTube.DTO;
+using MeTube.DTO.HistoryDTOs;
 using Microsoft.JSInterop;
 using Moq;
 using Moq.Protected;

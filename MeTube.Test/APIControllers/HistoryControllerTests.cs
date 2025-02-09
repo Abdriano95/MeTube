@@ -2,7 +2,7 @@
 using MeTube.API.Controllers;
 using MeTube.Data.Entity;
 using MeTube.Data.Repository;
-using MeTube.DTO;
+using MeTube.DTO.HistoryDTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
