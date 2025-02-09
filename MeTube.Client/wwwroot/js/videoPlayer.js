@@ -35,10 +35,10 @@
             if (err.code === 3) { // MEDIA_ERR_DECODE
                 console.log('Attempting to recover from decode error...');
 
-                // Försök ladda om videon
+                // Tries to load the video again
                 video.load();
 
-                // Vänta lite och försök spela
+                // Delay before playing the video
                 setTimeout(() => {
                     video.play().catch(playError => {
                         console.error('Failed to recover:', playError);
@@ -47,7 +47,7 @@
             }
         });
 
-        // Lägg till stöd för seeking
+        // Support for seeking
         video.addEventListener('seeking', () => {
             console.log('Seeking to:', video.currentTime);
         });
@@ -56,6 +56,7 @@
             console.log('Video can start playing');
         });
 
+        // support for loggin to user viewing history
         video.addEventListener('play', async () => {
             await dotNetHelper.invokeMethodAsync('HandleVideoPlay');
         });

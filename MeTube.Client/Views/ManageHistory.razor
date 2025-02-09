@@ -1,0 +1,123 @@
+﻿@page "/managehistory"
+@using MeTube.Client.ViewModels.HistoryViewModels
+@using MeTube.Client.Models
+@inject AdminHistoryViewModel ViewModel
+
+<h3>Manage History (Admin)</h3>
+
+<div class="mb-3">
+    <label class="form-label">User ID:</label>
+    <input type="number"
+           class="form-control"
+           @bind="ViewModel.SelectedUserId" />
+    <button class="btn btn-primary mt-2" @onclick="ViewModel.LoadHistoriesAsync">
+        Load Histories
+    </button>
+</div>
+
+@if (ViewModel.IsLoading)
+{
+    <p><strong>Loading...</strong></p>
+}
+else if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+{
+    <div class="alert alert-danger">@ViewModel.ErrorMessage</div>
+}
+else
+{
+    @if (ViewModel.Histories != null && ViewModel.Histories.Count > 0)
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>UserId</th>
+                    <th>UserName</th>
+                    <th>VideoId</th>
+                    <th>VideoTitle</th>
+                    <th>DateWatched</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ViewModel.Histories)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.UserId</td>
+                        <td>@item.UserName</td>
+                        <td>@item.VideoId</td>
+                        <td>@item.VideoTitle</td>
+                        <td>@item.DateWatched.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning"
+                                    @onclick="() => ViewModel.EditHistory(item)">
+                                Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger"
+                                    @onclick="() => ViewModel.DeleteHistoryAsync(item)">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No history found for user @ViewModel.SelectedUserId</p>
+    }
+}
+
+<hr />
+
+<h4>@(ViewModel.EditingHistory.Id == 0 ? "Create New" : "Update") History</h4>
+<div class="row">
+    <div class="col-md-3">
+        <label class="form-label">UserId</label>
+        <input type="number"
+               class="form-control"
+               @bind="ViewModel.EditingHistory.UserId" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">VideoId</label>
+        <input type="number"
+               class="form-control"
+               @bind="ViewModel.EditingHistory.VideoId" />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">DateWatched</label>
+        <input type="datetime-local"
+               class="form-control"
+               @bind="ViewModel.EditingHistory.DateWatched"
+               @bind:format="yyyy-MM-ddTHH:mm" />
+    </div>
+</div>
+<div class="mt-2">
+    @if (ViewModel.EditingHistory.Id == 0)
+    {
+        <!-- CREATE -->
+        <button class="btn btn-success" @onclick="ViewModel.CreateHistoryAsync">
+            Create
+        </button>
+    }
+    else
+    {
+        <!-- UPDATE -->
+        <button class="btn btn-primary" @onclick="ViewModel.UpdateHistoryAsync">
+            Update
+        </button>
+    }
+    <button class="btn btn-secondary ms-2" @onclick="ClearEditing">
+        Clear
+    </button>
+</div>
+
+@code {
+    private void ClearEditing()
+    {
+        // Återställ "EditingHistory"
+        ViewModel.EditingHistory = new HistoryAdmin();
+    }
+}
