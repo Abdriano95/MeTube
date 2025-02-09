@@ -25,9 +25,6 @@ namespace MeTube.API.Controllers
         public async Task<IActionResult> GetCommentsByVideo(int videoId)
         {
             var comments = await _unitOfWork.Comments.GetCommentsByVideoIdAsync(videoId);
-            if (!comments.Any())
-                return NotFound(new { Message = "No comments found for this video." });
-
             return Ok(_mapper.Map<IEnumerable<CommentDto>>(comments));
         }
 
@@ -67,6 +64,7 @@ namespace MeTube.API.Controllers
 
             var comment = new Comment
             {
+                Id = commentDto.Id,
                 VideoId = commentDto.VideoId,
                 UserId = userId,
                 Content = commentDto.Content,

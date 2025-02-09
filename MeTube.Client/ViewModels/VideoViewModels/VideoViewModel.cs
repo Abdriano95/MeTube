@@ -204,17 +204,21 @@ namespace MeTube.Client.ViewModels.VideoViewModels
 
         public async Task LoadCommentsAsync(int videoId)
         {
-            var commentDtos = await _commentService.GetCommentsByVideoIdAsync(videoId);
-            Comments.Clear();
-
-            if (commentDtos != null)
+            try
             {
+                var commentDtos = await _commentService.GetCommentsByVideoIdAsync(videoId);
+                Comments.Clear();
+
                 foreach (var commentDto in commentDtos)
                 {
                     var comment = _mapper.Map<Comment>(commentDto);
                     comment.PosterUsername = await _commentService.GetPosterUsernameAsync(comment.UserId);
                     Comments.Add(comment);
                 }
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                Comments.Clear();
             }
         }
 
