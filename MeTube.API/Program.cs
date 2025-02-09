@@ -119,6 +119,7 @@ namespace MeTube.API
             builder.Services.AddAutoMapper(typeof(UserProfile), typeof(VideoProfile));
             builder.Services.AddAutoMapper(typeof(LikeProfile));
             builder.Services.AddAutoMapper(typeof(CommentProfile));
+            builder.Services.AddAutoMapper(typeof(HistoryProfile));
 
             builder.Services.AddCors(options =>
             {

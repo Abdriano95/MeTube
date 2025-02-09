@@ -27,6 +27,8 @@ namespace MeTube.Client.Profiles
             .ForMember(dest => dest.Password, opt => opt.Ignore());
 
             CreateMap<User, LoginDto>().ReverseMap();
+
+            CreateMap<UserDetails, UserDetailsDto>().ReverseMap();
         }
     }
 }

@@ -10,21 +10,47 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
     public partial class AdminHistoryViewModel
     {
         private readonly IAdminHistoryService _adminHistoryService;
+        private readonly IUserService _userService;
+        private readonly IVideoService _videoService;
 
-        // 1) Constructor
-        public AdminHistoryViewModel(IAdminHistoryService adminHistoryService)
+        public AdminHistoryViewModel(
+            IAdminHistoryService adminHistoryService,
+            IUserService userService,
+            IVideoService videoService)
         {
             _adminHistoryService = adminHistoryService;
+            _userService = userService;
+            _videoService = videoService;
+
             Histories = new ObservableCollection<HistoryAdmin>();
-            EditingHistory = new HistoryAdmin();
+            EditingHistory = new HistoryAdmin
+            {
+                DateWatched = DateTime.Now
+            };
+
+            Users = new ObservableCollection<UserDetails>();
+            Videos = new ObservableCollection<Video>();
         }
 
-        // 2) Fields/Properties
+        // ------------------------------------------------------------------
+        // Collections och properties
+        // ------------------------------------------------------------------
+        [ObservableProperty]
+        private ObservableCollection<HistoryAdmin> _histories;
+
+        [ObservableProperty]
+        private ObservableCollection<UserDetails> _users;
+
+        [ObservableProperty]
+        private ObservableCollection<Video> _videos;
+
+        // I stället för att binda till en hel user, binder vi enbart mot Id
         [ObservableProperty]
         private int _selectedUserId;
 
+        // Samma för video
         [ObservableProperty]
-        private ObservableCollection<HistoryAdmin> _histories;
+        private int _selectedVideoId;
 
         [ObservableProperty]
         private HistoryAdmin _editingHistory;
@@ -35,14 +61,57 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         [ObservableProperty]
         private string _errorMessage;
 
-        // 3) Commands/Methods
+        [ObservableProperty]
+        private string _infoMessage;
 
-        /// <summary>
-        /// Load all history for given UserId.
-        /// </summary>
+        // Hjälpproperty: när vi behöver accessa det *faktiska* user-objektet
+        public UserDetails? SelectedUser => Users.FirstOrDefault(u => u.Id == SelectedUserId);
+
+        public Video? SelectedVideo => Videos.FirstOrDefault(v => v.Id == SelectedVideoId);
+
+        // ------------------------------------------------------------------
+        // Ladda all users och videos (vid sidstart)
+        // ------------------------------------------------------------------
+        [RelayCommand]
+        public async Task LoadAllUsersAndVideosAsync()
+        {
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = string.Empty;
+
+                Users.Clear();
+                var allUsers = await _userService.GetAllUsersDetailsAsync();
+                foreach (var u in allUsers)
+                    Users.Add(u);
+
+                Videos.Clear();
+                var allVideos = await _videoService.GetAllVideosAsync();
+                foreach (var v in allVideos)
+                    Videos.Add(v);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "Error loading users/videos: " + ex.Message;
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Ladda en användares historik
+        // ------------------------------------------------------------------
         [RelayCommand]
         public async Task LoadHistoriesAsync()
         {
+            if (SelectedUserId == 0)
+            {
+                ErrorMessage = "Please select a user first!";
+                return;
+            }
+
             try
             {
                 IsLoading = true;
@@ -57,7 +126,11 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
 
                 if (Histories.Count == 0)
                 {
-                    ErrorMessage = "No history found for this user or an error occurred.";
+                    InfoMessage = $"User {SelectedUserId} has no history records yet.";
+                }
+                else
+                {
+                    InfoMessage = string.Empty;
                 }
             }
             catch (Exception ex)
@@ -70,9 +143,9 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
             }
         }
 
-        /// <summary>
-        /// Create a new history-post (POST).
-        /// </summary>
+        // ------------------------------------------------------------------
+        // Skapa en ny post
+        // ------------------------------------------------------------------
         [RelayCommand]
         public async Task CreateHistoryAsync()
         {
@@ -81,7 +154,18 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
                 IsLoading = true;
                 ErrorMessage = string.Empty;
 
-                // Call AdminHistoryService
+                // Sätt user & video i EditingHistory
+                if (SelectedUser != null)
+                {
+                    EditingHistory.UserId = SelectedUser.Id;
+                    EditingHistory.UserName = SelectedUser.Username;
+                }
+                if (SelectedVideo != null)
+                {
+                    EditingHistory.VideoId = SelectedVideo.Id;
+                    EditingHistory.VideoTitle = SelectedVideo.Title;
+                }
+
                 var created = await _adminHistoryService.CreateHistoryAsync(EditingHistory);
                 if (created == null)
                 {
@@ -89,11 +173,13 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
                     return;
                 }
 
-                // Add to list
                 Histories.Add(created);
 
-                // Reset input
-                EditingHistory = new HistoryAdmin();
+                // Nollställ "EditingHistory"
+                EditingHistory = new HistoryAdmin
+                {
+                    DateWatched = DateTime.Now
+                };
             }
             catch (Exception ex)
             {
@@ -105,9 +191,9 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
             }
         }
 
-        /// <summary>
-        /// Update existing history-post (PUT).
-        /// </summary>
+        // ------------------------------------------------------------------
+        // Uppdatera en befintlig post
+        // ------------------------------------------------------------------
         [RelayCommand]
         public async Task UpdateHistoryAsync()
         {
@@ -116,34 +202,43 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
                 IsLoading = true;
                 ErrorMessage = string.Empty;
 
+                if (SelectedUser != null)
+                {
+                    EditingHistory.UserId = SelectedUser.Id;
+                    EditingHistory.UserName = SelectedUser.Username;
+                }
+                if (SelectedVideo != null)
+                {
+                    EditingHistory.VideoId = SelectedVideo.Id;
+                    EditingHistory.VideoTitle = SelectedVideo.Title;
+                }
+
                 bool success = await _adminHistoryService.UpdateHistoryAsync(EditingHistory);
                 if (!success)
                 {
-                    ErrorMessage = "Failed to update history. Possibly not found or server error.";
+                    ErrorMessage = "Failed to update history.";
                     return;
                 }
 
-                // Update local list
-                var index = Histories
-                    .ToList()
-                    .FindIndex(h => h.Id == EditingHistory.Id);
-
+                // Uppdatera i listan
+                var index = Histories.ToList().FindIndex(h => h.Id == EditingHistory.Id);
                 if (index >= 0)
                 {
-                    // Replace with a new copy (to trigger UI refresh)
                     Histories[index] = new HistoryAdmin
                     {
                         Id = EditingHistory.Id,
                         UserId = EditingHistory.UserId,
-                        VideoId = EditingHistory.VideoId,
                         UserName = EditingHistory.UserName,
+                        VideoId = EditingHistory.VideoId,
                         VideoTitle = EditingHistory.VideoTitle,
                         DateWatched = EditingHistory.DateWatched
                     };
                 }
 
-                // clear/edit-läget
-                EditingHistory = new HistoryAdmin();
+                EditingHistory = new HistoryAdmin
+                {
+                    DateWatched = DateTime.Now
+                };
             }
             catch (Exception ex)
             {
@@ -155,9 +250,9 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
             }
         }
 
-        /// <summary>
-        /// Remove history-post (DELETE).
-        /// </summary>
+        // ------------------------------------------------------------------
+        // Ta bort
+        // ------------------------------------------------------------------
         [RelayCommand]
         public async Task DeleteHistoryAsync(HistoryAdmin history)
         {
@@ -169,13 +264,11 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
                 bool success = await _adminHistoryService.DeleteHistoryAsync(history.Id);
                 if (!success)
                 {
-                    ErrorMessage = "Failed to delete history. Possibly not found or server error.";
+                    ErrorMessage = "Failed to delete history.";
                     return;
                 }
 
-                // Remove from the local list
                 Histories.Remove(history);
-
             }
             catch (Exception ex)
             {
@@ -187,20 +280,24 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
             }
         }
 
-        /// <summary>
-        /// Method for filling EditingHistory at "edit".
-        /// </summary>
+        // ------------------------------------------------------------------
+        // Börja "redigera" en vald post
+        // ------------------------------------------------------------------
         public void EditHistory(HistoryAdmin history)
         {
             EditingHistory = new HistoryAdmin
             {
                 Id = history.Id,
                 UserId = history.UserId,
-                VideoId = history.VideoId,
                 UserName = history.UserName,
+                VideoId = history.VideoId,
                 VideoTitle = history.VideoTitle,
                 DateWatched = history.DateWatched
             };
+
+            // Synka dropdowns: Sätt SelectedUserId, SelectedVideoId
+            SelectedUserId = history.UserId;
+            SelectedVideoId = history.VideoId;
         }
     }
 }
