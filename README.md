@@ -1,2 +1,2 @@
 # MeTube
-Me2b
+The video streaming service you always wanted!
