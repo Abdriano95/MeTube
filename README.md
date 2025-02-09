@@ -8,6 +8,22 @@ A simple YouTube-inspired web application that demonstrates core video streaming
 - [Application Architecture](#application-architecture)
 - [Screenshots](#screenshots)
 - [Sprints](#sprints)
+  - [Sprint 1](#sprint-1)
+    - [Planning](#planning-1)
+    - [Review](#review-1)
+    - [Retrospective](#retrospective-1)
+  - [Sprint 2](#sprint-2)
+    - [Planning](#planning-2)
+    - [Review](#review-2)
+    - [Retrospective](#retrospective-2)
+  - [Sprint 3](#sprint-3)
+    - [Planning](#planning-3)
+    - [Review](#review-3)
+    - [Retrospective](#retrospective-3)
+  - [Sprint 4](#sprint-4)
+    - [Planning](#planning-4)
+    - [Review](#review-4)
+    - [Retrospective](#retrospective-4)
 
 ## Documentation
 
