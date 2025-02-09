@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using Azure.Identity;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
 using MeTube.DTO;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System.Collections.ObjectModel;
 
 namespace MeTube.Client.ViewModels.VideoViewModels
@@ -28,6 +28,12 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         [ObservableProperty]
         private string _userRole = "Customer";
 
+        [ObservableProperty]
+        private bool _isEditingComment;
+
+        [ObservableProperty]
+        private Comment _commentToEdit;
+
         public VideoViewModel(IVideoService videoService, ICommentService commentService, UserService userService, NavigationManager navigationManager, IMapper mapper)
         {
             _videoService = videoService;
@@ -38,9 +44,6 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             Comments = new ObservableCollection<Comment>();
         }
 
-        /// <summary>
-        /// Returns true if the user is authenticated and not a "Customer".
-        /// </summary>
         public bool CanPostComment => IsAuthenticated && UserRole != "Customer";
 
         public async Task InitializeAsync()
@@ -61,6 +64,79 @@ namespace MeTube.Client.ViewModels.VideoViewModels
 
         public ObservableCollection<Comment> Comments { get; set; }
 
+        [ObservableProperty]
+        private string _newCommentText = string.Empty;
+
+        public async Task PostComment()
+        {
+            if (!string.IsNullOrWhiteSpace(NewCommentText))
+            {
+                try
+                {
+                    var newCommentDto = new CommentDto
+                    {
+                        VideoId = CurrentVideo.Id,
+                        UserId = 0, // this is checked in the API properly
+                        Content = NewCommentText,
+                        DateAdded = DateTime.Now
+                    };
+
+                    var postedComment = await _commentService.AddCommentAsync(newCommentDto);
+
+                    if (postedComment != null)
+                    {
+                        await LoadCommentsAsync(CurrentVideo.Id);
+                        NewCommentText = string.Empty;
+                        CommentErrorMessage = string.Empty;
+                    }
+                    else
+                    {
+                        CommentErrorMessage = "Failed to post your comment. Please try again.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CommentErrorMessage = "An error occurred while posting the comment. Please try again.";
+                    Console.Error.WriteLine($"Error posting comment: {ex.Message}");
+                }
+            }
+            else
+            {
+                CommentErrorMessage = "Comment cannot be empty.";
+            }
+        }
+
+        public void StartEditingComment(Comment comment)
+        {
+            CommentToEdit = comment;
+            IsEditingComment = true;
+        }
+
+        public async Task SaveCommentChanges()
+        {
+            if (!string.IsNullOrEmpty(CommentToEdit.Content))
+            {
+                await EditCommentAsync(CommentToEdit);
+                IsEditingComment = false;
+                await LoadCommentsAsync(CurrentVideo.Id);
+            }
+        }
+
+        public void CancelEdit()
+        {
+            IsEditingComment = false;
+        }
+
+        public async Task DeleteCommentWithConfirmation(Comment comment, IJSRuntime jsRuntime)
+        {
+            var confirmation = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this comment?");
+            if (confirmation)
+            {
+                await DeleteCommentAsync(comment);
+                await LoadCommentsAsync(CurrentVideo.Id);
+            }
+        }
+
         [RelayCommand]
         public async Task LoadVideoAsync(int videoId)
         {
@@ -73,7 +149,6 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                 if (CurrentVideo != null)
                 {
                     CurrentVideo.VideoUrl = Constants.VideoStreamUrl(videoId);
-                    // Load comments from the API
                     await LoadCommentsAsync(videoId);
                 }
                 else
@@ -92,7 +167,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             }
         }
 
-        private async Task LoadCommentsAsync(int videoId)
+        public async Task LoadCommentsAsync(int videoId)
         {
             var commentDtos = await _commentService.GetCommentsByVideoIdAsync(videoId);
             Comments.Clear();
@@ -105,7 +180,6 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                     comment.PosterUsername = await _commentService.GetPosterUsernameAsync(comment.UserId);
                     Comments.Add(comment);
                 }
-                Console.WriteLine($"Loaded {Comments.Count} comments for video {videoId}");
             }
         }
 
