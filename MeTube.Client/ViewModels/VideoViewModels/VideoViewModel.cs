@@ -14,12 +14,17 @@ namespace MeTube.Client.ViewModels.VideoViewModels
     {
         private readonly IVideoService _videoService;
         private readonly ILikeService _likeService;
+        private readonly IHistoryService _historyService;
         private readonly NavigationManager _navigationManager;
 
-        public VideoViewModel(IVideoService videoService, ILikeService likeService, NavigationManager navigationManager)
+        public VideoViewModel(IVideoService videoService, 
+                              ILikeService likeService, 
+                              NavigationManager navigationManager,
+                              IHistoryService historyService)
         {
             _videoService = videoService;
             _likeService = likeService;
+            _historyService = historyService;
             _navigationManager = navigationManager;
             Comments = new ObservableCollection<Comment>();
         }
@@ -137,5 +142,23 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                 OnPropertyChanged(nameof(ErrorMessage));
             }
         }
+
+        public async Task RecordHistoryAsync(int videoId)
+        {
+            try
+            {
+                History history = new History
+                {
+                    VideoId = videoId,
+                    DateWatched = DateTime.Now,
+                    VideoTitle = CurrentVideo.Title
+
+                };
+
+                await _historyService.AddHistoryAsync(history);
+            }
+            catch { } // quietly ignore errors
+        }
+
     }
 }

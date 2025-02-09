@@ -181,40 +181,34 @@ namespace MeTube.Test.APIControllers
         }
 
         [Fact]
-        public async Task RemoveLikesForVideo_ReturnsNoContent_WhenSuccessful()
+        public async Task RemoveLikeAsAdmin_ReturnsNoContent_WhenSuccessful()
         {
             // Arrange
-            int videoId = 1;
-            _mockUnitOfWork.Setup(uow => uow.Likes.RemoveLikesForVideoAsync(videoId))
-                .Returns(Task.CompletedTask);
-            _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync())
-                .ReturnsAsync(1);
+            int videoId = 1, userId = 2;
+            var like = new Like { VideoID = videoId, UserID = userId };
+            _mockUnitOfWork.Setup(uow => uow.Likes.GetLikeAsync(videoId, userId))
+                           .ReturnsAsync(like);
 
             // Act
-            var result = await _controller.RemoveLikesForVideo(videoId);
+            var result = await _controller.RemoveLikeAsAdmin(videoId, userId);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            _mockUnitOfWork.Verify(uow => uow.Likes.RemoveLikesForVideoAsync(videoId), Times.Once);
+            _mockUnitOfWork.Verify(uow => uow.Likes.RemoveLikeAsync(like), Times.Once);
             _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Once);
         }
 
         [Fact]
-        public async Task RemoveLikesForVideo_ReturnsBadRequest_WhenExceptionOccurs()
+        public async Task RemoveLikeAsAdmin_ReturnsNotFound_WhenLikeDoesNotExist()
         {
             // Arrange
-            int videoId = 1;
-            var errorMessage = "Failed to remove likes";
-            _mockUnitOfWork.Setup(uow => uow.Likes.RemoveLikesForVideoAsync(videoId))
-                .ThrowsAsync(new Exception(errorMessage));
-
+            int videoId = 1, userId = 2;
+            _mockUnitOfWork.Setup(uow => uow.Likes.GetLikeAsync(videoId, userId))
+                           .ReturnsAsync((Like)null);
             // Act
-            var result = await _controller.RemoveLikesForVideo(videoId);
-
+            var result = await _controller.RemoveLikeAsAdmin(videoId, userId);
             // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal(errorMessage, badRequestResult.Value);
-            _mockUnitOfWork.Verify(uow => uow.Likes.RemoveLikesForVideoAsync(videoId), Times.Once);
+            Assert.IsType<NotFoundObjectResult>(result);
         }
     }
 }

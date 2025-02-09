@@ -5,10 +5,12 @@ namespace MeTube.Data.Repository
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext context;
+
         private IDbContextTransaction _currentTransaction;
         public IUserRepository Users { get; private set; }
         public IVideoRepository Videos { get; private set; }
         public ILikeRepository Likes { get; private set; }
+        public IHistoryRepository Histories { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -16,6 +18,7 @@ namespace MeTube.Data.Repository
             Users = new UserRepository(context);
             Videos = new VideoRepository(context);
             Likes = new LikeRepository(context);
+            Histories = new HistoryRepository(context);
         }
         public void Dispose()
         {
