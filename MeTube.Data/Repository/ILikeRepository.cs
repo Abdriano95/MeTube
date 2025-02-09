@@ -16,5 +16,6 @@ namespace MeTube.Data.Repository
 
         // Removing likes for a video as an admin
         Task RemoveLikesForVideoAsync(int videoId);
+        Task<Like> GetLikeAsync(int videoId, int userId);
     }
 }

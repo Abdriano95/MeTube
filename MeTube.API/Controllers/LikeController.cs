@@ -131,21 +131,17 @@ namespace MeTube.API.Controllers
             }
         }
 
-        // DELETE: api/Like/video/{videoId}
+        // DELETE: api/Like/{videoId}/{userId}
         [Authorize(Roles = "Admin")]
-        [HttpDelete("video/{videoId}")]
-        public async Task<IActionResult> RemoveLikesForVideo(int videoId)
+        [HttpDelete("{videoId}/{userId}")]
+        public async Task<IActionResult> RemoveLikeAsAdmin(int videoId, int userId)
         {
-            try
-            {
-                await _unitOfWork.Likes.RemoveLikesForVideoAsync(videoId);
-                await _unitOfWork.SaveChangesAsync();
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var like = await _unitOfWork.Likes.GetLikeAsync(videoId, userId);
+            if (like == null)
+                return NotFound("Like not found");
+            await _unitOfWork.Likes.RemoveLikeAsync(like);
+            await _unitOfWork.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

@@ -41,6 +41,20 @@ namespace MeTube.API.Controllers
             return Ok(videoDtos);
         }
 
+
+        // GET: api/Video/username/{videoId}
+        [HttpGet("username/{videoId:int}")]
+        public async Task<IActionResult> GetUploaderUsername(int videoId)
+        {
+            var video = await _unitOfWork.Videos.GetVideoByIdAsync(videoId);
+            if (video == null)
+                return NotFound();
+            var uploader = await _unitOfWork.Users.GetUserByIdAsync(video.UserId);
+            if (uploader == null)
+                return NotFound();
+            return Ok(uploader.Username);
+        }
+
         // GET: api/Video/{id}
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetVideoById(int id)
