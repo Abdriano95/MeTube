@@ -104,12 +104,12 @@ namespace MeTube.Client.ViewModels.SignupViewModels
             var success = await _userService.RegisterUserAsync(newUser);
             if (!success)
             {
-                await _jsRuntime.InvokeAsync<bool>("alert", "Unable to signup!");
+                await _jsRuntime.InvokeVoidAsync("alert", "Unable to signup!");
                 return;
             }
             else
             {
-                await _jsRuntime.InvokeAsync<bool>("alert", "Account succesfully created!");
+                await _jsRuntime.InvokeVoidAsync("alert", "Account succesfully created!");
                 ClearAllFields();
                 _navigation.NavigateTo("/login", forceLoad: true);
             }
