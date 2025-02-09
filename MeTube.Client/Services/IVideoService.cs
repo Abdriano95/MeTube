@@ -13,7 +13,8 @@ namespace MeTube.Client.Services
 
         Task<Video?> UpdateVideoFileAsync(int videoId, Stream videoFileStream, string fileName);
         Task<Video?> UpdateVideoThumbnailAsync(int videoId, Stream thumbnailFileStream, string fileName);
-
+        Task<bool> ResetThumbnail(int videoId);
         Task<bool> DeleteVideoAsync(int videoId);
+        Task<string?> GetUploaderUsernameAsync(int videoId);
     }
 }

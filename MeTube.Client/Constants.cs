@@ -26,6 +26,7 @@
         public static string VideoGetByIdUrl(int id) => $"{VideoBaseUrl}/{id}"; // GET api/Video/{id}
         public static string VideoStreamUrl(int id) => $"{VideoBaseUrl}/stream/{id}"; // GET api/Video/stream/{id}
         public static string VideoGetByUserUrl = $"{VideoBaseUrl}/user"; // GET api/Video/user
+        public static string VideoGetUploaderUsernameUrl(int videoId) => $"{VideoBaseUrl}/username/{videoId}";
 
         // POST
         public static string VideoUploadUrl = VideoBaseUrl; // POST api/Video
@@ -38,6 +39,33 @@
 
         // DELETE
         public static string VideoDeleteUrl(int id) => $"{VideoBaseUrl}/{id}"; // DELETE api/Video/{id}
+
+        public static string LikeRemoveAdminUrl(int videoId, int userId) => $"{LikeBaseUrl}/{videoId}/{userId}";
+
+
+        // Like endpoints
+        public static string LikeBaseUrl = $"{BaseUrl}/Like";
+
+        // GET
+        public static string LikeGetAllUrl = LikeBaseUrl;
+        public static string LikeGetByVideoIdUrl(int videoId) => $"{LikeBaseUrl}/{videoId}";
+        public static string LikeGetForVideoUrl(int videoId) => $"{LikeBaseUrl}/video/{videoId}";
+
+        // POST
+        public static string LikeAddUrl = LikeBaseUrl;
+
+        // DELETE
+        public static string LikeRemoveUrl = LikeBaseUrl;
+
+        // History endpoints
+        public static string HistoryBaseUrl = $"{BaseUrl}/History";
+
+        // GET
+        public static string HistoryGetAllUrl = HistoryBaseUrl;
+
+        // POST
+        public static string HistoryAddUrl = HistoryBaseUrl;
+
 
 
     }

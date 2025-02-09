@@ -2,6 +2,7 @@
 using MeTube.Client.Models;
 using MeTube.DTO.VideoDTOs;
 using Microsoft.JSInterop;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -159,9 +160,11 @@ namespace MeTube.Client.Services
                 var content = new MultipartFormDataContent();
                 var thumbnailContent = new StreamContent(thumbnailFileStream);
                 thumbnailContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-                content.Add(thumbnailContent, "thumbnail", fileName);
+                content.Add(thumbnailContent, "thumbnailFile", fileName);
 
                 var response = await _httpClient.PutAsync(Constants.VideoUpdateThumbnailUrl(videoId), content);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
                 if (!response.IsSuccessStatusCode) return null;
 
                 var updatedDto = await response.Content.ReadFromJsonAsync<VideoDto>(_serializerOptions);
@@ -170,6 +173,26 @@ namespace MeTube.Client.Services
             catch
             {
                 return null;
+            }
+        }
+
+        public async Task<bool> ResetThumbnail(int videoId)
+        {
+            await AddAuthorizationHeader();
+            try
+            {
+                Uri uri = new Uri(Constants.VideoResetThumbnailUrl(videoId));
+
+                var response = await _httpClient.PutAsync(Constants.VideoResetThumbnailUrl(videoId), new StringContent(""));
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode) return false;
+
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -218,6 +241,20 @@ namespace MeTube.Client.Services
                 {
                     Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
                 }
+                return null;
+            }
+        }
+
+        public async Task<string?> GetUploaderUsernameAsync(int videoId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(Constants.VideoGetUploaderUsernameUrl(videoId));
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch
+            {
                 return null;
             }
         }

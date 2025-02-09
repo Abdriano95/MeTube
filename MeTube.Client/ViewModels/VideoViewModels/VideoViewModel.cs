@@ -7,6 +7,8 @@ using MeTube.DTO;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System.Collections.ObjectModel;
+using System.Net;
+using System.Xml.Linq;
 
 namespace MeTube.Client.ViewModels.VideoViewModels
 {
@@ -16,6 +18,8 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         private readonly IVideoService _videoService;
         private readonly ICommentService _commentService;
         private readonly UserService _userService;
+        private readonly ILikeService _likeService;
+        private readonly IHistoryService _historyService;
         private readonly NavigationManager _navigationManager;
         private readonly IMapper _mapper;
 
@@ -35,8 +39,14 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         private Comment _commentToEdit;
 
         public VideoViewModel(IVideoService videoService, ICommentService commentService, UserService userService, NavigationManager navigationManager, IMapper mapper)
+        public VideoViewModel(IVideoService videoService, 
+                              ILikeService likeService, 
+                              NavigationManager navigationManager,
+                              IHistoryService historyService)
         {
             _videoService = videoService;
+            _likeService = likeService;
+            _historyService = historyService;
             _commentService = commentService;
             _userService = userService;
             _navigationManager = navigationManager;
@@ -66,6 +76,17 @@ namespace MeTube.Client.ViewModels.VideoViewModels
 
         [ObservableProperty]
         private string _newCommentText = string.Empty;
+        [ObservableProperty]
+        private bool _hasUserLiked;
+
+        [ObservableProperty]
+        private int _likeCount;
+
+        [ObservableProperty]
+        private bool _showLoginPrompt;
+
+        [ObservableProperty]
+        private string _uploaderUsername;
 
         public async Task PostComment()
         {
@@ -138,6 +159,12 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         }
 
         [RelayCommand]
+        private void RedirectToLogin()
+        {
+            _navigationManager.NavigateTo("/login");
+        }
+
+        [RelayCommand]
         public async Task LoadVideoAsync(int videoId)
         {
             IsLoading = true;
@@ -155,7 +182,18 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                 {
                     ErrorMessage = "Video could not be found";
                     _navigationManager.NavigateTo("/");
+                    return;
                 }
+                CurrentVideo.VideoUrl = Constants.VideoStreamUrl(videoId);
+
+
+
+                UploaderUsername = await _videoService.GetUploaderUsernameAsync(videoId);
+                HasUserLiked = await _likeService.HasUserLikedVideoAsync(videoId);
+                LikeCount = await _likeService.GetLikeCountForVideoAsync(videoId);
+
+                // TODO: Hämta kommentarer från API
+                await LoadCommentsAsync(videoId);
             }
             catch (Exception ex)
             {
@@ -240,5 +278,55 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                 Console.Error.WriteLine($"Error deleting comment: {ex.Message}");
             }
         }
+
+        [RelayCommand]
+        public async Task ToggleLikeAsync()
+        {
+            try
+            {
+                bool success = HasUserLiked
+                    ? await _likeService.RemoveLikeAsync(CurrentVideo.Id)
+                    : await _likeService.AddLikeAsync(CurrentVideo.Id);
+
+                if (success)
+                {
+                    HasUserLiked = !HasUserLiked;
+                    LikeCount += HasUserLiked ? 1 : -1;
+                }
+                else
+                {
+                    ShowLoginPrompt = true;
+                    OnPropertyChanged(nameof(ShowLoginPrompt));
+                }
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                ShowLoginPrompt = true;
+                OnPropertyChanged(nameof(ShowLoginPrompt));
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"An error has occured: {ex.Message}";
+                OnPropertyChanged(nameof(ErrorMessage));
+            }
+        }
+
+        public async Task RecordHistoryAsync(int videoId)
+        {
+            try
+            {
+                History history = new History
+                {
+                    VideoId = videoId,
+                    DateWatched = DateTime.Now,
+                    VideoTitle = CurrentVideo.Title
+
+                };
+
+                await _historyService.AddHistoryAsync(history);
+            }
+            catch { } // quietly ignore errors
+        }
+
     }
 }

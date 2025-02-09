@@ -21,9 +21,15 @@ namespace MeTube.Data.Repository
             await Context.Set<TEntity>().AddAsync(entity);
         }
 
+        public async Task RemoveAsync(TEntity entity)
+        {
+            await Task.Run(() => Context.Set<TEntity>().Remove(entity));
+        }
+
         public void Delete(TEntity entity)
         {
             Context.Set<TEntity>().Remove(entity);
+            Context.SaveChanges();
         }
 
         public async Task<IEnumerable<TEntity>> GetAllAsync()

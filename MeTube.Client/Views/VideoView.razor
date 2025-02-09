@@ -1,11 +1,13 @@
 ﻿@page "/video/{VideoId:int}"
 @using MeTube.Client.Models
+@using MeTube.Client.ViewModels.VideoViewModels
 @using MeTube.Client.Services
 @using MeTube.DTO
 @inject VideoViewModel ViewModel
 @inject IJSRuntime JSRuntime
 @inject ICommentService CommentService
 @inject UserService UserService
+
 
 <link href="css/video_view.css" rel="stylesheet" />
 
@@ -31,6 +33,7 @@
             <div class="col-lg-8 col-md-12">
                 <div class="video-container">
                     <video id="videoPlayer"
+                           @ref="videoElement"
                            controls
                            class="video-player"
                            controlsList="nodownload"
@@ -48,11 +51,13 @@
                         <div>
                             <h4 class="fw-bold mb-0">@ViewModel.CurrentVideo.Title</h4>
                             <small class="text-muted">Uploaded @ViewModel.CurrentVideo.DateUploaded.ToString("dd MMM yyyy")</small>
+                            <small class="text-muted">By @ViewModel.UploaderUsername</small>
                         </div>
                         <div class="like-section">
-                            <button class="btn btn-outline-primary">
-                                <i class="bi bi-hand-thumbs-up"></i>
-                                <span>13</span>
+                            <button class="@(ViewModel.HasUserLiked ? "btn-primary liked" : "btn-outline-primary")"
+                                    @onclick="async () => await ViewModel.ToggleLikeAsync()">
+                                <i id="like-icon" class="bi bi-hand-thumbs-up-fill"></i>
+                                <span>@ViewModel.LikeCount</span>
                             </button>
                         </div>
                     </div>
@@ -141,11 +146,42 @@
     }
 </div>
 
+
+<!-- Log in prompt for unauthorized users -->
+@if (ViewModel.ShowLoginPrompt)
+{
+    <div class="modal-backdrop show"></div>
+    <div class="modal show" style="display:block">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login required</h5>
+                </div>
+                <div class="modal-body">
+                    <p>You have to logged in to be able to like videos</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => ViewModel.ShowLoginPrompt = false">Abort</button>
+                    <button class="btn btn-primary" @onclick="() => ViewModel.RedirectToLoginCommand.Execute(null)">Log in</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [Parameter]
     public int VideoId { get; set; }
 
     private string _newComment = string.Empty;
+
+    private bool videoLoaded = false;
+
+    private ElementReference videoElement;
+
+    private DotNetObjectReference<VideoView> _dotNetHelper;
+
+    private bool _historyRecorded;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -153,4 +189,51 @@
         await ViewModel.InitializeAsync();
         await ViewModel.LoadCommentsAsync(VideoId);
     }
+
+    private async Task OnVideoLoaded()
+    {
+        if (!videoLoaded)
+        {
+            videoLoaded = true;
+            await JSRuntime.InvokeVoidAsync("initializeVideoPlayer", videoElement);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                _dotNetHelper = DotNetObjectReference.Create(this);
+                await Task.Delay(100);
+                await JSRuntime.InvokeVoidAsync(
+                "initializeVideoPlayer",
+                _dotNetHelper 
+            );
+                await JSRuntime.InvokeVoidAsync("eval", "document.head.insertAdjacentHTML('beforeend', '<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\">')");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error initializing video player: {ex.Message}");
+            }
+        }
+    }
+
+    [JSInvokable]
+    public async Task HandleVideoPlay()
+    {
+        if (!_historyRecorded && ViewModel.CurrentVideo != null)
+        {
+            await ViewModel.RecordHistoryAsync(ViewModel.CurrentVideo.Id);
+            _historyRecorded = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        _dotNetHelper?.Dispose();
+    }
+
+    
 }

@@ -4,7 +4,7 @@ using Moq;
 
 namespace MeTube.Test
 {
-    public class UnitTest1
+    public class VideoTest
     {
         // Enhetstest för att kontrollera att ID inte genereras vid AddVideoWithoutSave
         [Fact]

@@ -10,5 +10,7 @@
         public string? ThumbnailUrl { get; set; }
         public DateTime DateUploaded { get; set; }
         public string UserId { get; set; }
+
+        public string? UploaderUsername { get; set; }
     }
 }

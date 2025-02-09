@@ -105,7 +105,7 @@ namespace MeTube.Data
                 entity.HasKey(l => new { l.VideoID, l.UserID });
 
                 // Relation with user
-                entity.HasOne(l => l.User).WithMany(u => u.Likes).HasForeignKey(l => l.UserID).IsRequired().OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(l => l.User).WithMany(u => u.Likes).HasForeignKey(l => l.UserID).IsRequired().OnDelete(DeleteBehavior.ClientCascade);
                 // Relation with video
                 entity.HasOne(l => l.Video).WithMany(v => v.Likes).HasForeignKey(l => l.VideoID).IsRequired().OnDelete(DeleteBehavior.Cascade);
             });

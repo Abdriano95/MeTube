@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
+using MeTube.DTO;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
@@ -11,6 +12,7 @@ namespace MeTube.Client.ViewModels
     public partial class EditVideoViewModel : ObservableValidator
     {
         private readonly IVideoService _videoService;
+        private readonly ILikeService _likeService;
         private readonly NavigationManager _navigationManager;
         private readonly IJSRuntime _jsRuntime;
 
@@ -18,13 +20,13 @@ namespace MeTube.Client.ViewModels
         private Video? currentVideo;
 
         [ObservableProperty]
-        [Required(ErrorMessage = "Title is required")]
-        [StringLength(100, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 100 characters")]
+        //[Required(ErrorMessage = "Title is required")]
+        [StringLength(100, MinimumLength = 0, ErrorMessage = "Title must be between 3 and 100 characters")]
         private string title = string.Empty;
 
         [ObservableProperty]
-        [Required(ErrorMessage = "Description is required")]
-        [StringLength(1000, MinimumLength = 10, ErrorMessage = "Description must be between 10 and 1000 characters")]
+        //[Required(ErrorMessage = "Description is required")]
+        [StringLength(1000, MinimumLength = 0, ErrorMessage = "Description must be between 10 and 1000 characters")]
         private string description = string.Empty;
 
         [ObservableProperty]
@@ -39,14 +41,31 @@ namespace MeTube.Client.ViewModels
         [ObservableProperty]
         private string errorMessage = string.Empty;
 
+        [ObservableProperty]
+        private IEnumerable<Like>? likes;
+
         public EditVideoViewModel(
             IVideoService videoService,
             NavigationManager navigationManager,
-            IJSRuntime jsRuntime)
+            IJSRuntime jsRuntime,
+            ILikeService likeService)
         {
             _videoService = videoService;
             _navigationManager = navigationManager;
             _jsRuntime = jsRuntime;
+            _likeService = likeService;
+        }
+
+        public async Task LoadLikesAsync(int videoId)
+        {
+            try
+            {
+                Likes = await _likeService.GetLikesForVideoManagementAsync(videoId);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "Failed to load likes: " + ex.Message;
+            }
         }
 
         public async Task LoadVideoAsync(int videoId)
@@ -57,6 +76,7 @@ namespace MeTube.Client.ViewModels
                 ErrorMessage = string.Empty;
 
                 CurrentVideo = await _videoService.GetVideoByIdAsync(videoId);
+                await LoadLikesAsync(videoId);
                 if (CurrentVideo != null)
                 {
                     Title = CurrentVideo.Title;
@@ -74,6 +94,30 @@ namespace MeTube.Client.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        public async Task RemoveLikeAsAdmin(int userId)
+        {
+            if (CurrentVideo == null) return;
+
+            try
+            {
+                var confirmed = await _jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this like?");
+                if (!confirmed) return;
+
+                var likeDto = new LikeDto
+                {
+                    VideoID = CurrentVideo.Id,
+                    UserID = userId
+                };
+
+                await _likeService.RemoveLikesForVideoAsync(CurrentVideo.Id, userId);
+                await LoadLikesAsync(CurrentVideo.Id);
+            }
+            catch (Exception)
+            {
+                ErrorMessage = "Failed to remove like.";
             }
         }
 
@@ -185,8 +229,16 @@ namespace MeTube.Client.ViewModels
                 if (!confirmed) return;
 
                 // Implementation needed based on your requirements
-                await _videoService.UpdateVideoAsync(CurrentVideo);
-                await _jsRuntime.InvokeVoidAsync("alert", "Reset to default thumbnail successful!");
+                bool resetOk = await _videoService.ResetThumbnail(CurrentVideo.Id);
+                if(resetOk)
+                {
+                    await _jsRuntime.InvokeVoidAsync("alert", "Reset to default thumbnail successful!");
+                    NewThumbnailFile = null;
+                    await LoadVideoAsync(CurrentVideo.Id);
+                }
+                else
+                    await _jsRuntime.InvokeVoidAsync("alert", "Reset to default thumbnail not successful!");
+
             }
             catch (Exception)
             {

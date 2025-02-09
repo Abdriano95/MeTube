@@ -31,16 +31,23 @@ namespace MeTube.Data.Repository
         // Ta bort videon
         public async Task DeleteVideo(Video video)
         {
-            var videoToDelete = await DbContext.Videos.Include(v => v.Comments).FirstOrDefaultAsync(v => v.Id == video.Id);
-            if (videoToDelete != null)
+            await using var transaction = await DbContext.Database.BeginTransactionAsync();
+            try
             {
-                // Delete related comments
-                DbContext.RemoveRange(videoToDelete.Comments);
-
-                // Delete the video
-                DbContext.Videos.Remove(videoToDelete);
+                await DbContext.Comments.Where(a => a.VideoId == video.Id).ExecuteDeleteAsync();
+                await DbContext.Histories.Where(b => b.VideoId == video.Id).ExecuteDeleteAsync();
+                await DbContext.Likes.Where(c => c.VideoID == video.Id).ExecuteDeleteAsync();
+                DbContext.Videos.Remove(video);
+                DbContext.SaveChanges();
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception("Kunde inte radera videon.", ex);
             }
         }
+
 
         public async Task<IEnumerable<Video>> GetAllVideosAsync()
         {
@@ -68,6 +75,14 @@ namespace MeTube.Data.Repository
         public void UpdateVideo(Video video)
         {
             DbContext.Videos.Update(video);
+        }
+
+        public async Task<string> GetVideoUploaderUsernameAsync(int videoId)
+        {
+            return await DbContext.Videos
+                .Where(v => v.Id == videoId)
+                .Select(v => v.User.Username)
+                .FirstOrDefaultAsync();
         }
     }
 }

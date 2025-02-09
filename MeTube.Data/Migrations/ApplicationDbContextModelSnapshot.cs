@@ -264,7 +264,7 @@ namespace MeTube.Data.Migrations
                     b.HasOne("MeTube.Data.Entity.User", "User")
                         .WithMany("Likes")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("MeTube.Data.Entity.Video", "Video")

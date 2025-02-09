@@ -1,6 +1,7 @@
 using MeTube.Client.Models;
 using MeTube.Client.Services;
 using MeTube.Client.ViewModels;
+using MeTube.Client.ViewModels.HistoryViewModels;
 using MeTube.Client.ViewModels.LoginViewModels;
 using MeTube.Client.ViewModels.ManageUsersViewModels;
 using MeTube.Client.ViewModels.SignupViewModels;
@@ -35,6 +36,7 @@ namespace MeTube.Client
             builder.Services.AddSingleton<ManageVideos>();
             builder.Services.AddSingleton<EditVideo>();
             builder.Services.AddSingleton<UploadVideo>();
+            builder.Services.AddSingleton<HistoryView>();
 
 
             builder.Services.AddTransient<SignupViewModel>();
@@ -45,19 +47,25 @@ namespace MeTube.Client
             builder.Services.AddTransient<ManageVideosViewModel>();
             builder.Services.AddTransient<EditVideoViewModel>();
             builder.Services.AddTransient<UploadVideoViewModel>();
+            builder.Services.AddTransient<UserHistoryViewModel>();
 
             builder.Services.AddSingleton<ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<IVideoService, VideoService>();
+            builder.Services.AddScoped<ILikeService, LikeService>();
+            builder.Services.AddScoped<IHistoryService, HistoryService>();
             builder.Services.AddScoped<ICommentService, CommentService>();
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddAuthorizationCore();
             builder.Services.AddAutoMapper(typeof(User));
             builder.Services.AddAutoMapper(typeof(Video));
+            builder.Services.AddAutoMapper(typeof(Like));
+            builder.Services.AddAutoMapper(typeof(History));
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
             builder.Services.AddTransient<HttpClient>();
+
             //builder.Services.AddSingleton<IHttpsClientHandlerService, HttpsClientHandlerService>();
 
             await builder.Build().RunAsync();
