@@ -38,9 +38,11 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         [ObservableProperty]
         private Comment _commentToEdit;
 
-        public VideoViewModel(IVideoService videoService, ICommentService commentService, UserService userService, NavigationManager navigationManager, IMapper mapper)
         public VideoViewModel(IVideoService videoService, 
-                              ILikeService likeService, 
+                              ILikeService likeService,
+                              ICommentService commentService,
+                              UserService userService,
+                              IMapper mapper,
                               NavigationManager navigationManager,
                               IHistoryService historyService)
         {
@@ -185,14 +187,9 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                     return;
                 }
                 CurrentVideo.VideoUrl = Constants.VideoStreamUrl(videoId);
-
-
-
                 UploaderUsername = await _videoService.GetUploaderUsernameAsync(videoId);
                 HasUserLiked = await _likeService.HasUserLikedVideoAsync(videoId);
                 LikeCount = await _likeService.GetLikeCountForVideoAsync(videoId);
-
-                // TODO: Hämta kommentarer från API
                 await LoadCommentsAsync(videoId);
             }
             catch (Exception ex)
