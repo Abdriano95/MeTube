@@ -31,6 +31,63 @@ Authors: Ali Behrooz, Ronnie, Abdulla Mehdi, Oskar, Sebastian Svensson - Loop Le
     - [Retrospective](#retrospective-4)
 
 ## Documentation
+This section contains step-by-step instructions for setting up the project on your local computer.
+
+### 1. Restore the database
+To ensure you have a clean installation, you first need to restore the database:
+
+#### 1.1 Remove migrations
+- Locate and remove all migration files in the project
+- Also remove the file `ApplicationDbContextModelSnapShot.cs`
+
+#### 1.2 Remove the database
+- Open SQL Server Object Explorer in Visual Studio (View -> SQL Server Object Explorer)
+- Go to (localdb)\MSSQLLocalDB
+- Expand the "Databases" dropdown
+- Expand the "MeTubeDB" dropdown
+- Right-click on the database
+- Choose "Delete"
+
+#### 1.3 Update the database
+- Open the Package Manager Console (Tools -> NuGet Package Manager -> Package Manager Console)
+- Right-click on MeTube.Data and select "Set as Start Up Project"
+- Run the command: `update-database`
+- Navigate to the gear icon next to the Start button and choose "new profile" (or the name you have assigned). This is so you can return to multiple startup projects.
+
+### 2. Update from master
+
+Retrieve the latest version from the master branch:
+```bash
+git pull origin master
+```
+Or in Visual Studio, select master and click the Pull button.
+
+
+### 3. Configure User Secrets
+
+This only needs to be done once on your local machine:
+
+1. Open Developer PowerShell:
+   - Go to `Tools -> Command Line -> Developer PowerShell`
+
+2. Navigate to the API project:
+   ```bash
+   cd MeTube.API
+   ```
+
+3. Initialize user secrets:
+   ```bash
+   dotnet user-secrets init
+   ```
+
+4. Configure Azure Storage settings:
+   ```bash
+   dotnet user-secrets set "AzureStorage:AccountName" "looplegionmetube20250129"
+   dotnet user-secrets set "AzureStorage:AccountKey" "xxxx"
+   ```
+   DISCLAIMER: Contact us for the Azure Storage key!
+
+After following these steps, the project should be properly configured and ready to run on your local machine.
 
 ## Application Architecture
 
@@ -46,6 +103,7 @@ Authors: Ali Behrooz, Ronnie, Abdulla Mehdi, Oskar, Sebastian Svensson - Loop Le
   - *User Story 3*: As a user, I want to be able to log out so that I'm logged out.
 
 #### Review
+
 
 #### Retrospective
 
