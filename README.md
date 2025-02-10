@@ -93,6 +93,41 @@ After following these steps, the project should be properly configured and ready
 ## Application Architecture
 
 ## Screenshots
+Screenshot of the Home page:
+
+![Home Page](./screenshots/home.png)
+
+It shows the video selection and the sidebar.
+
+Screenshot of the Login page:
+
+![Login Page](./screenshots/login.png)
+
+This is where you input you user information to login.
+
+Screenshot of the video viewing layout:
+
+![video Page](./screenshots/video.png)
+
+Our video layout, with a title, description, likes and a comment section.
+
+Screenshot of the Upload Video page:
+
+![Upload Page](./screenshots/upload.png)
+
+This is where you can upload your own videos.
+
+Screenshot of the Manage Video page:
+
+![Manage Page](./screenshots/manage.png)
+
+Here you can manage everything with your uploaded videos.
+
+Screenshot of the History page:
+
+![History Page](./screenshots/history.png)
+
+On this page you can see your entire video viewing history.
 
 ## Sprints
 
