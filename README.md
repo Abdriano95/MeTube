@@ -99,11 +99,13 @@ Screenshot of the Home page:
 
 It shows the video selection and the sidebar.
 
+
 Screenshot of the Login page:
 
 ![Login Page](./screenshots/login.png)
 
 This is where you input you user information to login.
+
 
 Screenshot of the video viewing layout:
 
@@ -111,17 +113,20 @@ Screenshot of the video viewing layout:
 
 Our video layout, with a title, description, likes and a comment section.
 
+
 Screenshot of the Upload Video page:
 
 ![Upload Page](./screenshots/upload.png)
 
 This is where you can upload your own videos.
 
+
 Screenshot of the Manage Video page:
 
 ![Manage Page](./screenshots/manage.png)
 
 Here you can manage everything with your uploaded videos.
+
 
 Screenshot of the History page:
 
@@ -139,9 +144,28 @@ On this page you can see your entire video viewing history.
   - *User Story 3*: As a user, I want to be able to log out so that I'm logged out.
 
 #### Review
+- **Completed**:
+  - *User Story 1*: Implementation of registration functionality (Sign-Up).
+- **Not Completed**:
+  - *User Story 2*: Implementation of login functionality (the connection between API and client).
+  - *User Story 3*: Implementation of logout functionality (not yet implemented).
+- **Issues**:
+  - Integration with the database took longer than expected.
+  - We had environment setup issues.
+  - Very short sprint period, only 3 days.
 
 
 #### Retrospective
+- **What went well**:
+  - Clear communication in daily stand-ups.
+  - Smooth process for defining user stories
+  - Good distribution of tasks
+  - Strong attendance and engagement
+- **What could be improved**:
+  - Unclear distribution of roles in certain parts of API development
+- **Amendments to process**:
+  - Reconsider role distribution and possibly adapt a more vertical working approach
+  - Formalize code review steps.
 
 ### Sprint 2
 #### Planning
@@ -154,8 +178,23 @@ On this page you can see your entire video viewing history.
   - *User Story 6*: As an unauthenticated or authenticated user, I want to view a list of video metadata, so that I can quickly determine which videos are of interest to me before deciding to watch or take further action.
 
 #### Review
+- **Completed**:
+  - *User Story 1*:
+- **Not Completed**:
+  - *User Story 2*:
+- **Issues**:
+  - 
+  - 
 
 #### Retrospective
+- **What went well**:
+  - 
+  - 
+- **What could be improved**:
+  - 
+- **Amendments to process**:
+  - 
+  - 
 
 ### Sprint 3
 #### Planning
@@ -168,8 +207,23 @@ On this page you can see your entire video viewing history.
   - *User Story 6*: As an admin I want to manage comments for videos so that I can edit or delete them.
 
 #### Review
+- **Completed**:
+  - *User Story 1*:
+- **Not Completed**:
+  - *User Story 2*:
+- **Issues**:
+  - 
+  - 
 
 #### Retrospective
+- **What went well**:
+  - 
+  - 
+- **What could be improved**:
+  - 
+- **Amendments to process**:
+  - 
+  - 
 
 ### Sprint 4
 #### Planning
@@ -179,5 +233,21 @@ On this page you can see your entire video viewing history.
   - *User Story 3*: As a user, I want videos to be recommended to me based on a simple recommendation algorithm so that I can discover and enjoy content that matches my interests.
 
 #### Review
+- **Completed**:
+  - *User Story 1*:
+- **Not Completed**:
+  - *User Story 2*: 
+- **Issues**:
+  - 
+  - 
+
 
 #### Retrospective
+- **What went well**:
+  - 
+  - 
+- **What could be improved**:
+  - 
+- **Amendments to process**:
+  - 
+  - 
