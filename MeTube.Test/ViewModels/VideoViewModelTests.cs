@@ -1,4 +1,5 @@
-﻿using MeTube.Client.Models;
+﻿using AutoMapper;
+using MeTube.Client.Models;
 using MeTube.Client.Services;
 using MeTube.Client.ViewModels.VideoViewModels;
 using Microsoft.AspNetCore.Components;
@@ -15,7 +16,9 @@ namespace MeTube.Test.ViewModels
     {
         private readonly Mock<IVideoService> _mockVideoService;
         private readonly Mock<IHistoryService> _mockHistoryService;
-
+        private readonly Mock<IUserService> _mockUserService;
+        private readonly Mock<ICommentService> _mockCommentService;
+        private readonly Mock<IMapper> _mockMapper;
         private readonly Mock<ILikeService> _mockLikeService;
         private readonly Mock<NavigationManager> _mockNavigationManager;
         private readonly VideoViewModel _viewModel;
@@ -25,8 +28,17 @@ namespace MeTube.Test.ViewModels
             _mockVideoService = new Mock<IVideoService>();
             _mockLikeService = new Mock<ILikeService>();
             _mockHistoryService = new Mock<IHistoryService>();
+            _mockUserService = new Mock<IUserService>();
+            _mockCommentService = new Mock<ICommentService>();
+            _mockMapper = new Mock<IMapper>();
             _mockNavigationManager = new Mock<NavigationManager>();
-            _viewModel = new VideoViewModel(_mockVideoService.Object, _mockLikeService.Object, _mockNavigationManager.Object, _mockHistoryService.Object);
+            _viewModel = new VideoViewModel(_mockVideoService.Object,
+                                            _mockLikeService.Object,
+                                            _mockCommentService.Object,
+                                            _mockUserService.Object as UserService,
+                                            _mockMapper.Object,
+                                            _mockNavigationManager.Object,
+                                            _mockHistoryService.Object);
         }
 
         [Fact]
