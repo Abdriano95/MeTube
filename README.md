@@ -14,21 +14,21 @@ Authors: Ali Behrooz, Ronnie, Abdulla Mehdi, Oskar, Sebastian Svensson - Loop Le
 - [Screenshots](#screenshots)
 - [Sprints](#sprints)
   - [Sprint 1](#sprint-1)
-    - [Planning](#planning-1)
-    - [Review](#review-1)
-    - [Retrospective](#retrospective-1)
+    - [Planning](#planning)
+    - [Review](#review)
+    - [Retrospective](#retrospective)
   - [Sprint 2](#sprint-2)
-    - [Planning](#planning-2)
-    - [Review](#review-2)
-    - [Retrospective](#retrospective-2)
+    - [Planning](#planning)
+    - [Review](#review)
+    - [Retrospective](#retrospective)
   - [Sprint 3](#sprint-3)
-    - [Planning](#planning-3)
-    - [Review](#review-3)
-    - [Retrospective](#retrospective-3)
+    - [Planning](#planning)
+    - [Review](#review)
+    - [Retrospective](#retrospective)
   - [Sprint 4](#sprint-4)
-    - [Planning](#planning-4)
-    - [Review](#review-4)
-    - [Retrospective](#retrospective-4)
+    - [Planning](#planning)
+    - [Review](#review)
+    - [Retrospective](#retrospective)
 
 ## Documentation
 This section contains step-by-step instructions for setting up the project on your local computer.
@@ -179,22 +179,33 @@ On this page you can see your entire video viewing history.
 - **Sprint Backlog**:
   - *User Story 1*: As a user, I want to be able to log out so that I'm logged out.
   - *User Story 2*: As an admin, I want to create, read, update, and delete user accounts so that I can manage users in the system.
-  - *User Story 3*: As an authenticated User I want to manage my videos so that I can upload and delete them.
+  - *User Story 3*: As an authenticated user I want to manage my videos so that I can upload and delete them.
   - *User Story 4*: As an unauthenticated and authenticated user I want to be able to access videos so that I can watch them.
   - *User Story 5*: As a user, I want metadata about the video to be stored in persistent storage when a video is uploaded and removed when the video is deleted, so that I can efficiently manage and retrieve video information.
   - *User Story 6*: As an unauthenticated or authenticated user, I want to view a list of video metadata, so that I can quickly determine which videos are of interest to me before deciding to watch or take further action.
 
 #### Review
 - **Completed**:
-  - *User Story 1*:
+  - *User Story 1*: Log out function implemented.
+  - *User Story 2*: Admin account and functionality created and able to use CRUD operations in account management.
+  - *User Story 3*: Video management and uploading functionality for users implemented.
+  - *User Story 4*: Viewing of video content implemented.
+  - *User Story 5*: Metadata implemented in the database and is deleted when video is deleted.
 - **Not Completed**:
-  - *User Story 2*:
+  - *User Story 6*: The client side still has CRUD functionality (list) left to implement.
 - **Issues**:
+  - Problems with working vertically.
 
 #### Retrospective
 - **What went well**:
+  - We basically managed to complete all user stories.
+  - We did a lot, in a very short time span.
 - **What could be improved**:
+  - We bit off more than we could chew.
+  - We should work on less user stories during our short sprints.
 - **Amendments to process**:
+  - Shorten the user stories during the next sprint.
+  - Put less user stories in the Sprint Backlog.
 
 ---
 
@@ -204,21 +215,38 @@ On this page you can see your entire video viewing history.
   - *User Story 1*: As an admin, I want to manage metadata so that I can create read update and delete metadata.
   - *User Story 2*: As an admin I want to manage videos so that I can upload, play, overwrite and delete videos.
   - *User Story 3*: As an authenticated user I want to be able to like a video so that I can show that I enjoyed it.
-  - *User Story 4*: As an Admin I want to manage likes for videos so that I can create, read, update and delete likes.
+  - *User Story 4*: As an admin I want to manage likes for videos so that I can create, read, update and delete likes.
   - *User Story 5*: As an authenticated user I want to be able to post comments on videos so i can share my thoughts and have discussions about them.
   - *User Story 6*: As an admin I want to manage comments for videos so that I can edit or delete them.
 
 #### Review
 - **Completed**:
-  - *User Story 1*:
+  - *User Story 1*: An admin now has full CRUD power for managing the metadata of all videos.
+  - *User Story 2*: An admin can now fully modify all videos and their contents.
+  - *User Story 3*: The ability to like a video and remove the like is fully functional and tied to every user.
+  - *User Story 4*: An admin has the ability to modify the likes of any video.
 - **Not Completed**:
-  - *User Story 2*:
+  - *User Story 5*: Need to implement the connection between the API and the client.
+  - *User Story 6*: Without the comment functionality fully implemented we couldnt start the development process for this user story.
 - **Issues**:
+  - We had worsened our communication during this sprint.
+  - We had less daily scrums this sprint.
+  - Many more user stories were incompleted.
 
 #### Retrospective
 - **What went well**:
+  - We developed a solid workflow with pull requests, linked to testing.
+  - Most of the work was completed.
+  - We assigned estimates for the user stories using Scrum Poker.
+  - We refrained from writing specific tasks for the user stories and will change that approach to defining a DoD (Definition of Done).
 - **What could be improved**:
+  - Better communication in the next sprint.
+  - More daily scrums.
+  - Make sure that we have less user stories in the sprint backlog.
 - **Amendments to process**:
+  - More frequent check-ins, at least two times during a sprint.
+  - Improve the pull request workflow.
+  - Change from tasks to DoD in issues.
 
 ---
 
