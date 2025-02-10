@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace MeTube.Client.ViewModels.HistoryViewModels
 {
@@ -12,6 +13,10 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         private readonly IAdminHistoryService _adminHistoryService;
         private readonly IUserService _userService;
         private readonly IVideoService _videoService;
+
+        // NY PROPERTY: TempDateWatched (frikopplad från EditingHistory)
+        [ObservableProperty]
+        private DateTime _tempDateWatched = DateTime.Now;
 
         public AdminHistoryViewModel(
             IAdminHistoryService adminHistoryService,
@@ -23,10 +28,9 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
             _videoService = videoService;
 
             Histories = new ObservableCollection<HistoryAdmin>();
-            EditingHistory = new HistoryAdmin
-            {
-                DateWatched = DateTime.Now
-            };
+
+            EditingHistory = new HistoryAdmin();
+            // TempDateWatched = DateTime.Now; // redan satt i fältdeklarationen
 
             Users = new ObservableCollection<UserDetails>();
             Videos = new ObservableCollection<Video>();
@@ -54,6 +58,9 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         private HistoryAdmin _editingHistory;
 
         [ObservableProperty]
+        private DateTime _editingDate = DateTime.Now;
+
+        [ObservableProperty]
         private bool _isLoading;
 
         [ObservableProperty]
@@ -63,11 +70,10 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         private string _infoMessage;
 
         public UserDetails? SelectedUser => Users.FirstOrDefault(u => u.Id == SelectedUserId);
-
         public Video? SelectedVideo => Videos.FirstOrDefault(v => v.Id == SelectedVideoId);
 
         // ------------------------------------------------------------------
-        // load all users and videos (at start)
+        // Ladda alla users och videos (vid sidstart)
         // ------------------------------------------------------------------
         [RelayCommand]
         public async Task LoadAllUsersAndVideosAsync()
@@ -76,6 +82,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
             {
                 IsLoading = true;
                 ErrorMessage = string.Empty;
+                InfoMessage = string.Empty;
 
                 Users.Clear();
                 var allUsers = await _userService.GetAllUsersDetailsAsync();
@@ -89,7 +96,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = "Error loading users/videos: " + ex.Message;
+                ErrorMessage = $"Error loading users/videos: {ex.Message}";
             }
             finally
             {
@@ -98,21 +105,23 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         }
 
         // ------------------------------------------------------------------
-        // load user history
+        // Ladda en användares historik
         // ------------------------------------------------------------------
         [RelayCommand]
         public async Task LoadHistoriesAsync()
         {
+            ErrorMessage = string.Empty;
+            InfoMessage = string.Empty;
+
             if (SelectedUserId == 0)
             {
-                ErrorMessage = "Please select a user first!";
+                InfoMessage = "Please select a user first!";
                 return;
             }
 
             try
             {
                 IsLoading = true;
-                ErrorMessage = string.Empty;
                 Histories.Clear();
 
                 var list = await _adminHistoryService.GetHistoryByUserAsync(SelectedUserId);
@@ -123,11 +132,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
 
                 if (Histories.Count == 0)
                 {
-                    InfoMessage = $"User {SelectedUserId} has no history records yet.";
-                }
-                else
-                {
-                    InfoMessage = string.Empty;
+                    InfoMessage = $"No history found for user {SelectedUser?.Username}.";
                 }
             }
             catch (Exception ex)
@@ -141,17 +146,19 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         }
 
         // ------------------------------------------------------------------
-        // Create new post
+        // Skapa en ny post (Create)
         // ------------------------------------------------------------------
         [RelayCommand]
         public async Task CreateHistoryAsync()
         {
+            ErrorMessage = string.Empty;
+            InfoMessage = string.Empty;
+
             try
             {
                 IsLoading = true;
-                ErrorMessage = string.Empty;
 
-                // Sätt user & video i EditingHistory
+                // 1) Sätt user & video
                 if (SelectedUser != null)
                 {
                     EditingHistory.UserId = SelectedUser.Id;
@@ -163,6 +170,18 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
                     EditingHistory.VideoTitle = SelectedVideo.Title;
                 }
 
+                // 2) Kopiera in vald tid
+                EditingHistory.DateWatched = EditingDate;
+
+                // 3) Validera
+                EditingHistory.ValidateAll();
+                if (EditingHistory.HasErrors)
+                {
+                    // Avbryt => fältfel visas i UI
+                    return;
+                }
+
+                // 4) Spara via server
                 var created = await _adminHistoryService.CreateHistoryAsync(EditingHistory);
                 if (created == null)
                 {
@@ -170,13 +189,14 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
                     return;
                 }
 
+                // 5) Lägg till i listan
                 Histories.Add(created);
 
+                // 6) Nollställ
+                EditingHistory = new HistoryAdmin();
+                TempDateWatched = DateTime.Now;
 
-                EditingHistory = new HistoryAdmin
-                {
-                    DateWatched = DateTime.Now
-                };
+                await LoadHistoriesAsync();
             }
             catch (Exception ex)
             {
@@ -189,16 +209,19 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         }
 
         // ------------------------------------------------------------------
-        // Update exisitng post
+        // Uppdatera befintlig post (Update)
         // ------------------------------------------------------------------
         [RelayCommand]
         public async Task UpdateHistoryAsync()
         {
+            ErrorMessage = string.Empty;
+            InfoMessage = string.Empty;
+
             try
             {
                 IsLoading = true;
-                ErrorMessage = string.Empty;
 
+                // 1) Sätt user & video
                 if (SelectedUser != null)
                 {
                     EditingHistory.UserId = SelectedUser.Id;
@@ -210,6 +233,17 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
                     EditingHistory.VideoTitle = SelectedVideo.Title;
                 }
 
+                // 2) Kopiera in vald tid
+                EditingHistory.DateWatched = EditingDate;
+
+                // 3) Validera
+                EditingHistory.ValidateAll();
+                if (EditingHistory.HasErrors)
+                {
+                    return;
+                }
+
+                // 4) Anropa server
                 bool success = await _adminHistoryService.UpdateHistoryAsync(EditingHistory);
                 if (!success)
                 {
@@ -217,7 +251,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
                     return;
                 }
 
-                // update in collection
+                // 5) Uppdatera i listan
                 var index = Histories.ToList().FindIndex(h => h.Id == EditingHistory.Id);
                 if (index >= 0)
                 {
@@ -232,10 +266,9 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
                     };
                 }
 
-                EditingHistory = new HistoryAdmin
-                {
-                    DateWatched = DateTime.Now
-                };
+                // 6) Rensa
+                EditingHistory = new HistoryAdmin();
+                TempDateWatched = DateTime.Now;
             }
             catch (Exception ex)
             {
@@ -248,15 +281,17 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         }
 
         // ------------------------------------------------------------------
-        // Deleteq post
+        // Ta bort
         // ------------------------------------------------------------------
         [RelayCommand]
         public async Task DeleteHistoryAsync(HistoryAdmin history)
         {
+            ErrorMessage = string.Empty;
+            InfoMessage = string.Empty;
+
             try
             {
                 IsLoading = true;
-                ErrorMessage = string.Empty;
 
                 bool success = await _adminHistoryService.DeleteHistoryAsync(history.Id);
                 if (!success)
@@ -278,7 +313,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         }
 
         // ------------------------------------------------------------------
-        // Start "edit mode" for a post
+        // Redigera en vald post
         // ------------------------------------------------------------------
         public void EditHistory(HistoryAdmin history)
         {
@@ -292,9 +327,12 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
                 DateWatched = history.DateWatched
             };
 
-            // Sync drowdowns
+            // Sätt dropdowns
             SelectedUserId = history.UserId;
             SelectedVideoId = history.VideoId;
+
+            // Sätt temp-datumet till det befintliga
+            EditingDate = history.DateWatched;
         }
     }
 }

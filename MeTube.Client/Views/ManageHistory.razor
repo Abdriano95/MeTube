@@ -1,6 +1,7 @@
 ﻿@page "/managehistory"
 @using MeTube.Client.ViewModels.HistoryViewModels
 @using MeTube.Client.Models
+@using System.ComponentModel.DataAnnotations;
 @inject AdminHistoryViewModel ViewModel
 
 <h3>Manage History (Admin)</h3>
@@ -11,77 +12,30 @@
 }
 else
 {
-    <!-- Load All Users & Videos -->
-    <button class="btn btn-secondary mb-3"
-            @onclick="ViewModel.LoadAllUsersAndVideosAsync">
-        Load All Users & Videos
-    </button>
-
-    <!-- 1) Choose user from dropdown to see history -->
-    <div class="mb-3">
-        <label>Select User:</label>
-        <select class="form-select"
-                @bind="ViewModel.SelectedUserId">
-            <option value="0">-- Choose user --</option>
-            @foreach (var usr in ViewModel.Users)
-            {
-                <option value="@usr.Id">@usr.Username</option>
-            }
-        </select>
-        <button class="btn btn-primary ms-2" @onclick="ViewModel.LoadHistoriesAsync">
-            Load Histories
-        </button>
-    </div>
-
-    <!-- 2) Display Histories in a table -->
-    @if (ViewModel.Histories.Any())
+    @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
     {
-        <table class="table table-hover mt-3">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>UserName</th>
-                    <th>VideoTitle</th>
-                    <th>DateWatched</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var history in ViewModel.Histories)
-                {
-                    <tr>
-                        <td>@history.Id</td>
-                        <td>@history.UserName</td>
-                        <td>@history.VideoTitle</td>
-                        <td>@history.DateWatched.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning"
-                                    @onclick="() => ViewModel.EditHistory(history)">
-                                Edit
-                            </button>
-                            <button class="btn btn-sm btn-danger"
-                                    @onclick="() => ViewModel.DeleteHistoryAsync(history)">
-                                Delete
-                            </button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="alert alert-danger">@ViewModel.ErrorMessage</div>
+        <button class="btn btn-secondary" @onclick="ClearAllMessages">
+            Back
+        </button>
+    }
+    else if (!string.IsNullOrEmpty(ViewModel.InfoMessage))
+    {
+        <div class="alert alert-info">@ViewModel.InfoMessage</div>
+        <button class="btn btn-secondary" @onclick="ClearAllMessages">
+            OK
+        </button>
     }
     else
     {
-        <p>No history loaded yet, or the user has no history records.</p>
-    }
+        <button class="btn btn-secondary mb-3"
+                @onclick="ViewModel.LoadAllUsersAndVideosAsync">
+            Load All Users & Videos
+        </button>
 
-    <hr />
-
-    <!-- 3) Form for Create/Update -->
-    <h5>@(ViewModel.EditingHistory.Id == 0 ? "Create New" : "Update") History</h5>
-
-    <div class="row mb-2">
-        <div class="col-md-4">
-            <label>User:</label>
+        <!-- 1) Choose user -->
+        <div class="mb-3">
+            <label>Select User:</label>
             <select class="form-select"
                     @bind="ViewModel.SelectedUserId">
                 <option value="0">-- Choose user --</option>
@@ -90,63 +44,161 @@ else
                     <option value="@usr.Id">@usr.Username</option>
                 }
             </select>
-        </div>
-        <div class="col-md-4">
-            <label>Video:</label>
-            <select class="form-select"
-                    @bind="ViewModel.SelectedVideoId">
-                <option value="0">-- Choose video --</option>
-                @foreach (var vid in ViewModel.Videos)
-                {
-                    <option value="@vid.Id">@vid.Title</option>
-                }
-            </select>
-        </div>
-        <div class="col-md-4">
-            <label>DateWatched:</label>
-            <input type="datetime-local"
-                   class="form-control"
-                   @bind="ViewModel.EditingHistory.DateWatched"
-                   @bind:format="yyyy-MM-ddTHH:mm" />
-        </div>
-    </div>
 
-    <div>
-        @if (ViewModel.EditingHistory.Id == 0)
-        {
-            <!-- CREATE -->
-            <button class="btn btn-success" @onclick="ViewModel.CreateHistoryAsync">
-                Create
+            <!-- Visa fel för UserId -->
+            @if (ViewModel.EditingHistory.GetErrors(nameof(HistoryAdmin.UserId))
+           is IEnumerable<ValidationResult> userIdErrors
+           && userIdErrors.Any())
+            {
+                <ul class="text-danger">
+                    @foreach (var err in userIdErrors)
+                    {
+                        <li>@err.ErrorMessage</li>
+                    }
+                </ul>
+            }
+
+            <button class="btn btn-primary mt-2" @onclick="ViewModel.LoadHistoriesAsync">
+                Load Histories
             </button>
+        </div>
+
+        <!-- TABLE: Histories etc. -->
+        @if (ViewModel.Histories.Any())
+        {
+            <table class="table table-hover mt-3">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>UserName</th>
+                        <th>VideoTitle</th>
+                        <th>DateWatched</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var history in ViewModel.Histories)
+                    {
+                        <tr>
+                            <td>@history.Id</td>
+                            <td>@history.UserName</td>
+                            <td>@history.VideoTitle</td>
+                            <td>@history.DateWatched.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning"
+                                        @onclick="() => ViewModel.EditHistory(history)">
+                                    Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger"
+                                        @onclick="() => ViewModel.DeleteHistoryAsync(history)">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         }
         else
         {
-            <!-- UPDATE -->
-            <button class="btn btn-primary" @onclick="ViewModel.UpdateHistoryAsync">
-                Update
-            </button>
+            <p>No history loaded yet, or the user has no history records.</p>
         }
-        <button class="btn btn-secondary ms-2" @onclick="ClearEditing">
-            Clear
-        </button>
-    </div>
+
+        <hr />
+
+        <!-- 3) Form for Create/Update -->
+        <h5>@(ViewModel.EditingHistory.Id == 0 ? "Create New" : "Update") History</h5>
+
+        <div class="row mb-2">
+            <div class="col-md-4">
+                <label>User:</label>
+                <select class="form-select" @bind="ViewModel.SelectedUserId">
+                    <option value="0">-- Choose user --</option>
+                    @foreach (var usr in ViewModel.Users)
+                    {
+                        <option value="@usr.Id">@usr.Username</option>
+                    }
+                </select>
+                <!-- Visa fel för "UserId" ... (oförändrat) -->
+            </div>
+
+            <div class="col-md-4">
+                <label>Video:</label>
+                <select class="form-select" @bind="ViewModel.SelectedVideoId">
+                    <option value="0">-- Choose video --</option>
+                    @foreach (var vid in ViewModel.Videos)
+                    {
+                        <option value="@vid.Id">@vid.Title</option>
+                    }
+                </select>
+                <!-- Visa fel för "VideoId" ... -->
+            </div>
+
+            <div class="col-md-4">
+                <label>DateWatched:</label>
+                <!-- NYTT: vi binder mot TempDateWatched, inte EditingHistory.DateWatched -->
+                <input type="datetime-local"
+                       class="form-control"
+                       @bind-value="ViewModel.EditingDate"
+                       @bind-value:format="yyyy-MM-ddTHH:mm"
+                       @bind-value:event="onchange" />
+
+                <!-- Fel för DateWatched (från EditingHistory)
+                     visas först EFTER vi kopierat över TempDateWatched
+                     och kört ValidateAll() i "Create" / "Update" -->
+                @if (ViewModel.EditingHistory.GetErrors(nameof(HistoryAdmin.DateWatched))
+               is IEnumerable<ValidationResult> dateErrors
+               && dateErrors.Any())
+                {
+                    <ul class="text-danger">
+                        @foreach (var err in dateErrors)
+                        {
+                            <li>@err.ErrorMessage</li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <div>
+            @if (ViewModel.EditingHistory.Id == 0)
+            {
+                <button class="btn btn-success" @onclick="ViewModel.CreateHistoryAsync">
+                    Create
+                </button>
+            }
+            else
+            {
+                <button class="btn btn-primary" @onclick="ViewModel.UpdateHistoryAsync">
+                    Update
+                </button>
+            }
+            <button class="btn btn-secondary ms-2" @onclick="ClearEditing">
+                Clear
+            </button>
+        </div>
+    }
 }
 
 @code {
     protected override async Task OnInitializedAsync()
     {
-        // load all users and videos
         await ViewModel.LoadAllUsersAndVideosAsync();
     }
 
     private void ClearEditing()
     {
         ViewModel.EditingHistory = new HistoryAdmin
-            {
-                DateWatched = DateTime.Now
-            };
+         {
+             DateWatched = DateTime.Now
+        };
         ViewModel.SelectedUserId = 0;
         ViewModel.SelectedVideoId = 0;
     }
 
+    private void ClearAllMessages()
+    {
+        ViewModel.ErrorMessage = string.Empty;
+        ViewModel.InfoMessage = string.Empty;
+    }
 }
