@@ -207,10 +207,7 @@
             {
                 _dotNetHelper = DotNetObjectReference.Create(this);
                 await Task.Delay(100);
-                await JSRuntime.InvokeVoidAsync(
-                "initializeVideoPlayer",
-                _dotNetHelper 
-            );
+                await JSRuntime.InvokeVoidAsync("initializeVideoPlayer", _dotNetHelper);
                 await JSRuntime.InvokeVoidAsync("eval", "document.head.insertAdjacentHTML('beforeend', '<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\">')");
             }
             catch (Exception ex)
@@ -223,12 +220,21 @@
     [JSInvokable]
     public async Task HandleVideoPlay()
     {
-        if (!_historyRecorded && ViewModel.CurrentVideo != null)
+        try
         {
-            await ViewModel.RecordHistoryAsync(ViewModel.CurrentVideo.Id);
-            _historyRecorded = true;
+            if (!_historyRecorded && ViewModel.CurrentVideo != null)
+            {
+                await ViewModel.RecordHistoryAsync(ViewModel.CurrentVideo.Id);
+                _historyRecorded = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in HandleVideoPlay: {ex}");
+            throw; // rethrow if you still want it to propagate to JS
         }
     }
+
 
     public void Dispose()
     {
