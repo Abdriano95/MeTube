@@ -112,40 +112,59 @@ else
         <div class="row mb-2">
             <div class="col-md-4">
                 <label>User:</label>
-                <select class="form-select" @bind="ViewModel.SelectedUserId">
+                <select class="form-select"
+                        @bind="ViewModel.SelectedUserId">
                     <option value="0">-- Choose user --</option>
                     @foreach (var usr in ViewModel.Users)
                     {
                         <option value="@usr.Id">@usr.Username</option>
                     }
                 </select>
-                <!-- Visa fel för "UserId" ... (oförändrat) -->
+
+                @if (ViewModel.EditingHistory.GetErrors(nameof(HistoryAdmin.UserId))
+               is IEnumerable<ValidationResult> userErrors
+               && userErrors.Any())
+                {
+                    <ul class="text-danger">
+                        @foreach (var err in userErrors)
+                        {
+                            <li>@err.ErrorMessage</li>
+                        }
+                    </ul>
+                }
             </div>
 
             <div class="col-md-4">
                 <label>Video:</label>
-                <select class="form-select" @bind="ViewModel.SelectedVideoId">
+                <select class="form-select"
+                        @bind="ViewModel.SelectedVideoId">
                     <option value="0">-- Choose video --</option>
                     @foreach (var vid in ViewModel.Videos)
                     {
                         <option value="@vid.Id">@vid.Title</option>
                     }
                 </select>
-                <!-- Visa fel för "VideoId" ... -->
+
+                @if (ViewModel.EditingHistory.GetErrors(nameof(HistoryAdmin.VideoId))
+               is IEnumerable<ValidationResult> videoErrors
+               && videoErrors.Any())
+                {
+                    <ul class="text-danger">
+                        @foreach (var err in videoErrors)
+                        {
+                            <li>@err.ErrorMessage</li>
+                        }
+                    </ul>
+                }
             </div>
 
             <div class="col-md-4">
                 <label>DateWatched:</label>
-                <!-- NYTT: vi binder mot TempDateWatched, inte EditingHistory.DateWatched -->
                 <input type="datetime-local"
                        class="form-control"
-                       @bind-value="ViewModel.EditingDate"
-                       @bind-value:format="yyyy-MM-ddTHH:mm"
-                       @bind-value:event="onchange" />
+                       value="@ViewModel.EditingHistory.DateWatched.ToString("yyyy-MM-ddTHH:mm")"
+                       @onchange="@(e => HandleDateChange(e))" />
 
-                <!-- Fel för DateWatched (från EditingHistory)
-                     visas först EFTER vi kopierat över TempDateWatched
-                     och kört ValidateAll() i "Create" / "Update" -->
                 @if (ViewModel.EditingHistory.GetErrors(nameof(HistoryAdmin.DateWatched))
                is IEnumerable<ValidationResult> dateErrors
                && dateErrors.Any())
@@ -189,9 +208,9 @@ else
     private void ClearEditing()
     {
         ViewModel.EditingHistory = new HistoryAdmin
-         {
-             DateWatched = DateTime.Now
-        };
+            {
+                DateWatched = DateTime.Now
+            };
         ViewModel.SelectedUserId = 0;
         ViewModel.SelectedVideoId = 0;
     }
@@ -200,5 +219,13 @@ else
     {
         ViewModel.ErrorMessage = string.Empty;
         ViewModel.InfoMessage = string.Empty;
+    }
+
+    private void HandleDateChange(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out DateTime newDate))
+        {
+            ViewModel.EditingHistory.DateWatched = newDate;
+        }
     }
 }

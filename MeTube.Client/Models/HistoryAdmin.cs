@@ -14,7 +14,7 @@ namespace MeTube.Client.Models
         public int VideoId { get; set; }
 
         [Required(ErrorMessage = "DateWatched is required.")]
-        public DateTime DateWatched { get; set; }
+        public DateTime DateWatched { get; set; } = DateTime.Now;
 
         public string UserName { get; set; } = string.Empty;
         public string VideoTitle { get; set; } = string.Empty;
