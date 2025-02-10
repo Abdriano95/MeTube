@@ -14,21 +14,9 @@ Authors: Ali Behrooz, Ronnie, Abdulla Mehdi, Oskar, Sebastian Svensson - Loop Le
 - [Screenshots](#screenshots)
 - [Sprints](#sprints)
   - [Sprint 1](#sprint-1)
-    - [Planning](#planning)
-    - [Review](#review)
-    - [Retrospective](#retrospective)
   - [Sprint 2](#sprint-2)
-    - [Planning](#planning)
-    - [Review](#review)
-    - [Retrospective](#retrospective)
   - [Sprint 3](#sprint-3)
-    - [Planning](#planning)
-    - [Review](#review)
-    - [Retrospective](#retrospective)
   - [Sprint 4](#sprint-4)
-    - [Planning](#planning)
-    - [Review](#review)
-    - [Retrospective](#retrospective)
 
 ## Documentation
 This section contains step-by-step instructions for setting up the project on your local computer.
