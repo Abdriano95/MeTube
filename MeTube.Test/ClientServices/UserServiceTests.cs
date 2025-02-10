@@ -26,11 +26,9 @@ namespace MeTube.Test.ClientServices
             _mockClientService = new Mock<IClientService>();
             _mockJsRuntime = new Mock<IJSRuntime>();
             _mockMapper = new Mock<IMapper>();
-            _httpClient = new HttpClient(); // Ingen HttpMock behövs här
+            _httpClient = new HttpClient();
 
-            // Skapa UserService med mockad ClientService
-            _userService = new UserService(_mockClientService.Object, _mockJsRuntime.Object, _httpClient);
-            // ✅ Skapa UserService med en mockad ClientService
+            //_userService = new UserService(_mockClientService.Object, _mockJsRuntime.Object, _httpClient);
             _clientService = new ClientService(_httpClient, _mockMapper.Object, _mockJsRuntime.Object);
 
 
