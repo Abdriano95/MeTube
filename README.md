@@ -183,18 +183,11 @@ On this page you can see your entire video viewing history.
 - **Not Completed**:
   - *User Story 2*:
 - **Issues**:
-  - 
-  - 
 
 #### Retrospective
 - **What went well**:
-  - 
-  - 
 - **What could be improved**:
-  - 
 - **Amendments to process**:
-  - 
-  - 
 
 ### Sprint 3
 #### Planning
@@ -212,18 +205,11 @@ On this page you can see your entire video viewing history.
 - **Not Completed**:
   - *User Story 2*:
 - **Issues**:
-  - 
-  - 
 
 #### Retrospective
 - **What went well**:
-  - 
-  - 
 - **What could be improved**:
-  - 
 - **Amendments to process**:
-  - 
-  - 
 
 ### Sprint 4
 #### Planning
@@ -238,16 +224,9 @@ On this page you can see your entire video viewing history.
 - **Not Completed**:
   - *User Story 2*: 
 - **Issues**:
-  - 
-  - 
 
 
 #### Retrospective
 - **What went well**:
-  - 
-  - 
 - **What could be improved**:
-  - 
 - **Amendments to process**:
-  - 
-  - 
