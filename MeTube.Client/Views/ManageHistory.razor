@@ -135,7 +135,7 @@ else
 @code {
     protected override async Task OnInitializedAsync()
     {
-        // Ladda all users/videos när sidan körs första gången
+        // load all users and videos
         await ViewModel.LoadAllUsersAndVideosAsync();
     }
 

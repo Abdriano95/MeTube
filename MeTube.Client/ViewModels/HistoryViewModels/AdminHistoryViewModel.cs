@@ -44,11 +44,9 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         [ObservableProperty]
         private ObservableCollection<Video> _videos;
 
-        // I stället för att binda till en hel user, binder vi enbart mot Id
         [ObservableProperty]
         private int _selectedUserId;
 
-        // Samma för video
         [ObservableProperty]
         private int _selectedVideoId;
 
@@ -64,13 +62,12 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         [ObservableProperty]
         private string _infoMessage;
 
-        // Hjälpproperty: när vi behöver accessa det *faktiska* user-objektet
         public UserDetails? SelectedUser => Users.FirstOrDefault(u => u.Id == SelectedUserId);
 
         public Video? SelectedVideo => Videos.FirstOrDefault(v => v.Id == SelectedVideoId);
 
         // ------------------------------------------------------------------
-        // Ladda all users och videos (vid sidstart)
+        // load all users and videos (at start)
         // ------------------------------------------------------------------
         [RelayCommand]
         public async Task LoadAllUsersAndVideosAsync()
@@ -101,7 +98,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         }
 
         // ------------------------------------------------------------------
-        // Ladda en användares historik
+        // load user history
         // ------------------------------------------------------------------
         [RelayCommand]
         public async Task LoadHistoriesAsync()
@@ -144,7 +141,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         }
 
         // ------------------------------------------------------------------
-        // Skapa en ny post
+        // Create new post
         // ------------------------------------------------------------------
         [RelayCommand]
         public async Task CreateHistoryAsync()
@@ -175,7 +172,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
 
                 Histories.Add(created);
 
-                // Nollställ "EditingHistory"
+
                 EditingHistory = new HistoryAdmin
                 {
                     DateWatched = DateTime.Now
@@ -192,7 +189,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         }
 
         // ------------------------------------------------------------------
-        // Uppdatera en befintlig post
+        // Update exisitng post
         // ------------------------------------------------------------------
         [RelayCommand]
         public async Task UpdateHistoryAsync()
@@ -220,7 +217,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
                     return;
                 }
 
-                // Uppdatera i listan
+                // update in collection
                 var index = Histories.ToList().FindIndex(h => h.Id == EditingHistory.Id);
                 if (index >= 0)
                 {
@@ -251,7 +248,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         }
 
         // ------------------------------------------------------------------
-        // Ta bort
+        // Deleteq post
         // ------------------------------------------------------------------
         [RelayCommand]
         public async Task DeleteHistoryAsync(HistoryAdmin history)
@@ -281,7 +278,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
         }
 
         // ------------------------------------------------------------------
-        // Börja "redigera" en vald post
+        // Start "edit mode" for a post
         // ------------------------------------------------------------------
         public void EditHistory(HistoryAdmin history)
         {
@@ -295,7 +292,7 @@ namespace MeTube.Client.ViewModels.HistoryViewModels
                 DateWatched = history.DateWatched
             };
 
-            // Synka dropdowns: Sätt SelectedUserId, SelectedVideoId
+            // Sync drowdowns
             SelectedUserId = history.UserId;
             SelectedVideoId = history.VideoId;
         }

@@ -1,18 +1,20 @@
 ﻿window.initializeVideoPlayer = async (dotNetHelper) => {
     try {
         await new Promise(resolve => setTimeout(resolve, 500));
-
         const video = document.getElementById('videoPlayer');
+
         if (!video) {
             console.warn('Video element not found, retrying...');
-            setTimeout(() => window.initializeVideoPlayer(), 500);
+            setTimeout(() => window.initializeVideoPlayer(dotNetHelper), 500);
             return;
         }
 
         console.log('Video element found, initializing...');
 
-        video.addEventListener('loadedmetadata', () => {
-            console.log('Video metadata loaded, duration:', video.duration);
+        // Logging video events and adds to user view history
+        video.addEventListener('play', async () => {
+            console.log('Video playback started');
+            await dotNetHelper.invokeMethodAsync('HandleVideoPlay');
         });
 
         video.addEventListener('progress', () => {
@@ -35,10 +37,10 @@
             if (err.code === 3) { // MEDIA_ERR_DECODE
                 console.log('Attempting to recover from decode error...');
 
-                // Tries to load the video again
+                // Try to reload the video
                 video.load();
 
-                // Delay before playing the video
+                // Delay the play to give the video time to reload
                 setTimeout(() => {
                     video.play().catch(playError => {
                         console.error('Failed to recover:', playError);
@@ -47,7 +49,7 @@
             }
         });
 
-        // Support for seeking
+        // Suport for seeking
         video.addEventListener('seeking', () => {
             console.log('Seeking to:', video.currentTime);
         });
@@ -55,12 +57,6 @@
         video.addEventListener('canplay', () => {
             console.log('Video can start playing');
         });
-
-        // support for loggin to user viewing history
-        video.addEventListener('play', async () => {
-            await dotNetHelper.invokeMethodAsync('HandleVideoPlay');
-        });
-
 
         console.log('Video player initialized successfully');
     } catch (error) {
