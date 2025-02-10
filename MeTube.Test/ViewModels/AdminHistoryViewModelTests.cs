@@ -137,16 +137,23 @@ namespace MeTube.Test.ViewModels
             var newHistory = new HistoryAdmin { Id = 1, UserId = 1, VideoId = 1 };
             _viewModel.SelectedUserId = 1;
             _viewModel.SelectedVideoId = 1;
+
             _mockAdminHistoryService.Setup(s => s.CreateHistoryAsync(It.IsAny<HistoryAdmin>()))
                                     .ReturnsAsync(newHistory);
+
+            Console.WriteLine("[DEBUG] Running CreateHistoryAsync test...");
 
             // Act
             await _viewModel.CreateHistoryAsync();
 
+            Console.WriteLine($"[DEBUG] Histories count after: {_viewModel.Histories.Count}");
+
             // Assert
+            Assert.NotNull(newHistory);
             Assert.Single(_viewModel.Histories);
             Assert.Empty(_viewModel.ErrorMessage);
         }
+
 
         [Fact]
         public async Task CreateHistoryAsync_WithValidationError_ShouldNotCallService()

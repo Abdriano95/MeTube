@@ -214,7 +214,7 @@ public partial class AdminHistoryViewModel
             ErrorMessage = string.Empty;
             InfoMessage = string.Empty;
 
-            // Validate: User and Video must be selected
+            // Validation: User and Video must be selected
             if (SelectedUserId == 0 || SelectedVideoId == 0)
             {
                 ErrorMessage = "Please select both a user and a video.";
@@ -240,9 +240,6 @@ public partial class AdminHistoryViewModel
             Console.WriteLine($"[DEBUG] History added! New count: {Histories.Count}");
 
             EditingHistory = new HistoryAdmin();
-
-            // reload history
-            await LoadHistoriesAsync();
         }
         catch (Exception ex)
         {
@@ -254,6 +251,7 @@ public partial class AdminHistoryViewModel
             IsLoading = false;
         }
     }
+
 
 
 
