@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using MeTube.Client.Models;
-using MeTube.Client.Models;
 using MeTube.Client.Services;
 using MeTube.DTO;
 using Microsoft.JSInterop;
@@ -15,53 +14,43 @@ namespace MeTube.Test.ClientServices
     public class UserServiceTests
     {
         private readonly Mock<IClientService> _mockClientService;
-        private readonly Mock<HttpMessageHandler> _mockHttpMessageHandler;
-        private readonly Mock<IMapper> _mockMapper;
         private readonly Mock<IJSRuntime> _mockJsRuntime;
+        private readonly Mock<IMapper> _mockMapper;
         private readonly HttpClient _httpClient;
-        private readonly ClientService _clientService; // ✅ Använder en riktig ClientService
         private readonly UserService _userService;
+        private ClientService _clientService;
+
 
         public UserServiceTests()
         {
             _mockClientService = new Mock<IClientService>();
-            _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-            _httpClient = new HttpClient(_mockHttpMessageHandler.Object); // ✅ Mocka HTTP-anrop
-            _mockMapper = new Mock<IMapper>();
             _mockJsRuntime = new Mock<IJSRuntime>();
+            _mockMapper = new Mock<IMapper>();
+            _httpClient = new HttpClient(); // Ingen HttpMock behövs här
 
-            // ✅ Skapa en riktig ClientService
+            // Skapa UserService med mockad ClientService
+            _userService = new UserService(_mockClientService.Object, _mockJsRuntime.Object, _httpClient);
+            // ✅ Skapa UserService med en mockad ClientService
             _clientService = new ClientService(_httpClient, _mockMapper.Object, _mockJsRuntime.Object);
 
-            // ✅ Skapa UserService med en riktig ClientService
-            _userService = new UserService(_clientService, _mockJsRuntime.Object, _httpClient);
 
             // ✅ Mocka att en JWT-token finns i `localStorage`
-            _mockJsRuntime.Setup(x => x.InvokeAsync<string>("localStorage.getItem", It.IsAny<object[]>()))
-                          .ReturnsAsync("fake-jwt-token");
+            _mockJsRuntime.Setup(x => x.InvokeAsync<string>(
+        It.IsAny<string>(),
+        It.IsAny<object[]>()))
+    .ReturnsAsync("fake-jwt-token");
         }
-
-
 
         [Fact]
         public async Task RegisterUserAsync_ShouldReturnTrue_WhenRegistrationIsSuccessful()
         {
-            var userId = 1;
-            var fakeToken = "fake-jwt-token";
+            var user = new User { Username = "NewUser", Email = "new@example.com", Password = "password" };
 
-            // ✅ Använd en workaround för `InvokeAsync`
-            _mockJsRuntime.Setup(js => js.InvokeAsync<string>(It.IsAny<string>(), It.IsAny<object[]>()))
-                          .ReturnsAsync(fakeToken);
+            _mockClientService.Setup(cs => cs.RegisterUserAsync(user)).ReturnsAsync(true);
 
-            // ✅ Mocka att API:et returnerar `true` för `DeleteUserAsync`
-            _mockClientService.Setup(cs => cs.DeleteUser(userId))
-                              .ReturnsAsync(true);
+            var result = await _userService.RegisterUserAsync(user);
 
-            // Act
-            var result = await _userService.DeleteUserAsync(userId);
-
-            // Assert
-            Assert.True(result); // ✅ Förväntar oss `true`
+            Assert.True(result);
         }
 
         [Fact]
@@ -78,13 +67,13 @@ namespace MeTube.Test.ClientServices
                 Role = "User"
             };
 
-            var loginResponse = new LoginResponse // ✅ Mocka rätt returtyp!
+            var loginResponse = new LoginResponse
             {
                 User = expectedUser,
                 Token = "fake-jwt-token"
             };
 
-            // ✅ Mocka `LoginAsync` korrekt
+            // Mockar ClientService.LoginAsync så att den returnerar en LoginResponse
             _mockClientService.Setup(cs => cs.LoginAsync(username, password))
                               .ReturnsAsync(loginResponse);
 
@@ -92,35 +81,63 @@ namespace MeTube.Test.ClientServices
             var result = await _userService.LoginAsync(username, password);
 
             // Assert
-            Assert.NotNull(result);  // ✅ Se till att det inte är null
-            Assert.Equal(username, result.Username); // ✅ Kontrollera att det är rätt användare
+            Assert.NotNull(result);
+            Assert.Equal(username, result.Username);
+
+            // Verifiera att LoginAsync verkligen anropades
+            _mockClientService.Verify(cs => cs.LoginAsync(username, password), Times.Once);
+        }
+
+        [Fact]
+        public async Task LoginAsync_ShouldReturnNull_WhenCredentialsAreIncorrect()
+        {
+            // Arrange
+            var username = "TestUser";
+            var password = "wrongpassword";
+
+            // Mockar så att felaktiga inloggningsuppgifter returnerar null
+            _mockClientService.Setup(cs => cs.LoginAsync(username, password))
+                              .ReturnsAsync((LoginResponse?)null);
+
+            // Act
+            var result = await _userService.LoginAsync(username, password);
+
+            // Assert
+            Assert.Null(result);
+
+            // Verifiera att LoginAsync verkligen anropades
+            _mockClientService.Verify(cs => cs.LoginAsync(username, password), Times.Once);
         }
 
         [Fact]
         public async Task LogoutAsync_ShouldReturnTrue_WhenLogoutIsSuccessful()
         {
-            // Arrange
-            _mockJsRuntime.Setup(js => js.InvokeVoidAsync("localStorage.removeItem", "jwtToken")).Returns(ValueTask.CompletedTask);
+            _mockClientService.Setup(cs => cs.LogoutAsync()).ReturnsAsync(true);
 
-            // Act
             var result = await _userService.LogoutAsync();
 
-            // Assert
             Assert.True(result);
         }
 
         [Fact]
         public async Task GetTokenAsync_ShouldReturnToken_WhenLoginIsSuccessful()
         {
-            // Arrange
             var username = "TestUser";
             var password = "password";
 
-            // Act
+            var loginResponse = new LoginResponse
+            {
+                User = new User { Username = username, Email = "test@example.com" },
+                Token = "fake-jwt-token"
+            };
+
+            _mockClientService.Setup(cs => cs.LoginAsync(username, password))
+                              .ReturnsAsync(loginResponse);
+
             var result = await _userService.GetTokenAsync(username, password);
 
-            // Assert
             Assert.NotNull(result);
+            Assert.Equal("fake-jwt-token", result);
         }
 
         [Fact]
@@ -128,32 +145,23 @@ namespace MeTube.Test.ClientServices
         {
             var userId = 1;
 
-            // ✅ Se till att en token finns i localStorage
-            _mockJsRuntime.Setup(js => js.InvokeAsync<string>("localStorage.getItem", "jwtToken"))
-                          .ReturnsAsync("fake-jwt-token");
+            _mockClientService.Setup(cs => cs.DeleteUser(userId)).ReturnsAsync(true);
 
-            // ✅ Mocka att API:et returnerar `true` för DeleteUserAsync
-            _mockClientService.Setup(cs => cs.DeleteUser(userId))
-                              .ReturnsAsync(true);
-
-            // Act
             var result = await _userService.DeleteUserAsync(userId);
 
-            // Assert
-            Assert.True(result); // ✅ Förväntar oss `true`
+            Assert.True(result);
         }
 
         [Fact]
         public async Task UpdateUserAsync_ShouldReturnTrue_WhenUserIsUpdated()
         {
-            // Arrange
             var userId = 1;
             var updateUserDto = new UpdateUserDto { Username = "UpdatedUser", Email = "updated@example.com" };
 
-            // Act
+            _mockClientService.Setup(cs => cs.UpdateUserAsync(userId, updateUserDto)).ReturnsAsync(true);
+
             var result = await _userService.UpdateUserAsync(userId, updateUserDto);
 
-            // Assert
             Assert.True(result);
         }
     }
