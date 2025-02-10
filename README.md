@@ -99,6 +99,7 @@ Screenshot of the Home page:
 
 It shows the video selection and the sidebar.
 
+---
 
 Screenshot of the Login page:
 
@@ -106,6 +107,7 @@ Screenshot of the Login page:
 
 This is where you input you user information to login.
 
+---
 
 Screenshot of the video viewing layout:
 
@@ -113,6 +115,7 @@ Screenshot of the video viewing layout:
 
 Our video layout, with a title, description, likes and a comment section.
 
+---
 
 Screenshot of the Upload Video page:
 
@@ -120,6 +123,7 @@ Screenshot of the Upload Video page:
 
 This is where you can upload your own videos.
 
+---
 
 Screenshot of the Manage Video page:
 
@@ -127,6 +131,7 @@ Screenshot of the Manage Video page:
 
 Here you can manage everything with your uploaded videos.
 
+---
 
 Screenshot of the History page:
 
@@ -167,6 +172,8 @@ On this page you can see your entire video viewing history.
   - Reconsider role distribution and possibly adapt a more vertical working approach
   - Formalize code review steps.
 
+---
+
 ### Sprint 2
 #### Planning
 - **Sprint Backlog**:
@@ -189,6 +196,8 @@ On this page you can see your entire video viewing history.
 - **What could be improved**:
 - **Amendments to process**:
 
+---
+
 ### Sprint 3
 #### Planning
 - **Sprint Backlog**:
@@ -210,6 +219,8 @@ On this page you can see your entire video viewing history.
 - **What went well**:
 - **What could be improved**:
 - **Amendments to process**:
+
+---
 
 ### Sprint 4
 #### Planning
