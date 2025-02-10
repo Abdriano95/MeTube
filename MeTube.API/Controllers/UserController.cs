@@ -118,7 +118,7 @@ namespace MeTube.API.Controllers
             var requestFromUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             int userIdRequestedFromuser = int.Parse(requestFromUser);
             if (userIdRequestedFromuser == id)
-                return NotFound(new { Message = "Cant delete your own user" });
+                return NotFound(new { Message = "Cant update your own user" });
 
             var user = await _unitOfWork.Users.GetUserByIdAsync(id);
             if (user == null)
@@ -204,7 +204,7 @@ namespace MeTube.API.Controllers
             }
         }
 
-        private string GenerateJwtToken(User user)
+        public string GenerateJwtToken(User user)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword"));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
