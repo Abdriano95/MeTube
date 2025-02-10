@@ -14,5 +14,6 @@ namespace MeTube.Data.Repository
         Task AddUserAsync(User user);
         void UpdateUser(User user);
         Task DeleteUser(User user);
+        Task DeleteUserAsync(int userId);
     }
 }
