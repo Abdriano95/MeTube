@@ -32,9 +32,7 @@ namespace MeTube.Test.Repositories
                 .Returns(_mockVideoRepo.Object);
         }
 
-        // ------------------------------------------------------------------
-        // 1) GetAllVideosAsync()
-        // ------------------------------------------------------------------
+        
         [Fact]
         public async Task GetAllVideos_ShouldReturnListOfVideos()
         {
@@ -73,9 +71,7 @@ namespace MeTube.Test.Repositories
             _mockVideoRepo.Verify(repo => repo.GetAllVideosAsync(), Times.Once);
         }
 
-        // ------------------------------------------------------------------
-        // 2) GetVideoByIdAsync()
-        // ------------------------------------------------------------------
+      
         [Fact]
         public async Task GetVideoByIdAsync_ExistingVideo_ShouldReturnVideo()
         {
@@ -120,9 +116,7 @@ namespace MeTube.Test.Repositories
             _mockVideoRepo.Verify(repo => repo.GetVideoByIdAsync(999), Times.Once);
         }
 
-        // ------------------------------------------------------------------
-        // 3) GetVideoByIdWithTrackingAsync()
-        // ------------------------------------------------------------------
+       
         [Fact]
         public async Task GetVideoByIdWithTrackingAsync_ExistingVideo_ShouldReturnVideo()
         {
@@ -167,9 +161,7 @@ namespace MeTube.Test.Repositories
             _mockVideoRepo.Verify(repo => repo.GetVideoByIdWithTrackingAsync(999), Times.Once);
         }
 
-        // ------------------------------------------------------------------
-        // 4) GetVideosByUserIdAsync()
-        // ------------------------------------------------------------------
+       
         [Fact]
         public async Task GetVideosByUserIdAsync_ValidUser_ShouldReturnVideos()
         {
@@ -225,9 +217,7 @@ namespace MeTube.Test.Repositories
             _mockVideoRepo.Verify(repo => repo.GetVideosByUserIdAsync(999), Times.Once);
         }
 
-        // ------------------------------------------------------------------
-        // 5) AddVideoAsync()
-        // ------------------------------------------------------------------
+      
         [Fact]
         public async Task AddVideoAsync_ValidVideo_ShouldAddAndSave()
         {
@@ -271,9 +261,7 @@ namespace MeTube.Test.Repositories
             _mockVideoRepo.Verify(repo => repo.AddVideoAsync(null!), Times.Once);
         }
 
-        // ------------------------------------------------------------------
-        // 6) AddVideoWithoutSaveAsync()
-        // ------------------------------------------------------------------
+       
         [Fact]
         public async Task AddVideoWithoutSaveAsync_ValidVideo_ShouldAddWithoutCallingSaveHere()
         {
@@ -299,9 +287,7 @@ namespace MeTube.Test.Repositories
             _mockVideoRepo.Verify(repo => repo.AddVideoWithoutSaveAsync(video), Times.Once);
         }
 
-        // ------------------------------------------------------------------
-        // 7) UpdateVideo()
-        // ------------------------------------------------------------------
+       
         [Fact]
         public async Task UpdateVideo_ValidVideo_ShouldUpdateAndSave()
         {
@@ -343,9 +329,7 @@ namespace MeTube.Test.Repositories
             _mockVideoRepo.Verify(repo => repo.UpdateVideo(null!), Times.Once);
         }
 
-        // ------------------------------------------------------------------
-        // 8) DeleteVideo()
-        // ------------------------------------------------------------------
+       
         [Fact]
         public async Task DeleteVideo_ValidVideo_ShouldDeleteAndSave()
         {
@@ -399,9 +383,7 @@ namespace MeTube.Test.Repositories
             _mockVideoRepo.Verify(repo => repo.DeleteVideo(nonExistentVideo), Times.Once);
         }
 
-        // ------------------------------------------------------------------
-        // 9) GetVideoUploaderUsernameAsync()
-        // ------------------------------------------------------------------
+       
         [Fact]
         public async Task GetVideoUploaderUsernameAsync_ValidId_ShouldReturnUsername()
         {
