@@ -85,7 +85,8 @@ This only needs to be done once on your local machine:
    dotnet user-secrets set "AzureStorage:AccountName" "looplegionmetube20250129"
    dotnet user-secrets set "AzureStorage:AccountKey" "xxxx"
    ```
-   DISCLAIMER: Contact us for the Azure Storage key!
+   **DISCLAIMER: Contact us for the Azure Storage key!**
+   Input the key instead of the x that are in between the citations.
 
 After following these steps, the project should be properly configured and ready to run on your local machine.
 
