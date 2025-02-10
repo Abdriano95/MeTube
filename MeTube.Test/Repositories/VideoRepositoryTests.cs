@@ -1,10 +1,10 @@
-﻿using MeTube.Data.Entity;
-using MeTube.Data.Repository;
-using Moq;
-using Xunit;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Moq;
+using Xunit;
+using MeTube.Data.Entity;
+using MeTube.Data.Repository;
 
 namespace MeTube.Test.Repositories
 {
@@ -20,5 +20,5 @@ namespace MeTube.Test.Repositories
             _mockUnitOfWork.Setup(uow => uow.Videos).Returns(_mockVideoRepo.Object);
         }
 
-    }
+    }  
 }
