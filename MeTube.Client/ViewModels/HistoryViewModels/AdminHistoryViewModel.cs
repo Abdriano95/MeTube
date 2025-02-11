@@ -240,6 +240,9 @@ public partial class AdminHistoryViewModel
             Console.WriteLine($"[DEBUG] History added! New count: {Histories.Count}");
 
             EditingHistory = new HistoryAdmin();
+
+            // reload history
+            await LoadHistoriesAsync();
         }
         catch (Exception ex)
         {
