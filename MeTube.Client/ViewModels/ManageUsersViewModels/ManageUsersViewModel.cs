@@ -90,9 +90,13 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             bool securedelete = await _jsRuntime.InvokeAsync<bool>("confirm", $"You sure you want to delete this user?");
             if (securedelete)
             {
+                CloseUserCard();
                 bool response = await _userService.DeleteUserAsync(userId);
                 if (response)
+                {
                     await _jsRuntime.InvokeVoidAsync("alert", "User succesfully deleted!");
+                    await LoadUsers();
+                }
                 else
                     await _jsRuntime.InvokeVoidAsync("alert", "Unable to succesfully delete user!");
             }
@@ -143,6 +147,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
                 else
                     await _jsRuntime.InvokeVoidAsync("alert", "Unable to succesfully update user!");
             }
+            await LoadUsers();
         }
         public void SearchButton()
         {

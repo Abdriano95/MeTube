@@ -111,7 +111,8 @@ namespace MeTube.Client.ViewModels.SignupViewModels
             {
                 await _jsRuntime.InvokeVoidAsync("alert", "Account succesfully created!");
                 ClearAllFields();
-                _navigation.NavigateTo("/login", forceLoad: true);
+                if(_navigation != null)
+                    _navigation.NavigateTo("/login", forceLoad: true);
             }
         }
     }

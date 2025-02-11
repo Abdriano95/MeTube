@@ -1,6 +1,8 @@
 ﻿@page "/signup"
 @using MeTube.Client.ViewModels.SignupViewModels
 @inject SignupViewModel ViewModel
+@using MeTube.Client.Services;
+@inject UserService UserService;
 
 <link href="css/login_and_signup.css" rel="stylesheet" />
 @* <PageTitle>Signup</PageTitle> *@
@@ -8,7 +10,7 @@
 <div class="FormContainer">
     <form>
         <div class="FormText">
-            <h1>Sign up</h1>
+            <h1>@titel</h1>
             <p>Create an account here</p>
             <hr/>
         </div>
@@ -25,9 +27,27 @@
         <p class="validationerror">@ViewModel.PasswordError</p>
 
 
-        
-        <button @onclick="() => ViewModel.SignupButton()" type="button">Create Account</button>
 
-        <p class="TextWithLink">Already have an account? <a href="/login">Log In</a></p>
+        <button @onclick="() => ViewModel.SignupButton()" type="button">Create Account</button>
+        @if(!IsAuthenticated && UserRole != "Admin")
+        {
+            <p class="TextWithLink">Already have an account? <a href="/login">Log In</a></p>
+        }
     </form>
 </div>
+
+@code{
+    private bool IsAuthenticated = false;
+    private string UserRole = string.Empty;
+    private string titel = "Sign up";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Dictionary<string, string> response = await UserService.IsUserAuthenticated();
+        UserRole = response["Role"];
+        IsAuthenticated = Convert.ToBoolean(response["IsAuthenticated"]);
+
+        if (IsAuthenticated && UserRole == "Admin")
+            titel = "Create User Account";
+    }
+}
