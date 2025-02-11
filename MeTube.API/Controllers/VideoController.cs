@@ -6,6 +6,7 @@ using MeTube.DTO.VideoDTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using MeTube.Client.Services;
 
 namespace MeTube.API.Controllers
 {
