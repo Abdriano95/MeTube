@@ -63,6 +63,39 @@ namespace MeTube.Test.APIControllers
             };
 
         }
+        
+        [Fact]
+        public async Task GetAllVideos_ReturnsOk_WhenVideosExist()
+        {
+            // Arrange
+            _mockUnitOfWork.Setup(uow => uow.Videos.GetAllVideosAsync())
+                           .ReturnsAsync(_videos);
+
+            _mockVideoService
+                .Setup(service => service.BlobExistsAsync(It.IsAny<string>()))
+                .ReturnsAsync(true); // Anta att alla blobbar finns
+
+            // Mappa varje Video -> VideoDto
+            _mockMapper
+                .Setup(m => m.Map<VideoDto>(It.IsAny<Video>()))
+                .Returns((Video src) => new VideoDto
+                {
+                    Id = src.Id,
+                    Title = src.Title,
+                    Genre = src.Genre,
+                    DateUploaded = src.DateUploaded,
+                    VideoUrl = src.VideoUrl,
+                    ThumbnailUrl = src.ThumbnailUrl
+                });
+
+            // Act
+            var result = await _controller.GetAllVideos();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var videos = Assert.IsAssignableFrom<IEnumerable<VideoDto>>(okResult.Value);
+            Assert.Equal(2, videos.Count()); // Samma antal som i _videos
+        }
     }
 }
 
