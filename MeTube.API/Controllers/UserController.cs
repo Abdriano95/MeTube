@@ -259,7 +259,7 @@ namespace MeTube.API.Controllers
         }
 
         // This method generates a JWT token for a user.
-        public string GenerateJwtToken(User user)
+        private string GenerateJwtToken(User user)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword"));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
