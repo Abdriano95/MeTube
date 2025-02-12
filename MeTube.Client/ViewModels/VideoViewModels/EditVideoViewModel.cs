@@ -173,7 +173,9 @@ namespace MeTube.Client.ViewModels
             {
                 IsLoading = true;
                 using var videoStream = NewVideoFile.OpenReadStream(500 * 1024 * 1024); // Max 500MB
-                var updatedVideo = await _videoService.UpdateVideoFileAsync(CurrentVideo.Id, videoStream, NewVideoFile.Name);
+                DateTime dateUploaded = DateTime.Now;
+                string uniqeVideWithDate = dateUploaded.ToString();
+                var updatedVideo = await _videoService.UpdateVideoFileAsync(CurrentVideo.Id, videoStream, NewVideoFile.Name+ uniqeVideWithDate);
 
                 if (updatedVideo != null)
                 {
