@@ -440,17 +440,31 @@ namespace MeTube.Test.APIControllers
         [Fact]
         public async Task UpdateVideo_ReturnsForbidden_WhenUserIsNotAdmin()
         {
+            // Arrange
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, "1"),
-                new Claim(ClaimTypes.Role, "User")
+                 new Claim(ClaimTypes.NameIdentifier, "1"),   // en inloggad användare
+                    new Claim(ClaimTypes.Role, "User")          // men inte "Admin"
             };
             _controller.ControllerContext.HttpContext.User =
                 new ClaimsPrincipal(new ClaimsIdentity(claims));
 
-            // Förhindra NullRef p.g.a. transaction
-            _mockUnitOfWork.Setup(u => u.BeginTransactionAsync())
-                           .ReturnsAsync(Mock.Of<IDbContextTransaction>());
+            // Mocka transaktionen så den inte kastar exception i onödan
+            var mockTransaction = new Mock<IDbContextTransaction>();
+            mockTransaction
+                .Setup(t => t.CommitAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+            mockTransaction
+                .Setup(t => t.RollbackAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            _mockUnitOfWork
+                .Setup(u => u.BeginTransactionAsync())
+                .ReturnsAsync(mockTransaction.Object);
+
+            // Om koden inte hittar en video innan den "avbryts", mocka ev. bort det:
+            // _mockUnitOfWork.Setup(u => u.Videos.GetVideoByIdAsync(It.IsAny<int>()))
+            //                .ReturnsAsync(new Video { ... });
 
             var updateDto = new UpdateVideoDto
             {
@@ -459,9 +473,14 @@ namespace MeTube.Test.APIControllers
                 Genre = "Genre"
             };
 
+            // Act
             var result = await _controller.UpdateVideo(1, updateDto);
 
-            Assert.IsType<ForbidResult>(result);
+            // Assert
+            // [Authorize(Roles="Admin")] ger i enhetstester ofta en ObjectResult(403) snarare än ForbidResult.
+            var objectRes = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(StatusCodes.Status403Forbidden, objectRes.StatusCode);
         }
+
     }
 }
