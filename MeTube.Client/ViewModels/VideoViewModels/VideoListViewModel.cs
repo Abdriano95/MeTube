@@ -63,14 +63,17 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                     videos = new List<Video>();
                     videos.Clear();
                 }
-
-                // Skapa en ObservableCollection från listan
-                RecommendedVideos = new ObservableCollection<Video>(videos);
-
-                // Sätt UploaderUsername för varje video, precis som du gör i LoadVideosAsync()
-                foreach (var video in RecommendedVideos)
+                else
                 {
-                    video.UploaderUsername = await _videoService.GetUploaderUsernameAsync(video.Id);
+
+                    // Skapa en ObservableCollection från listan
+                    RecommendedVideos = new ObservableCollection<Video>(videos);
+
+                    // Sätt UploaderUsername för varje video, precis som du gör i LoadVideosAsync()
+                    foreach (var video in RecommendedVideos)
+                    {
+                        video.UploaderUsername = await _videoService.GetUploaderUsernameAsync(video.Id);
+                    }
                 }
             }
             finally

@@ -95,10 +95,10 @@ namespace MeTube.API.Controllers
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
             if (userId == 0)
                 return Unauthorized();
-            var videos = await _unitOfWork.Videos.GetRecommendedVideosForUserAsync(userId, 5);
+            var videos = await _unitOfWork.Videos.GetRecommendedVideosForUserAsync(userId, 3);
             if (videos.Any())
             {
-                var videoDtos = _mapper.Map<IEnumerable<VideoDto>>(videos);
+                var videoDtos = _mapper.Map<List<VideoDto>>(videos);
                 return Ok(videoDtos);
             }
             else

@@ -278,7 +278,7 @@ namespace MeTube.Client.Services
                 Console.WriteLine($"JSON Response: {json}");
 
                 // Deserialisera till en lista av VideoDto
-                var videoDtos = JsonSerializer.Deserialize<List<VideoDto>>(json);
+                var videoDtos = JsonSerializer.Deserialize<List<VideoDto>>(json, _serializerOptions);
 
                 if (videoDtos == null)
                 {

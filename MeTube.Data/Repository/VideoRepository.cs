@@ -123,28 +123,34 @@ namespace MeTube.Data.Repository
                 .ToListAsync();
 
 
-            // if user doesn't have any liked genres, return empty list
-            if (!likedGenres.Any())
-            {
-                return new List<Video>();
-            }
-
-
             // E.g. find "top genre" or take random
             var topGenre = likedGenres.GroupBy(g => g)
-                                      .OrderByDescending(g => g.Count())
-                                      .First()
-                                      .Key;
+                                      .OrderByDescending(g => g.Count()).ToList();
+                                      
+            int genreIndex = 0;
+            while (genreIndex < topGenre.Count())
+            {
+                var recommended = await DbContext.Videos
+                                    .Where(v => v.Genre == topGenre[genreIndex].Key && !likedVideoIds.Contains(v.Id))
+                                    .OrderByDescending(v => v.DateUploaded)
+                                    .Take(maxCount)
+                                    .ToListAsync();
 
+                if (recommended.Count > 0)
+                {
+                    return recommended;
+                    
+                }
+
+                genreIndex++;
+            }
             // 3) Get other videos in that genre
             //    Exclude users own videos, or redan already liked videos
-            var recommended = await DbContext.Videos
-                .Where(v => v.Genre == topGenre && !likedVideoIds.Contains(v.Id))
-                .OrderByDescending(v => v.DateUploaded)
-                .Take(maxCount)
-                .ToListAsync();
 
-            return recommended;
+            return await DbContext.Videos
+                    .OrderByDescending(v => v.DateUploaded)
+                    .Take(maxCount)
+                    .ToListAsync();
         }
 
 
