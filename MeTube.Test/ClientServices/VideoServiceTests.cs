@@ -153,7 +153,40 @@ namespace MeTube.Test.ClientServices
             Assert.NotNull(result);
             Assert.Equal(99, result.Id);
         }
+        [Fact]
+        public async Task GetVideoByIdAsync_ReturnsNull_WhenFail()
+        {
+            SetupHttpResponse(HttpStatusCode.BadRequest);
+            var result = await _videoService.GetVideoByIdAsync(1000);
+            Assert.Null(result);
+        }
+        [Fact]
+        public async Task GetVideosByUserIdAsync_ReturnsList_WhenOk()
+        {
+            var videoDtos = new List<VideoDto>
+            {
+                new VideoDto {
+                    Id=10, Title="UserVid", Description="Udesc", Genre="Ugenre",
+                    VideoUrl="http://some/uvideo.mp4", ThumbnailUrl=null,
+                    DateUploaded=DateTime.UtcNow, UserId=1, BlobExists=false
+                }
+            };
 
+            var opts = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            var json = JsonSerializer.Serialize(videoDtos, opts);
+            SetupHttpResponse(HttpStatusCode.OK, json);
+
+            _mockMapper
+                .Setup(m => m.Map<List<Video>>(It.IsAny<List<VideoDto>>()))
+                .Returns(new List<Video>
+                {
+                    new Video { Id=10, Title="UserVid", Description="Udesc", Genre="Ugenre" }
+                });
+
+            var result = await _videoService.GetVideosByUserIdAsync();
+            Assert.NotNull(result);
+            Assert.Single(result);
+        }
 
     }
 
