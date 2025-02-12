@@ -70,20 +70,31 @@ namespace MeTube.Test.ClientServices
         [Fact]
         public async Task GetCommentsByVideoIdAsync_WithValidResponse_ShouldReturnCommentCollection()
         {
-            // Arrange
-            var commentDtos = new List<CommentDto> { new CommentDto() };
+            var commentDtos = new List<CommentDto> { new CommentDto { Id = 1, Content = "Test Comment" } };
+            var expectedComments = new List<Comment> { new Comment { Id = 1, Content = "Test Comment" } };
+
+            var mockResponse = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonSerializer.Serialize(commentDtos, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }))
+            };
+
             _mockHttpMessageHandler.Protected()
-                                   .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                                   .ReturnsAsync(new HttpResponseMessage
-                                   {
-                                       StatusCode = HttpStatusCode.OK,
-                                       Content = new StringContent(JsonSerializer.Serialize(commentDtos))
-                                   });
-            _mockMapper.Setup(x => x.Map<List<Comment>>(commentDtos)).Returns(new List<Comment>());
-            // Act
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(mockResponse);
+
+            _mockMapper.Setup(x => x.Map<List<Comment>>(It.IsAny<List<CommentDto>>()))
+                       .Returns(expectedComments);
+
             var result = await _commentService.GetCommentsByVideoIdAsync(1);
+
             // Assert
             Assert.NotNull(result);
+            Assert.NotEmpty(result);
+            Assert.Equal(expectedComments.Count, result.Count);
         }
 
         [Fact]
