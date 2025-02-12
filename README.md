@@ -79,6 +79,8 @@ This only needs to be done once on your local machine:
 After following these steps, the project should be properly configured and ready to run on your local machine.
 
 ## Application Architecture
+![Application Architecture](./screenshots/architecture.png)
+Diagram of our application architecture.
 
 ## Screenshots
 Screenshot of the Home page:
@@ -151,13 +153,13 @@ On this page you can see your entire video viewing history.
 #### Retrospective
 - **What went well**:
   - Clear communication in daily stand-ups.
-  - Smooth process for defining user stories
-  - Good distribution of tasks
+  - Smooth process for defining user stories.
+  - Good distribution of tasks.
   - Strong attendance and engagement
 - **What could be improved**:
-  - Unclear distribution of roles in certain parts of API development
+  - Unclear distribution of roles in certain parts of API development.
 - **Amendments to process**:
-  - Reconsider role distribution and possibly adapt a more vertical working approach
+  - Reconsider role distribution and possibly adapt a more vertical working approach.
   - Formalize code review steps.
 
 ---
