@@ -97,7 +97,6 @@ namespace MeTube.Test.APIControllers
                 .Setup(u => u.Videos.GetAllVideosAsync())
                 .ReturnsAsync(_videos);
 
-            // Mappa varje Video -> VideoDto i testet
             _mockMapper
                 .Setup(m => m.Map<VideoDto>(It.IsAny<Video>()))
                 .Returns((Video v) => new VideoDto
@@ -121,6 +120,48 @@ namespace MeTube.Test.APIControllers
             var dtoList = Assert.IsAssignableFrom<IEnumerable<VideoDto>>(okResult.Value);
             Assert.Equal(2, dtoList.Count());
 
+        }
+        [Fact]
+        public async Task GetAllVideos_ReturnsOk_EmptyList_WhenNoVideosExist()
+        {
+            // Arrange
+            _mockUnitOfWork
+                .Setup(u => u.Videos.GetAllVideosAsync())
+                .ReturnsAsync(new List<Video>()); // tom
+
+            // Act
+            var result = await _controller.GetAllVideos();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var dtoList = Assert.IsAssignableFrom<IEnumerable<VideoDto>>(okResult.Value);
+            Assert.Empty(dtoList);
+        }
+        [Fact]
+        public async Task GetUploaderUsername_ReturnsOk_WhenVideoAndUserExist()
+        {
+            // Arrange
+            var video = _videos.First();
+            var user = new User
+            {
+                Id = video.UserId,
+                Username = "UploaderUser",
+                Email = "uploader@example.com",
+                Password = "pwd123",
+                Role = "User"
+            };
+
+            _mockUnitOfWork.Setup(u => u.Videos.GetVideoByIdAsync(video.Id))
+                           .ReturnsAsync(video);
+            _mockUnitOfWork.Setup(u => u.Users.GetUserByIdAsync(video.UserId))
+                           .ReturnsAsync(user);
+
+            // Act
+            var result = await _controller.GetUploaderUsername(video.Id);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal("UploaderUser", okResult.Value);
         }
     }
 }
