@@ -14,6 +14,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace MeTube.Test.APIControllers
 {
@@ -237,10 +238,7 @@ namespace MeTube.Test.APIControllers
             Assert.IsType<NotFoundResult>(result);
         }
 
-        // ------------------------------------------------------------------
-        // GET: api/Video/user
-        //  [Authorize]
-        // ------------------------------------------------------------------
+     
         [Fact]
         public async Task GetVideosByUserId_ReturnsOk_WhenUserHasVideos()
         {
@@ -299,9 +297,275 @@ namespace MeTube.Test.APIControllers
             var list = Assert.IsAssignableFrom<IEnumerable<Video>>(okResult.Value);
             Assert.Empty(list);
         }
+        [Fact]
+        public async Task UploadVideo_ReturnsCreated_WhenValid()
+        {
+            // Arrange
+            var uploadDto = new UploadVideoDto
+            {
+                Title = "NewVideo",
+                Description = "TestDesc",
+                Genre = "TestGenre"
+            };
+            // Mock a valid mp4 file
+            var mockFormFile = new Mock<IFormFile>();
+            mockFormFile.Setup(f => f.Length).Returns(1024); // 1KB
+            mockFormFile.Setup(f => f.ContentType).Returns("video/mp4");
+            uploadDto.VideoFile = mockFormFile.Object;
 
+            var mockTransaction = new Mock<IDbContextTransaction>();
+            _mockUnitOfWork.Setup(u => u.BeginTransactionAsync())
+                           .ReturnsAsync(mockTransaction.Object);
+
+            // Låt UploadAsync i VideoService lyckas
+            _mockVideoService
+                .Setup(vs => vs.UploadAsync(mockFormFile.Object))
+                .ReturnsAsync(new BlobResponseDto
+                {
+                    Error = false,
+                    Status = "File uploaded",
+                    Blob = new BlobDto { Name = "blobname.mp4", Uri = "http://somewhere/blob.mp4" }
+                });
+
+            // Spara i DB
+            _mockUnitOfWork
+                .Setup(u => u.Videos.AddVideoWithoutSaveAsync(It.IsAny<Video>()))
+                .Returns(Task.CompletedTask);
+            _mockUnitOfWork
+                .Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            // Mappa UploadVideoDto -> Video
+            _mockMapper
+                .Setup(m => m.Map<Video>(uploadDto))
+                .Returns(new Video {
+                    Id = 0,
+                    Title = uploadDto.Title,
+                    Description = uploadDto.Description!, //för att jag redan har läst in DTO
+                    Genre = uploadDto.Genre!
+                });
+
+            // Mappa Video -> VideoDto
+            _mockMapper
+                .Setup(m => m.Map<VideoDto>(It.IsAny<Video>()))
+                .Returns(new VideoDto { Id = 111, Title = "NewVideo" });
+
+            // Act
+            var result = await _controller.UploadVideo(uploadDto);
+
+            // Assert
+            var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+            Assert.Equal(nameof(VideoController.GetVideoById), createdResult.ActionName);
+            var returnedDto = Assert.IsType<VideoDto>(createdResult.Value);
+            Assert.Equal(111, returnedDto.Id);
+        }
+
+        [Fact]
+        public async Task UploadVideo_ReturnsBadRequest_WhenFileIsInvalid()
+        {
+            // Arrange
+            var uploadDto = new UploadVideoDto
+            {
+                Title = "BadVideo",
+                Description = "Desc",
+                Genre = "Genre"
+            };
+            // Låt filen vara null => invalid
+            uploadDto.VideoFile = null;
+
+            // Act
+            var result = await _controller.UploadVideo(uploadDto);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task UploadVideo_ReturnsUnauthorized_WhenUserIdIs0()
+        {
+            // Arrange
+            // Sätt userID=0
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "0")
+            };
+            _controller.ControllerContext.HttpContext.User =
+                new ClaimsPrincipal(new ClaimsIdentity(claims));
+
+            // Act
+            var result = await _controller.UploadVideo(new UploadVideoDto());
+
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+        }
+
+        
+        [Fact]
+        public async Task DeleteVideo_ReturnsOk_WhenSuccessful()
+        {
+            // Arrange
+            var vid = _videos.First();
+            _mockUnitOfWork.Setup(u => u.Videos.GetVideoByIdAsync(vid.Id))
+                           .ReturnsAsync(vid);
+
+            // Mock att DeleteAsync i VideoService lyckas
+            _mockVideoService.Setup(s => s.DeleteAsync(vid.BlobName))
+                             .ReturnsAsync(new BlobResponseDto { Error = false });
+
+            _mockUnitOfWork.Setup(u => u.Videos.DeleteVideo(vid))
+                           .Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _controller.DeleteVideo(vid.Id);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            _mockVideoService.Verify(s => s.DeleteAsync(vid.BlobName), Times.Once);
+            _mockUnitOfWork.Verify(u => u.Videos.DeleteVideo(vid), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteVideo_ReturnsNotFound_WhenVideoIsNull()
+        {
+            // Arrange
+            _mockUnitOfWork.Setup(u => u.Videos.GetVideoByIdAsync(It.IsAny<int>()))
+                           .ReturnsAsync((Video)null);
+
+            // Act
+            var result = await _controller.DeleteVideo(999);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task DeleteVideo_ReturnsUnauthorized_WhenUserIdIs0()
+        {
+            // Arrange
+            var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, "0") };
+            _controller.ControllerContext.HttpContext.User =
+                new ClaimsPrincipal(new ClaimsIdentity(claims));
+
+            // Act
+            var result = await _controller.DeleteVideo(1);
+
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+        }
+
+        [Fact]
+        public async Task DeleteVideo_ReturnsBadRequest_WhenDeleteBlobFails()
+        {
+            // Arrange
+            var vid = _videos.First();
+            _mockUnitOfWork.Setup(u => u.Videos.GetVideoByIdAsync(vid.Id))
+                           .ReturnsAsync(vid);
+
+            // Simulera fel vid blobb-borttagning
+            _mockVideoService.Setup(s => s.DeleteAsync(vid.BlobName))
+                             .ReturnsAsync(new BlobResponseDto { Error = true, Status = "Delete fail" });
+
+            // Act
+            var result = await _controller.DeleteVideo(vid.Id);
+
+            // Assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Delete fail", badRequest.Value);
+        }
+
+        
+        [Fact]
+        public async Task UpdateVideo_ReturnsOk_WhenVideoExistsAndAdmin()
+        {
+            // Arrange
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "1"),
+                new Claim(ClaimTypes.Role, "Admin")
+            };
+            _controller.ControllerContext.HttpContext.User =
+                new ClaimsPrincipal(new ClaimsIdentity(claims));
+
+            var existingVideo = _videos.First();
+            var updateDto = new UpdateVideoDto
+            {
+                Title = "Updated Title",
+                Description = "Updated Desc",
+                Genre = "Updated Genre"
+            };
+
+            var mockTransaction = new Mock<IDbContextTransaction>();
+            _mockUnitOfWork.Setup(u => u.BeginTransactionAsync())
+                           .ReturnsAsync(mockTransaction.Object);
+
+            // Video finns i DB
+            _mockUnitOfWork.Setup(u => u.Videos.GetVideoByIdAsync(existingVideo.Id))
+                           .ReturnsAsync(existingVideo);
+
+            _mockUnitOfWork.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Mappa updated Video -> VideoDto
+            _mockMapper.Setup(m => m.Map<VideoDto>(existingVideo))
+                       .Returns(new VideoDto { Id = existingVideo.Id, Title = updateDto.Title });
+
+            // Act
+            var result = await _controller.UpdateVideo(existingVideo.Id, updateDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedDto = Assert.IsType<VideoDto>(okResult.Value);
+            Assert.Equal("Updated Title", returnedDto.Title);
+        }
+
+        [Fact]
+        public async Task UpdateVideo_ReturnsNotFound_WhenVideoIsNull()
+        {
+            // Arrange
+            var updateDto = new UpdateVideoDto();
+            _mockUnitOfWork.Setup(u => u.Videos.GetVideoByIdAsync(It.IsAny<int>()))
+                           .ReturnsAsync((Video)null);
+
+            // Act
+            var result = await _controller.UpdateVideo(999, updateDto);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task UpdateVideo_ReturnsForbidden_WhenUserIsNotAdmin()
+        {
+            // Arrange
+            // "User" role, not "Admin"
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "1"),
+                new Claim(ClaimTypes.Role, "User")
+            };
+            _controller.ControllerContext.HttpContext.User =
+                new ClaimsPrincipal(new ClaimsIdentity(claims));
+
+            var updateDto = new UpdateVideoDto();
+
+            // Act
+            var result = await _controller.UpdateVideo(1, updateDto);
+
+            // Assert
+            Assert.IsType<ForbidResult>(result);
+        }
+
+        // Osv. Du kan fortsätta med fler tester för:
+        //   UpdateVideoFile(...),
+        //   UpdateThumbnail(...),
+        //   StreamVideo(...),
+        //   ResetToDefaultThumbnail(...),
+        // enligt samma mönster som i HistoryControllerTests.
 
     }
 }
+
+
+  
+
 
         
