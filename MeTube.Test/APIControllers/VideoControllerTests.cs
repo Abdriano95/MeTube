@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using MeTube.API.Controllers;
-using MeTube.Client.Services;    // <--- Här ligger IVideoService
+using MeTube.API.Services; // Här finns VideoService + IVideoService
 using MeTube.Data.Entity;
 using MeTube.Data.Repository;
 using MeTube.DTO.VideoDTOs;
@@ -22,19 +22,23 @@ namespace MeTube.Test.APIControllers
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IMapper> _mockMapper;
 
-        // Viktigt: nu mockar vi IVideoService, inte en konkret VideoService-klass.
+        
         private readonly Mock<IVideoService> _mockVideoService;
 
         private readonly VideoController _controller;
-        private readonly List<Video> _videos; // Exempellista att återanvända i tester
+
+        // Exempel-lista med videor att återanvända
+        private readonly List<Video> _videos;
 
         public VideoControllerTests()
         {
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockMapper = new Mock<IMapper>();
+
+            // Mock av IVideoService (om VideoController tar in IVideoService).
             _mockVideoService = new Mock<IVideoService>();
 
-            // Simulera en inloggad User med ID=1
+            // Simulera en inloggad användare (UserID=1, Role=User som standard)
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, "1"),
@@ -43,11 +47,12 @@ namespace MeTube.Test.APIControllers
             var identity = new ClaimsIdentity(claims, "TestAuthType");
             var claimsPrincipal = new ClaimsPrincipal(identity);
 
-           
+            // Skapa controller med mockade beroenden
             _controller = new VideoController(
                 _mockUnitOfWork.Object,
                 _mockMapper.Object,
-              
+                // Om din VideoController-konstruktor tar "VideoService" (klassen)
+                // måste du ev. partial-mocka klassen i stället för IVideoService
                 _mockVideoService.Object
             )
             {
@@ -60,11 +65,27 @@ namespace MeTube.Test.APIControllers
                 }
             };
 
-            // Några exempelvideor för att slippa upprepa i varje test
+            // Några exempelvideor
             _videos = new List<Video>
             {
-                new Video { Id = 1, Title = "Video #1", Description="Desc #1", Genre="Genre #1", UserId=1 },
-                new Video { Id = 2, Title = "Video #2", Description="Desc #2", Genre="Genre #2", UserId=2 }
+                new Video {
+                    Id = 1,
+                    UserId = 1,
+                    Title = "TestVideo #1",
+                    Description="Desc #1",
+                    Genre="Genre #1",
+                    BlobName="blob1.mp4",
+                    VideoUrl="http://blob1.mp4"
+                },
+                new Video {
+                    Id = 2,
+                    UserId = 2,
+                    Title = "TestVideo #2",
+                    Description="Desc #2",
+                    Genre="Genre #2",
+                    BlobName="blob2.mp4",
+                    VideoUrl="http://blob2.mp4"
+                }
             };
         }
 
