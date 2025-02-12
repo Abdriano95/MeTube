@@ -206,28 +206,27 @@ namespace MeTube.Test.ViewModels
             _viewModel.CurrentVideo = new Video { Id = 1 };
             var mockPostedComment = new Comment { Id = 123, Content = "New test comment" };
 
-            // Om .AddCommentAsync lyckas returnerar den mockPostedComment
-            _mockCommentService
-                .Setup(s => s.AddCommentAsync(It.IsAny<CommentDto>()))
+            // Mock AddCommentAsync
+            _mockCommentService.Setup(s => s.AddCommentAsync(It.IsAny<CommentDto>()))
                 .ReturnsAsync(mockPostedComment);
 
-            // LoadCommentsAsync anropas => vi behöver mocka GetCommentsByVideoIdAsync & GetPosterUsernameAsync
-            _mockCommentService
-                .Setup(s => s.GetCommentsByVideoIdAsync(1))
+            // Mock LoadCommentsAsync
+            _mockCommentService.Setup(s => s.GetCommentsByVideoIdAsync(It.IsAny<int>()))
                 .ReturnsAsync(new List<Comment> { mockPostedComment });
 
-            _mockCommentService
-                .Setup(s => s.GetPosterUsernameAsync(It.IsAny<int>()))
+            _mockCommentService.Setup(s => s.GetPosterUsernameAsync(It.IsAny<int>()))
                 .ReturnsAsync("PosterUsername");
 
             // Act
             await _viewModel.PostComment();
 
             // Assert
-            // Förväntar att NewCommentText blivit tömd när postedComment != null
-            Assert.Equal(string.Empty, _viewModel.NewCommentText);
-            Assert.Equal(string.Empty, _viewModel.CommentErrorMessage);
+            Assert.Equal(string.Empty, _viewModel.NewCommentText); 
+            Assert.Equal(string.Empty, _viewModel.CommentErrorMessage); 
+            Assert.Contains(mockPostedComment, _viewModel.Comments); 
         }
+
+
 
         [Fact]
         public async Task PostComment_Failure_ShowsErrorMessage()
