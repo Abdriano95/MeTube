@@ -80,6 +80,7 @@ After following these steps, the project should be properly configured and ready
 
 ## Application Architecture
 ![Application Architecture](./screenshots/architecture.png)
+
 Diagram of our application architecture.
 
 ## Screenshots
