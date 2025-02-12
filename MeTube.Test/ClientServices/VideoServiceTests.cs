@@ -30,10 +30,10 @@ namespace MeTube.Test.ClientServices
             _mockMapper = new Mock<IMapper>();
             _mockJsRuntime = new Mock<IJSRuntime>();
 
-            // VideoService kräver en IJSRuntime (för token) + IMapper + HttpClient
+            
             _videoService = new VideoService(_httpClient, _mockMapper.Object, _mockJsRuntime.Object);
 
-            // Låt den returnera "fake-jwt-token" när den hämtar från localStorage
+            
             _mockJsRuntime
                 .Setup(x => x.InvokeAsync<string>(It.IsAny<string>(), It.IsAny<object[]>()))
                 .ReturnsAsync("fake-jwt-token");
@@ -102,10 +102,10 @@ namespace MeTube.Test.ClientServices
                       new Video { Id=2, Title="Title2", Description="Desc2", Genre="Genre2" }
                   });
 
-            // Anropa metoden i VideoService
+            
             var result = await _videoService.GetAllVideosAsync();
 
-            // Kolla att vi inte får null + att listan har rätt antal
+           
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
         }
@@ -187,7 +187,247 @@ namespace MeTube.Test.ClientServices
             Assert.NotNull(result);
             Assert.Single(result);
         }
+        [Fact]
+        public async Task GetVideosByUserIdAsync_ReturnsNull_WhenException()
+        {
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ThrowsAsync(new Exception("Some error"));
 
+            var result = await _videoService.GetVideosByUserIdAsync();
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task DeleteVideoAsync_ReturnsTrue_WhenSuccess()
+        {
+            SetupHttpResponse(HttpStatusCode.OK);
+            var result = await _videoService.DeleteVideoAsync(77);
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task DeleteVideoAsync_ReturnsFalse_WhenException()
+        {
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ThrowsAsync(new Exception());
+
+            var result = await _videoService.DeleteVideoAsync(1);
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task UploadVideoAsync_ReturnsVideo_WhenSuccess()
+        {
+            var createdDto = new VideoDto
+            {
+                Id = 123,
+                Title = "CreatedTitle",
+                Description = "DescCreated",
+                Genre = "GenreC",
+                VideoUrl = "http://created/url.mp4",
+                ThumbnailUrl = "http://created/thumb.jpg",
+                DateUploaded = DateTime.UtcNow,
+                UserId = 5,
+                BlobExists = false
+            };
+            var opts = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            var json = JsonSerializer.Serialize(createdDto, opts);
+
+            SetupHttpResponse(HttpStatusCode.OK, json);
+
+            _mockMapper
+                .Setup(m => m.Map<Video>(It.IsAny<VideoDto>()))
+                .Returns(new Video { Id = 123, Title = "CreatedTitle" });
+
+            var video = new Video
+            {
+                Id = 0,
+                Title = "ToCreate",
+                Description = "DescToCreate",
+                Genre = "GenreToCreate"
+            };
+
+            using var ms = new MemoryStream(new byte[] { 1, 2, 3 });
+            var result = await _videoService.UploadVideoAsync(video, ms, "someVideo.mp4");
+            Assert.NotNull(result);
+            Assert.Equal(123, result.Id);
+        }
+
+        [Fact]
+        public async Task UploadVideoAsync_ReturnsNull_WhenFailStatusCode()
+        {
+            SetupHttpResponse(HttpStatusCode.BadRequest);
+
+            var video = new Video { Title = "FailVid", Description = "FailDesc", Genre = "FailGenre" };
+            using var ms = new MemoryStream(new byte[] { 1, 2, 3 });
+            var result = await _videoService.UploadVideoAsync(video, ms, "fail.mp4");
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task UpdateVideoAsync_ReturnsUpdatedVideo_WhenSuccess()
+        {
+            var dto = new VideoDto
+            {
+                Id = 10,
+                Title = "UpdatedTitle",
+                Description = "UpdatedDesc",
+                Genre = "UpdatedGenre",
+                VideoUrl = "http://some/update.mp4",
+                ThumbnailUrl = "http://some/upthumb.jpg",
+                DateUploaded = DateTime.UtcNow,
+                UserId = 5,
+                BlobExists = true
+            };
+            var opts = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            var json = JsonSerializer.Serialize(dto, opts);
+            SetupHttpResponse(HttpStatusCode.OK, json);
+
+            _mockMapper.Setup(m => m.Map<VideoDto>(It.IsAny<Video>()))
+                       .Returns(dto);
+            _mockMapper.Setup(m => m.Map<Video>(It.IsAny<VideoDto>()))
+                       .Returns(new Video { Id = 10, Title = "UpdatedTitle" });
+
+            var result = await _videoService.UpdateVideoAsync(new Video { Id = 10, Title = "OldTitle" });
+            Assert.NotNull(result);
+            Assert.Equal(10, result.Id);
+            Assert.Equal("UpdatedTitle", result.Title);
+        }
+
+        [Fact]
+        public async Task UpdateVideoAsync_ReturnsNull_WhenException()
+        {
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ThrowsAsync(new Exception());
+
+            var result = await _videoService.UpdateVideoAsync(new Video { Id = 99 });
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task UpdateVideoFileAsync_ReturnsVideo_WhenSuccess()
+        {
+            var dto = new VideoDto
+            {
+                Id = 88,
+                Title = "FileUpdated",
+                VideoUrl = "http://fileUpdated.mp4",
+                ThumbnailUrl = "http://some/filethumb.jpg",
+                DateUploaded = DateTime.UtcNow,
+                UserId = 5,
+                BlobExists = false
+            };
+            var opts = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            var json = JsonSerializer.Serialize(dto, opts);
+
+            SetupHttpResponse(HttpStatusCode.OK, json);
+
+            _mockMapper
+                .Setup(m => m.Map<Video>(It.IsAny<VideoDto>()))
+                .Returns(new Video { Id = 88, Title = "FileUpdated" });
+
+            using var fileStream = new MemoryStream(new byte[] { 10, 20, 30 });
+            var result = await _videoService.UpdateVideoFileAsync(88, fileStream, "myfile.mp4");
+            Assert.NotNull(result);
+            Assert.Equal(88, result.Id);
+        }
+
+        [Fact]
+        public async Task UpdateVideoFileAsync_ReturnsNull_WhenNotSuccess()
+        {
+            SetupHttpResponse(HttpStatusCode.InternalServerError);
+            using var fileStream = new MemoryStream(new byte[] { 1, 2, 3 });
+
+            var result = await _videoService.UpdateVideoFileAsync(99, fileStream, "fail.mp4");
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task UpdateVideoThumbnailAsync_ReturnsVideo_WhenSuccess()
+        {
+            var dto = new VideoDto { Id = 55, Title = "ThumbOk", VideoUrl = "http://some/t55.mp4" };
+            var opts = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            var json = JsonSerializer.Serialize(dto, opts);
+
+            SetupHttpResponse(HttpStatusCode.OK, json);
+
+            _mockMapper
+                .Setup(m => m.Map<Video>(It.IsAny<VideoDto>()))
+                .Returns(new Video { Id = 55, Title = "ThumbOk" });
+
+            using var thumbStream = new MemoryStream(new byte[] { 1, 2, 3 });
+            var result = await _videoService.UpdateVideoThumbnailAsync(55, thumbStream, "thumb.jpg");
+            Assert.NotNull(result);
+            Assert.Equal(55, result.Id);
+        }
+
+        [Fact]
+        public async Task UpdateVideoThumbnailAsync_ReturnsNull_WhenFailure()
+        {
+            SetupHttpResponse(HttpStatusCode.BadRequest);
+            using var thumbStream = new MemoryStream(new byte[] { 1, 2, 3 });
+
+            var result = await _videoService.UpdateVideoThumbnailAsync(10, thumbStream, "failthumb.jpg");
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task ResetThumbnail_ReturnsTrue_WhenOk()
+        {
+            SetupHttpResponse(HttpStatusCode.OK);
+            var result = await _videoService.ResetThumbnail(77);
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task ResetThumbnail_ReturnsFalse_WhenException()
+        {
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ThrowsAsync(new Exception());
+
+            var result = await _videoService.ResetThumbnail(77);
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task GetUploaderUsernameAsync_ReturnsName_WhenSuccess()
+        {
+            SetupHttpResponse(HttpStatusCode.OK, "MockUser");
+            var result = await _videoService.GetUploaderUsernameAsync(11);
+            Assert.Equal("MockUser", result);
+        }
+
+        [Fact]
+        public async Task GetUploaderUsernameAsync_ReturnsNull_WhenFailure()
+        {
+            SetupHttpResponse(HttpStatusCode.NotFound);
+            var result = await _videoService.GetUploaderUsernameAsync(55);
+            Assert.Null(result);
+        }
     }
 
 
