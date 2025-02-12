@@ -175,7 +175,7 @@ namespace MeTube.Test.ViewModels
                 { "IsAuthenticated", "true" },
                 { "Role", "Admin" }
             };
-            // Se till att mockUserService returnerar denna dictionary
+            
             _mockUserService.Setup(s => s.IsUserAuthenticated())
                             .ReturnsAsync(authData);
 
@@ -279,7 +279,11 @@ namespace MeTube.Test.ViewModels
 
             _mockCommentService
                 .Setup(s => s.GetCommentsByVideoIdAsync(10))
-                .ReturnsAsync(new List<Comment> { new Comment { Id = 1, Content = "Edited content" } });
+                .ReturnsAsync(new List<Comment> { new Comment { Id = 1, Content = "Edited content", UserId = 100 } });
+
+            _mockCommentService
+                .Setup(s => s.GetPosterUsernameAsync(It.IsAny<int>()))
+                .ReturnsAsync("TestUser");
 
             // Act
             await _viewModel.SaveCommentChanges();
@@ -287,7 +291,10 @@ namespace MeTube.Test.ViewModels
             // Assert
             Assert.False(_viewModel.IsEditingComment);
             _mockCommentService.Verify(s => s.UpdateCommentAsync(It.IsAny<CommentDto>()), Times.Once);
+            _mockCommentService.Verify(s => s.GetCommentsByVideoIdAsync(It.IsAny<int>()), Times.Once);
+            _mockCommentService.Verify(s => s.GetPosterUsernameAsync(It.IsAny<int>()), Times.AtLeastOnce);
         }
+
 
         [Fact]
         public async Task SaveCommentChanges_EmptyContent_DoesNothing()
@@ -364,19 +371,20 @@ namespace MeTube.Test.ViewModels
             _mockCommentService.Verify(s => s.GetCommentsByVideoIdAsync(10), Times.Once);
         }
 
-        /*[Fact]
+        [Fact]
         public async Task LoadCommentsAsync_SuccessfullyMapsAndAddsComments()
         {
             // Arrange
             int videoId = 33;
-            var commentDtos = new List<CommentDto>
-            {
-                new CommentDto { Id=1, Content="C1", UserId=100 },
-                new CommentDto { Id=2, Content="C2", UserId=101 }
-            };
-                _mockCommentService
+            var comments = new List<Comment>
+    {
+        new Comment { Id = 1, Content = "C1", UserId = 100 },
+        new Comment { Id = 2, Content = "C2", UserId = 101 }
+    };
+
+            _mockCommentService
                 .Setup(s => s.GetCommentsByVideoIdAsync(videoId))
-                .ReturnsAsync(commentDtos);
+                .ReturnsAsync(comments);  
 
             _mockMapper
                 .Setup(m => m.Map<Comment>(It.IsAny<CommentDto>()))
@@ -399,7 +407,8 @@ namespace MeTube.Test.ViewModels
             Assert.Equal("C1", _viewModel.Comments[0].Content);
             Assert.Equal("MockUser", _viewModel.Comments[0].PosterUsername);
             Assert.Equal("C2", _viewModel.Comments[1].Content);
-        }*/
+        }
+
 
         [Fact]
         public async Task LoadCommentsAsync_404ClearsComments()
