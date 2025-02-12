@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MeTube.Client;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
 using MeTube.Client.ViewModels.VideoViewModels;
@@ -16,11 +17,11 @@ namespace MeTube.Test.ViewModels
     {
         private readonly Mock<IVideoService> _mockVideoService;
         private readonly Mock<IHistoryService> _mockHistoryService;
-        private readonly Mock<IUserService> _mockUserService;
-        private readonly Mock<ICommentService> _mockCommentService;
-        private readonly Mock<IMapper> _mockMapper;
         private readonly Mock<ILikeService> _mockLikeService;
+        private readonly Mock<ICommentService> _mockCommentService;
+        private readonly Mock<IUserService> _mockUserService;
         private readonly Mock<NavigationManager> _mockNavigationManager;
+        private readonly Mock<IMapper> _mockMapper;
         private readonly VideoViewModel _viewModel;
 
         public VideoViewModelTests()
@@ -42,23 +43,57 @@ namespace MeTube.Test.ViewModels
         }
 
         [Fact]
-        public async Task LoadVideoAsync_LoadsVideoAndLikeInfo()
+        public async Task LoadVideoAsync_WhenVideoExists_SetsPropertiesAndLoadsComments()
         {
             // Arrange
-            var video = new Video { Id = 1, Title = "Test Video" };
-            _mockVideoService.Setup(s => s.GetVideoByIdAsync(1)).ReturnsAsync(video);
-            _mockLikeService.Setup(s => s.HasUserLikedVideoAsync(1)).ReturnsAsync(true);
-            _mockLikeService.Setup(s => s.GetLikeCountForVideoAsync(1)).ReturnsAsync(5);
+            int videoId = 1;
+            var expectedVideo = new Video();
+            var expectedUsername = "testUser";
+            bool expectedHasLiked = true;
+            int expectedLikeCount = 10;
+            var expectedComments = new List<Comment>();
+
+            _mockVideoService.Setup(x => x.GetVideoByIdAsync(videoId)).ReturnsAsync(expectedVideo);
+            _mockVideoService.Setup(x => x.GetUploaderUsernameAsync(videoId)).ReturnsAsync(expectedUsername);
+            _mockLikeService.Setup(x => x.HasUserLikedVideoAsync(videoId)).ReturnsAsync(expectedHasLiked);
+            _mockLikeService.Setup(x => x.GetLikeCountForVideoAsync(videoId)).ReturnsAsync(expectedLikeCount);
+            _mockCommentService.Setup(x => x.GetCommentsByVideoIdAsync(videoId)).ReturnsAsync(expectedComments);
 
             // Act
-            await _viewModel.LoadVideoAsync(1);
+            await _viewModel.LoadVideoAsync(videoId);
 
             // Assert
-            Assert.Equal(video, _viewModel.CurrentVideo);
-            Assert.True(_viewModel.HasUserLiked);
-            Assert.Equal(5, _viewModel.LikeCount);
+            _mockVideoService.Verify(x => x.GetVideoByIdAsync(videoId), Times.Once);
+            Assert.Equal(expectedVideo, _viewModel.CurrentVideo);
+            Assert.Equal(Constants.VideoStreamUrl(videoId), _viewModel.CurrentVideo.VideoUrl);
+
+            _mockVideoService.Verify(x => x.GetUploaderUsernameAsync(videoId), Times.Once);
+            Assert.Equal(expectedUsername, _viewModel.UploaderUsername);
+
+            _mockLikeService.Verify(x => x.HasUserLikedVideoAsync(videoId), Times.Once);
+            Assert.Equal(expectedHasLiked, _viewModel.HasUserLiked);
+
+            _mockLikeService.Verify(x => x.GetLikeCountForVideoAsync(videoId), Times.Once);
+            Assert.Equal(expectedLikeCount, _viewModel.LikeCount);
+
+            _mockCommentService.Verify(x => x.GetCommentsByVideoIdAsync(videoId), Times.Exactly(2));
             Assert.False(_viewModel.IsLoading);
-            Assert.Empty(_viewModel.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task LoadVideoAsync_WhenServiceThrowsException_SetsErrorMessage()
+        {
+            // Arrange
+            int videoId = 1;
+            var exception = new Exception("Test error");
+            _mockVideoService.Setup(x => x.GetVideoByIdAsync(videoId)).ThrowsAsync(exception);
+
+            // Act
+            await _viewModel.LoadVideoAsync(videoId);
+
+            // Assert
+            Assert.Equal($"An error occurred: {exception.Message}", _viewModel.ErrorMessage);
+            Assert.False(_viewModel.IsLoading);
         }
 
         [Fact]
@@ -124,7 +159,6 @@ namespace MeTube.Test.ViewModels
             // Act
             await _viewModel.ToggleLikeCommand.ExecuteAsync(null);
 
-            // Assert
             // Assert
             Assert.NotNull(_viewModel.ErrorMessage);
             Assert.Contains("Test error", _viewModel.ErrorMessage);

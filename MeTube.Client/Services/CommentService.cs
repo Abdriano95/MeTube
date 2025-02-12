@@ -42,7 +42,7 @@ namespace MeTube.Client.Services
         {
             try
             {
-                var requestUri = new Uri($"https://localhost:5001/api/comments/video/{videoId}");
+                var requestUri = new Uri($"https://localhost:5001/api/Comments/video/{videoId}");
                 var response = await _httpClient.GetAsync(requestUri);
 
                 response.EnsureSuccessStatusCode();

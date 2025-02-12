@@ -52,6 +52,17 @@ namespace MeTube.API.Controllers
             return Ok(userDtos);
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet("manageUsersDetails")]
+        public async Task<IActionResult> GetAllUsersDetails()
+        {
+            var users = await _unitOfWork.Users.GetAllAsync();
+            if (!users.Any())
+                return NotFound(new { Message = "Users not found" });
+            var userDtos = _mapper.Map<IEnumerable<UserDetailsDto>>(users);
+            return Ok(userDtos);
+        }
+
         [HttpGet("userIdFromEmail")]
         public async Task<IActionResult> GetUserIdByEmail([FromQuery] string email)
         {

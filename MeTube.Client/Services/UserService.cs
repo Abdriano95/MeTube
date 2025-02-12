@@ -106,5 +106,9 @@ namespace MeTube.Client.Services
             return await _clientService.GetUserByIdAsync(id);
         }
 
+        public Task<IEnumerable<UserDetails>> GetAllUsersDetailsAsync()
+        {
+            return _clientService.GetAllUsersDetailsAsync();
+        }
     }
 }

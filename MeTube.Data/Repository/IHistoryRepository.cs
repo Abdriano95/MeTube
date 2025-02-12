@@ -10,5 +10,6 @@ namespace MeTube.Data.Repository
     public interface IHistoryRepository : IRepository<History>
     {
         Task<IEnumerable<History>> GetHistoriesByUserIdAsync(int userId);
+        Task<History?> GetHistoryWithRelationsAsync(int historyId);
     }
 }

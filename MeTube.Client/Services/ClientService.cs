@@ -273,5 +273,35 @@ namespace MeTube.Client.Services
             }
         }
 
+        public async Task<IEnumerable<UserDetails>> GetAllUsersDetailsAsync()
+        {
+            await AddAuthorizationHeader();
+            try
+            {
+                Uri uri = new Uri(Constants.GetAllUsersDetails);
+                var response = await _client.GetAsync(uri);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine($"Failed to fetch users. StatusCode: {response.StatusCode}");
+                    return Enumerable.Empty<UserDetails>();
+                }
+
+                var users = await response.Content.ReadFromJsonAsync<IEnumerable<UserDetails>>(_serializerOptions);
+
+                if (!users.Any())
+                {
+                    Debug.WriteLine("Failed to deserialize users.");
+                    return Enumerable.Empty<UserDetails>();
+                }
+
+                return users;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error fetching users: {ex.Message}");
+                return Enumerable.Empty<UserDetails>();
+            }
+        }
     }
 }
