@@ -3,7 +3,9 @@ using MeTube.Client;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
 using MeTube.Client.ViewModels.VideoViewModels;
+using MeTube.DTO.CommentDTOs;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -164,5 +166,88 @@ namespace MeTube.Test.ViewModels
             Assert.Contains("Test error", _viewModel.ErrorMessage);
         }
 
+        [Fact]
+        public async Task PostComment_WhenCommentIsValid_AddsComment()
+        {
+            // Arrange
+            _viewModel.CurrentVideo = new Video { Id = 1 };
+            _viewModel.NewCommentText = "Test comment";
+            var newCommentDto = new CommentDto { Id = 1, Content = "Test comment", VideoId = 1, UserId = 0, DateAdded = DateTime.Now };
+            var newComment = new Comment { Id = 1, Content = "Test comment", VideoId = 1, UserId = 0, DateAdded = DateTime.Now };
+            _mockCommentService.Setup(s => s.AddCommentAsync(It.IsAny<CommentDto>())).ReturnsAsync(newComment);
+
+            // Act
+            await _viewModel.PostComment();
+
+            // Assert
+            _mockCommentService.Verify(s => s.AddCommentAsync(It.IsAny<CommentDto>()), Times.Once);
+            Assert.Empty(_viewModel.NewCommentText);
+            Assert.Empty(_viewModel.CommentErrorMessage);
+        }
+
+        [Fact]
+        public async Task PostComment_WhenCommentIsEmpty_SetsErrorMessage()
+        {
+            // Arrange
+            _viewModel.NewCommentText = string.Empty;
+
+            // Act
+            await _viewModel.PostComment();
+
+            // Assert
+            Assert.Equal("Comment cannot be empty.", _viewModel.CommentErrorMessage);
+        }
+
+        [Fact]
+        public async Task SaveCommentChanges_WhenCommentIsValid_UpdatesComment()
+        {
+            // Arrange
+            var comment = new Comment { Id = 1, Content = "Updated comment", VideoId = 1, UserId = 0, DateAdded = DateTime.Now };
+            var updatedCommentDto = new CommentDto { Id = 1, Content = "Updated comment", VideoId = 1, UserId = 0, DateAdded = DateTime.Now };
+            _viewModel.CommentToEdit = comment;
+            _viewModel.IsEditingComment = true;
+            _mockCommentService.Setup(s => s.UpdateCommentAsync(It.IsAny<CommentDto>())).ReturnsAsync(comment);
+
+            // Act
+            await _viewModel.SaveCommentChanges();
+
+            // Assert
+            _mockCommentService.Verify(s => s.UpdateCommentAsync(It.IsAny<CommentDto>()), Times.Once);
+            Assert.False(_viewModel.IsEditingComment);
+        }
+
+        [Fact]
+        public async Task DeleteCommentWithConfirmation_WhenConfirmed_DeletesComment()
+        {
+            // Arrange
+            var comment = new Comment { Id = 1, Content = "Test comment", VideoId = 1, UserId = 0, DateAdded = DateTime.Now };
+            _mockCommentService.Setup(s => s.DeleteCommentAsync(comment.Id)).ReturnsAsync(true);
+            var jsRuntimeMock = new Mock<IJSRuntime>();
+            jsRuntimeMock.Setup(js => js.InvokeAsync<bool>("confirm", It.IsAny<object[]>())).ReturnsAsync(true);
+
+            // Act
+            await _viewModel.DeleteCommentWithConfirmation(comment, jsRuntimeMock.Object);
+
+            // Assert
+            _mockCommentService.Verify(s => s.DeleteCommentAsync(comment.Id), Times.Once);
+        }
+
+        [Fact]
+        public async Task LoadCommentsAsync_WhenCalled_LoadsComments()
+        {
+            // Arrange
+            int videoId = 1;
+            var commentDtos = new List<CommentDto> { new CommentDto { Id = 1, Content = "Test comment", VideoId = 1, UserId = 0, DateAdded = DateTime.Now } };
+            var comments = new List<Comment> { new Comment { Id = 1, Content = "Test comment", VideoId = 1, UserId = 0, DateAdded = DateTime.Now } };
+            _mockCommentService.Setup(s => s.GetCommentsByVideoIdAsync(videoId)).ReturnsAsync(comments);
+            _mockMapper.Setup(m => m.Map<Comment>(It.IsAny<CommentDto>())).Returns(comments.First());
+
+            // Act
+            await _viewModel.LoadCommentsAsync(videoId);
+
+            // Assert
+            _mockCommentService.Verify(s => s.GetCommentsByVideoIdAsync(videoId), Times.Once);
+            Assert.Single(_viewModel.Comments);
+        }
     }
 }

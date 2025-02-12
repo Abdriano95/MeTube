@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
-using MeTube.DTO;
+using MeTube.DTO.CommentDTOs;
 using Microsoft.JSInterop;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -42,7 +42,7 @@ namespace MeTube.Client.Services
         {
             try
             {
-                var requestUri = new Uri($"https://localhost:5001/api/Comments/video/{videoId}");
+                var requestUri = new Uri(Constants.CommentGetByVideoIdUrl(videoId));
                 var response = await _httpClient.GetAsync(requestUri);
 
                 response.EnsureSuccessStatusCode();
@@ -68,7 +68,7 @@ namespace MeTube.Client.Services
                     "application/json"
                 );
 
-                var requestUri = new Uri("https://localhost:5001/api/comments");
+                var requestUri = new Uri(Constants.CommentAddUrl);
 
                 var response = await _httpClient.PostAsync(requestUri, content);
 
@@ -102,7 +102,7 @@ namespace MeTube.Client.Services
                     "application/json"
                 );
 
-                var requestUri = new Uri($"https://localhost:5001/api/comments/{commentDto.Id}");
+                var requestUri = new Uri(Constants.CommentUpdateUrl(commentDto.Id));
 
                 var response = await _httpClient.PutAsync(requestUri, content);
                 response.EnsureSuccessStatusCode();
@@ -122,7 +122,7 @@ namespace MeTube.Client.Services
             await AddAuthorizationHeader();
             try
             {
-                var requestUri = new Uri($"https://localhost:5001/api/comments/{commentId}");
+                var requestUri = new Uri(Constants.CommentDeleteUrl(commentId));
 
                 var response = await _httpClient.DeleteAsync(requestUri);
                 return response.IsSuccessStatusCode;
@@ -138,7 +138,7 @@ namespace MeTube.Client.Services
         {
             try
             {
-                var requestUri = new Uri($"https://localhost:5001/api/comments/username/{userId}");
+                var requestUri = new Uri(Constants.CommentGetPosterUsernameUrl(userId));
                 var response = await _httpClient.GetAsync(requestUri);
 
                 if (!response.IsSuccessStatusCode)
@@ -158,6 +158,5 @@ namespace MeTube.Client.Services
                 return null;
             }
         }
-
     }
 }

@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
-using MeTube.DTO;
+using MeTube.DTO.CommentDTOs;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System.Collections.ObjectModel;
