@@ -258,5 +258,44 @@ namespace MeTube.Client.Services
                 return null;
             }
         }
+
+        public async Task<List<Video>?> GetRecommendedVideosAsync()
+        {
+            await AddAuthorizationHeader();
+            try
+            {
+                var response = await _httpClient.GetAsync(Constants.VideoGetRecommendedUrl);
+
+                // Om servern svarar t.ex. 401 eller 403, 
+                // vill vi INTE returnera null – utan en tom lista
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Failed to get recommended videos (Status: {response.StatusCode})");
+                    return new List<Video>();
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"JSON Response: {json}");
+
+                // Deserialisera till en lista av VideoDto
+                var videoDtos = JsonSerializer.Deserialize<List<VideoDto>>(json);
+
+                if (videoDtos == null)
+                {
+                    Console.WriteLine("❌ videoDtos är null!");
+                    return new List<Video>();
+                }
+
+                // Mappa till klientsidans Video
+                return _mapper.Map<List<Video>>(videoDtos);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching recommended videos: {ex.Message}");
+                // Returnera tom lista i stället för null
+                return new List<Video>();
+            }
+        }
+
     }
 }

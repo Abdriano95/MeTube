@@ -13,14 +13,17 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         private readonly IVideoService _videoService;
 
         [ObservableProperty]
-        private ObservableCollection<Video> videos; 
+        private ObservableCollection<Video> videos;
+
+        [ObservableProperty]
+        private ObservableCollection<Video> recommendedVideos;
         public bool IsLoading { get; set; }
 
 
 
         public VideoListViewModel(IVideoService videoService)
         {
-            _videoService = videoService;     
+            _videoService = videoService;
         }
 
         [RelayCommand]
@@ -45,6 +48,35 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             }
         }
 
+        [RelayCommand]
+        public async Task LoadRecommendedVideosAsync()
+        {
+            IsLoading = true;
+            try
+            {
+                // Anropar service
+                var videos = await _videoService.GetRecommendedVideosAsync();
+
+                // Dubbelkolla om du vill:
+                if (videos == null)
+                {
+                    videos = new List<Video>();
+                }
+
+                // Skapa en ObservableCollection från listan
+                RecommendedVideos = new ObservableCollection<Video>(videos);
+
+                // Sätt UploaderUsername för varje video, precis som du gör i LoadVideosAsync()
+                foreach (var video in RecommendedVideos)
+                {
+                    video.UploaderUsername = await _videoService.GetUploaderUsernameAsync(video.Id);
+                }
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
 
     }
 }
