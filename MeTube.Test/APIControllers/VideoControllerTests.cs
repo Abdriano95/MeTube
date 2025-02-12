@@ -92,30 +92,35 @@ namespace MeTube.Test.APIControllers
         [Fact]
         public async Task GetAllVideos_ReturnsOk_WhenVideosExist()
         {
-            
-            var videoList = _videos; // Kan vara en exempelsamling
-
+            // Arrange
             _mockUnitOfWork
                 .Setup(u => u.Videos.GetAllVideosAsync())
-                .ReturnsAsync(videoList);
+                .ReturnsAsync(_videos);
 
+            // Mappa varje Video -> VideoDto i testet
             _mockMapper
                 .Setup(m => m.Map<VideoDto>(It.IsAny<Video>()))
-                .Returns((Video src) => new VideoDto
+                .Returns((Video v) => new VideoDto
                 {
-                    Id = src.Id,
-                    Title = src.Title,
-                    Genre = src.Genre,
-                    Description = src.Description
+                    Id = v.Id,
+                    Title = v.Title,
+                    Genre = v.Genre,
+                    Description = v.Description
                 });
 
-            // ACT
+            // Simulera att alla blobar existerar
+            _mockVideoService
+                .Setup(s => s.BlobExistsAsync(It.IsAny<string>()))
+                .ReturnsAsync(true);
+
+            // Act
             var result = await _controller.GetAllVideos();
 
-            // ASSERT
+            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedDtoList = Assert.IsAssignableFrom<IEnumerable<VideoDto>>(okResult.Value);
-            Assert.Equal(2, returnedDtoList.Count()); // Samma antal som i _videos
+            var dtoList = Assert.IsAssignableFrom<IEnumerable<VideoDto>>(okResult.Value);
+            Assert.Equal(2, dtoList.Count());
+
         }
     }
 }
