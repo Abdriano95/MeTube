@@ -462,9 +462,7 @@ namespace MeTube.Test.APIControllers
                 .Setup(u => u.BeginTransactionAsync())
                 .ReturnsAsync(mockTransaction.Object);
 
-            // Om koden inte hittar en video innan den "avbryts", mocka ev. bort det:
-            // _mockUnitOfWork.Setup(u => u.Videos.GetVideoByIdAsync(It.IsAny<int>()))
-            //                .ReturnsAsync(new Video { ... });
+           
 
             var updateDto = new UpdateVideoDto
             {
@@ -476,8 +474,7 @@ namespace MeTube.Test.APIControllers
             // Act
             var result = await _controller.UpdateVideo(1, updateDto);
 
-            // Assert
-            // [Authorize(Roles="Admin")] ger i enhetstester ofta en ObjectResult(403) snarare än ForbidResult.
+            
             var objectRes = Assert.IsType<ObjectResult>(result);
             Assert.Equal(StatusCodes.Status403Forbidden, objectRes.StatusCode);
         }
