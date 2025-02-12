@@ -7,6 +7,7 @@ using Moq;
 using Moq.Protected;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Xunit;
@@ -21,7 +22,6 @@ namespace MeTube.Test.ClientServices
         private readonly HttpClient _httpClient;
         private readonly VideoService _videoService;
 
-
         public VideoServiceTests()
         {
             _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -29,8 +29,10 @@ namespace MeTube.Test.ClientServices
             _mockMapper = new Mock<IMapper>();
             _mockJsRuntime = new Mock<IJSRuntime>();
 
+            // VideoService kräver en IJSRuntime (för token) + IMapper + HttpClient
             _videoService = new VideoService(_httpClient, _mockMapper.Object, _mockJsRuntime.Object);
 
+            // Låt den returnera "fake-jwt-token" när den hämtar från localStorage
             _mockJsRuntime
                 .Setup(x => x.InvokeAsync<string>(It.IsAny<string>(), It.IsAny<object[]>()))
                 .ReturnsAsync("fake-jwt-token");
@@ -53,31 +55,76 @@ namespace MeTube.Test.ClientServices
                 });
         }
 
+
         [Fact]
         public async Task GetAllVideosAsync_ReturnsList_WhenSuccessful()
         {
+            // Skapa testdatan som JSON
             var videoDtos = new List<VideoDto>
             {
-                new VideoDto { Id = 1, Title = "Title1" },
-                new VideoDto { Id = 2, Title = "Title2" }
+                new VideoDto {
+                    Id = 1,
+                    Title = "Title1",
+                    Description = "Desc1",
+                    Genre = "Genre1",
+                    VideoUrl = "http://some/video1.mp4",
+                    ThumbnailUrl = "http://some/thumb1.jpg",
+                    DateUploaded = DateTime.UtcNow,
+                    UserId = 10,
+                    BlobExists = false
+                },
+                new VideoDto {
+                    Id = 2,
+                    Title = "Title2",
+                    Description = "Desc2",
+                    Genre = "Genre2",
+                    VideoUrl = "http://some/video2.mp4",
+                    ThumbnailUrl = null,
+                    DateUploaded = DateTime.UtcNow,
+                    UserId = 20,
+                    BlobExists = true
+                }
             };
-            var json = JsonSerializer.Serialize(videoDtos);
+
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            var json = JsonSerializer.Serialize(videoDtos, options);
+
+            // Mocka respons 200 OK + JSON
             SetupHttpResponse(HttpStatusCode.OK, json);
 
+            // Mocka AutoMapper
             _mockMapper
                 .Setup(m => m.Map<List<Video>>(videoDtos))
                 .Returns(new List<Video>
                 {
-                    new Video { Id = 1, Title = "Title1" },
-                    new Video { Id = 2, Title = "Title2" }
+                    new Video { Id = 1, Title = "Title1", Description="Desc1", Genre="Genre1" },
+                    new Video { Id = 2, Title = "Title2", Description="Desc2", Genre="Genre2" }
                 });
 
+            // Anropa metoden i VideoService
             var result = await _videoService.GetAllVideosAsync();
 
+            // Kolla att vi inte får null + att listan har rätt antal
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
         }
+        [Fact]
+        public async Task GetAllVideosAsync_ReturnsNull_WhenException()
+        {
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                 )
+                .ThrowsAsync(new Exception("Network error"));
+
+            var result = await _videoService.GetAllVideosAsync();
+            Assert.Null(result);
+        }
+
+        
     }
 
 
- }  
+}  
