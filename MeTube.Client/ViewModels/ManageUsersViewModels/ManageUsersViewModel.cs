@@ -50,6 +50,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             _jsRuntime = jsRuntime;
             _navigation = navigation;
         }
+        // Loads all users from the user service and populates the AllUsers and FilteredUsers collections.
         public async Task LoadUsers()
         {
             var allUsers = await _userService.GetAllUsersAsync();
@@ -61,6 +62,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             }
         }
 
+        // Opens the user card for editing and sets the selected user and chosen user ID.
         public async Task EditUserButton(User user)
         {
             ShowUserCard = true;
@@ -68,22 +70,26 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             ChosenUserId = await GetUserId(user);
         }
 
+        // Closes the user card and clears the selected user.
         public void CloseUserCard()
         {
             ShowUserCard = false;
             SelectedUser = null;
         }
 
+        // Navigates to the user account creation page.
         public void CreateUserAccount()
         {
             _navigation.NavigateTo("/signup", forceLoad: true);
         }
+        // Retrieves the user ID based on the user's email.
         private async Task<int> GetUserId(User user)
         {
             var hasse = await _userService.GetUserIdByEmailAsync(user.Email);
             return hasse.Value;
         }
 
+        // Deletes the specified user after confirmation and reloads the user list.
         public async Task DeleteUserButton(User user)
         {
             int userId = await GetUserId(user);
@@ -102,6 +108,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             }
         }
 
+        // Checks if the user already exists based on username and email.
         private async Task<bool> CheckIfUserExist(User user)
         {
             Dictionary<string, string> response = await _userService.DoesUserExistAsync(user.Username, user.Email);
@@ -115,6 +122,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
                 return false;
         }
 
+        // Saves changes to the user after confirmation and reloads the user list.
         public async Task SaveChangesButton(User user)
         {
             var emailCount = AllUsers.Where(a => a.Email.Equals(user.Email));
@@ -133,14 +141,14 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
                 Password = user.Password,
                 Role = user.Role,
             };
-            
+
             bool secureupdate = await _jsRuntime.InvokeAsync<bool>("confirm", "You sure you want to update this user?");
             if (secureupdate)
             {
                 bool response = await _userService.UpdateUserAsync(ChosenUserId, dto);
                 string message = string.Empty;
-                if(response)
-                { 
+                if (response)
+                {
                     await _jsRuntime.InvokeVoidAsync("alert", "User succesfully saved!");
                     CloseUserCard();
                 }
@@ -149,6 +157,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             }
             await LoadUsers();
         }
+        // Searches for users based on the search term and updates the AllUsers collection.
         public void SearchButton()
         {
             if (string.IsNullOrWhiteSpace(Search))
@@ -158,6 +167,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             foreach (User user in result)
                 AllUsers.Add(user);
         }
+        // Resets the AllUsers collection to the original list of users.
         private void ResetSearchedSongs()
         {
             AllUsers.Clear();
