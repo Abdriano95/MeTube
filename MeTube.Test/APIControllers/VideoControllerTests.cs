@@ -163,6 +163,37 @@ namespace MeTube.Test.APIControllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.Equal("UploaderUser", okResult.Value);
         }
+        [Fact]
+        public async Task GetUploaderUsername_ReturnsNotFound_WhenVideoNotFound()
+        {
+            // Arrange
+            _mockUnitOfWork.Setup(u => u.Videos.GetVideoByIdAsync(It.IsAny<int>()))
+                           .ReturnsAsync((Video)null);
+
+            // Act
+            var result = await _controller.GetUploaderUsername(999);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+        [Fact]
+        public async Task GetUploaderUsername_ReturnsNotFound_WhenUserNotFound()
+        {
+            // Arrange
+            var video = _videos.First();
+            _mockUnitOfWork.Setup(u => u.Videos.GetVideoByIdAsync(video.Id))
+                           .ReturnsAsync(video);
+            _mockUnitOfWork.Setup(u => u.Users.GetUserByIdAsync(video.UserId))
+                           .ReturnsAsync((User)null);
+
+            // Act
+            var result = await _controller.GetUploaderUsername(video.Id);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+
     }
 }
 
