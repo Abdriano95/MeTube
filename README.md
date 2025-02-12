@@ -1,7 +1,7 @@
 # MeTube
 
 ## Description
-This is our group project for our Object Oriented Design course.
+This is our group project for our Object Oriented Software Development course.
 
 It's a simple YouTube-inspired web application that demonstrates core video streaming concepts—uploading, searching, and playing videos—while focusing on clean design and user-friendly interactions.
 
