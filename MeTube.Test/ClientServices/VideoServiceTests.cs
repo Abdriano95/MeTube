@@ -11,6 +11,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Xunit;
+using static System.Net.WebRequestMethods;
 
 namespace MeTube.Test.ClientServices
 {
@@ -79,7 +80,7 @@ namespace MeTube.Test.ClientServices
                     Description = "Desc2",
                     Genre = "Genre2",
                     VideoUrl = "http://some/video2.mp4",
-                    ThumbnailUrl = null,
+                    ThumbnailUrl = "http://some/thumb2.jpg",
                     DateUploaded = DateTime.UtcNow,
                     UserId = 20,
                     BlobExists = true
@@ -94,12 +95,12 @@ namespace MeTube.Test.ClientServices
 
             // Mocka AutoMapper
             _mockMapper
-                .Setup(m => m.Map<List<Video>>(videoDtos))
+                .Setup(m => m.Map<List<Video>>(It.IsAny<List<VideoDto>>()))
                 .Returns(new List<Video>
                 {
-                    new Video { Id = 1, Title = "Title1", Description="Desc1", Genre="Genre1" },
-                    new Video { Id = 2, Title = "Title2", Description="Desc2", Genre="Genre2" }
-                });
+                      new Video { Id=1, Title="Title1", Description="Desc1", Genre="Genre1" },
+                      new Video { Id=2, Title="Title2", Description="Desc2", Genre="Genre2" }
+                  });
 
             // Anropa metoden i VideoService
             var result = await _videoService.GetAllVideosAsync();
@@ -123,7 +124,37 @@ namespace MeTube.Test.ClientServices
             Assert.Null(result);
         }
 
-        
+        [Fact]
+        public async Task GetVideoByIdAsync_ReturnsVideo_WhenSuccessful()
+        {
+            var dto = new VideoDto
+            {
+                Id = 99,
+                Title = "TestVid",
+                Description = "DescTest",
+                Genre = "GenreTest",
+                VideoUrl = "http://video/vid99.mp4",
+                ThumbnailUrl = "http://video/thumb99.jpg",
+                DateUploaded = DateTime.UtcNow,
+                UserId = 5,
+                BlobExists = true
+            };
+
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            var json = JsonSerializer.Serialize(dto, options);
+            SetupHttpResponse(HttpStatusCode.OK, json);
+
+            _mockMapper
+            .Setup(m => m.Map<Video>(It.IsAny<VideoDto>()))
+            .Returns(new Video { Id = 99, Title = "TestVid" });
+
+            var result = await _videoService.GetVideoByIdAsync(99);
+
+            Assert.NotNull(result);
+            Assert.Equal(99, result.Id);
+        }
+
+
     }
 
 
