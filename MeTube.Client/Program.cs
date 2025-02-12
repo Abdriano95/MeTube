@@ -37,6 +37,7 @@ namespace MeTube.Client
             builder.Services.AddSingleton<EditVideo>();
             builder.Services.AddSingleton<UploadVideo>();
             builder.Services.AddSingleton<HistoryView>();
+            builder.Services.AddSingleton<ManageHistory>();
 
 
             builder.Services.AddTransient<SignupViewModel>();
@@ -48,6 +49,7 @@ namespace MeTube.Client
             builder.Services.AddTransient<EditVideoViewModel>();
             builder.Services.AddTransient<UploadVideoViewModel>();
             builder.Services.AddTransient<UserHistoryViewModel>();
+            builder.Services.AddTransient<AdminHistoryViewModel>();
 
             builder.Services.AddSingleton<ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
@@ -56,6 +58,7 @@ namespace MeTube.Client
             builder.Services.AddScoped<ILikeService, LikeService>();
             builder.Services.AddScoped<IHistoryService, HistoryService>();
             builder.Services.AddScoped<ICommentService, CommentService>();
+            builder.Services.AddScoped<IAdminHistoryService, AdminHistoryService>();
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddAuthorizationCore();

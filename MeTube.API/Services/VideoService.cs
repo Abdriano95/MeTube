@@ -9,7 +9,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace MeTube.API.Services
 {
-    public class VideoService
+    public class VideoService : IVideoService
     {
         private readonly BlobContainerClient _videoContainerClient;
         private readonly BlobContainerClient _thumbnailContainerClient;

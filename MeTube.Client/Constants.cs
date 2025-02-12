@@ -10,6 +10,7 @@
         // Specific REST URLs
         public static string UserRegisterUrl = $"{BaseUrl}/user/signup";
         public static string GetAllUsers = $"{BaseUrl}/user/manageUsers";
+        public static string GetAllUsersDetails = $"{BaseUrl}/user/manageUsersDetails";
         public static string GetUserIdByEmail = $"{BaseUrl}/user/userIdFromEmail";
         public static string UserLoginUrl = $"{BaseUrl}/user/login";
         public static string GetUserUrl = $"{BaseUrl}/user/{{0}}";
@@ -65,6 +66,22 @@
 
         // POST
         public static string HistoryAddUrl = HistoryBaseUrl;
+
+        // History endpoints for Admin
+        public static string HistoryAdminBaseUrl = $"{BaseUrl}/History/admin";
+        // GET
+        public static string HistoryAdminGetByUserIdUrl(int userId) => $"{HistoryAdminBaseUrl}/user/{userId}";
+
+        // POST
+        public static string HistoryAdminAddUrl = HistoryAdminBaseUrl;
+
+        // PUT
+        public static string HistoryAdminUpdateUrl(int historyId) => $"{HistoryAdminBaseUrl}/{historyId}";
+
+        // DELETE
+        public static string HistoryAdminDeleteUrl(int historyId) => $"{HistoryAdminBaseUrl}/{historyId}";
+
+
 
 
 

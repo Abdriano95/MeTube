@@ -25,5 +25,13 @@ namespace MeTube.Data.Repository
            .OrderByDescending(h => h.DateWatched)
            .ToListAsync();
         }
+
+        public async Task<History?> GetHistoryWithRelationsAsync(int historyId)
+        {
+            return await DbContext.Histories
+                .Include(h => h.Video)
+                .Include(h => h.User)
+                .FirstOrDefaultAsync(h => h.Id == historyId);
+        }
     }    
 }

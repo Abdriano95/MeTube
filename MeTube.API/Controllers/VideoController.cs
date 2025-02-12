@@ -15,9 +15,9 @@ namespace MeTube.API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly VideoService _videoService;
+        private readonly IVideoService _videoService;
 
-        public VideoController(IUnitOfWork unitOfWork, IMapper mapper, VideoService videoService)
+        public VideoController(IUnitOfWork unitOfWork, IMapper mapper, IVideoService videoService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
