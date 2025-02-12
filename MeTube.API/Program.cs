@@ -130,7 +130,7 @@ namespace MeTube.API
             });
 
             // Add VideoService
-            builder.Services.AddScoped<VideoService>();
+            builder.Services.AddScoped<IVideoService, VideoService>();
 
 
             var app = builder.Build();
