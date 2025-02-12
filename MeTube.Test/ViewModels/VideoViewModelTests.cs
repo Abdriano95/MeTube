@@ -3,6 +3,7 @@ using MeTube.Client;
 using MeTube.Client.Models;
 using MeTube.Client.Services;
 using MeTube.Client.ViewModels.VideoViewModels;
+using MeTube.DTO;
 using Microsoft.AspNetCore.Components;
 using Moq;
 using System;
@@ -36,7 +37,7 @@ namespace MeTube.Test.ViewModels
             _viewModel = new VideoViewModel(_mockVideoService.Object,
                                             _mockLikeService.Object,
                                             _mockCommentService.Object,
-                                            _mockUserService.Object as UserService,
+                                            _mockUserService.Object,
                                             _mockMapper.Object,
                                             _mockNavigationManager.Object,
                                             _mockHistoryService.Object);
@@ -162,6 +163,82 @@ namespace MeTube.Test.ViewModels
             // Assert
             Assert.NotNull(_viewModel.ErrorMessage);
             Assert.Contains("Test error", _viewModel.ErrorMessage);
+        }
+        [Fact]
+        public async Task InitializeAsync_SetsIsAuthenticatedAndUserRole()
+        {
+            // Arrange
+            var authData = new Dictionary<string, string>
+            {
+                { "IsAuthenticated", "true" },
+                { "Role", "Admin" }
+            };
+            // Se till att mockUserService returnerar denna dictionary
+            _mockUserService.Setup(s => s.IsUserAuthenticated())
+                            .ReturnsAsync(authData);
+
+            // Act
+            await _viewModel.InitializeAsync();
+
+            // Assert
+            Assert.True(_viewModel.IsAuthenticated);
+            Assert.Equal("Admin", _viewModel.UserRole);
+        }
+        [Fact]
+        public async Task PostComment_EmptyComment_ShowsErrorMessage()
+        {
+            // Arrange
+            _viewModel.NewCommentText = "";  // tom sträng
+            _viewModel.CommentErrorMessage = null;
+            _viewModel.CurrentVideo = new Video { Id = 1 };
+
+            // Act
+            await _viewModel.PostComment();
+
+            // Assert
+            Assert.Equal("Comment cannot be empty.", _viewModel.CommentErrorMessage);
+        }
+        [Fact]
+        public async Task PostComment_SuccessfullyAddsComment()
+        {
+            // Arrange
+            _viewModel.NewCommentText = "New test comment";
+            _viewModel.CurrentVideo = new Video { Id = 1 };
+            var mockPostedComment = new Comment { Id = 123, Content = "New test comment" };
+
+            _mockCommentService
+                .Setup(s => s.AddCommentAsync(It.IsAny<CommentDto>()))
+                .ReturnsAsync(mockPostedComment);
+
+            _mockCommentService
+                .Setup(s => s.GetCommentsByVideoIdAsync(1))
+                .ReturnsAsync(new List<Comment>() { mockPostedComment });
+
+            // Act
+            await _viewModel.PostComment();
+
+            // Assert
+            Assert.Equal(string.Empty, _viewModel.NewCommentText);
+            Assert.Equal(string.Empty, _viewModel.CommentErrorMessage);
+        }
+
+        [Fact]
+        public async Task PostComment_Failure_ShowsErrorMessage()
+        {
+            // Arrange
+            _viewModel.NewCommentText = "Fail comment";
+            _viewModel.CurrentVideo = new Video { Id = 10 };
+
+            // Simulera null från AddCommentAsync => misslyckad post
+            _mockCommentService
+                .Setup(s => s.AddCommentAsync(It.IsAny<CommentDto>()))
+                .ReturnsAsync((Comment)null);
+
+            // Act
+            await _viewModel.PostComment();
+
+            // Assert
+            Assert.Equal("Failed to post your comment. Please try again.", _viewModel.CommentErrorMessage);
         }
 
     }
