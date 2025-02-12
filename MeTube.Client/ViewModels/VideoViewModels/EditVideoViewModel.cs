@@ -30,6 +30,11 @@ namespace MeTube.Client.ViewModels
         private string description = string.Empty;
 
         [ObservableProperty]
+        //[Required(ErrorMessage = "Genre is required")]
+        [StringLength(30, MinimumLength = 3, ErrorMessage = "Please select a genre")]
+        private string genre = string.Empty;
+
+        [ObservableProperty]
         private IBrowserFile? newVideoFile;
 
         [ObservableProperty]
@@ -81,6 +86,7 @@ namespace MeTube.Client.ViewModels
                 {
                     Title = CurrentVideo.Title;
                     Description = CurrentVideo.Description;
+                    Genre = CurrentVideo.Genre;
                 }
                 else
                 {
@@ -136,6 +142,7 @@ namespace MeTube.Client.ViewModels
                 IsLoading = true;
                 CurrentVideo.Title = Title;
                 CurrentVideo.Description = Description;
+                CurrentVideo.Genre = Genre;
 
                 var updatedVideo = await _videoService.UpdateVideoAsync(CurrentVideo);
                 if (updatedVideo != null)
