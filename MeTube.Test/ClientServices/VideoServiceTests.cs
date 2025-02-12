@@ -21,6 +21,7 @@ namespace MeTube.Test.ClientServices
         private readonly HttpClient _httpClient;
         private readonly VideoService _videoService;
 
+
         public VideoServiceTests()
         {
             _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -33,6 +34,48 @@ namespace MeTube.Test.ClientServices
             _mockJsRuntime
                 .Setup(x => x.InvokeAsync<string>(It.IsAny<string>(), It.IsAny<object[]>()))
                 .ReturnsAsync("fake-jwt-token");
+        }
+
+
+        private void SetupHttpResponse(HttpStatusCode statusCode, string content = "")
+        {
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = statusCode,
+                    Content = new StringContent(content, Encoding.UTF8, "application/json")
+                });
+        }
+
+        [Fact]
+        public async Task GetAllVideosAsync_ReturnsList_WhenSuccessful()
+        {
+            var videoDtos = new List<VideoDto>
+            {
+                new VideoDto { Id = 1, Title = "Title1" },
+                new VideoDto { Id = 2, Title = "Title2" }
+            };
+            var json = JsonSerializer.Serialize(videoDtos);
+            SetupHttpResponse(HttpStatusCode.OK, json);
+
+            _mockMapper
+                .Setup(m => m.Map<List<Video>>(videoDtos))
+                .Returns(new List<Video>
+                {
+                    new Video { Id = 1, Title = "Title1" },
+                    new Video { Id = 2, Title = "Title2" }
+                });
+
+            var result = await _videoService.GetAllVideosAsync();
+
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
     }
 
