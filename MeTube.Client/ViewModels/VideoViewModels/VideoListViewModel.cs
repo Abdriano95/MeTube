@@ -61,6 +61,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                 if (videos == null)
                 {
                     videos = new List<Video>();
+                    videos.Clear();
                 }
 
                 // Skapa en ObservableCollection från listan
