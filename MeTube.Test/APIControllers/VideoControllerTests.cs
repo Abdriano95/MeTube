@@ -192,6 +192,113 @@ namespace MeTube.Test.APIControllers
             // Assert
             Assert.IsType<NotFoundResult>(result);
         }
+        [Fact]
+        public async Task GetVideoById_ReturnsOk_WhenVideoExists()
+        {
+            // Arrange
+            var video = _videos.First();
+            _mockUnitOfWork.Setup(u => u.Videos.GetVideoByIdAsync(video.Id))
+                           .ReturnsAsync(video);
+
+            _mockMapper
+                .Setup(m => m.Map<VideoDto>(video))
+                .Returns(new VideoDto
+                {
+                    Id = video.Id,
+                    Title = video.Title
+                });
+
+            // BlobExists -> true
+            _mockVideoService
+                .Setup(s => s.BlobExistsAsync(video.BlobName))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _controller.GetVideoById(video.Id);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var dto = Assert.IsType<VideoDto>(okResult.Value);
+            Assert.Equal(video.Id, dto.Id);
+        }
+
+        [Fact]
+        public async Task GetVideoById_ReturnsNotFound_WhenVideoDoesNotExist()
+        {
+            // Arrange
+            _mockUnitOfWork
+                .Setup(u => u.Videos.GetVideoByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync((Video)null);
+
+            // Act
+            var result = await _controller.GetVideoById(999);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        // ------------------------------------------------------------------
+        // GET: api/Video/user
+        //  [Authorize]
+        // ------------------------------------------------------------------
+        [Fact]
+        public async Task GetVideosByUserId_ReturnsOk_WhenUserHasVideos()
+        {
+            // Arrange
+            // Standard user = ID=1 i claims
+            var userVideos = _videos.Where(v => v.UserId == 1).ToList();
+            _mockUnitOfWork
+                .Setup(u => u.Videos.GetVideosByUserIdAsync(1))
+                .ReturnsAsync(userVideos);
+
+            _mockMapper
+                .Setup(m => m.Map<IEnumerable<VideoDto>>(userVideos))
+                .Returns(userVideos.Select(v => new VideoDto { Id = v.Id, Title = v.Title }));
+
+            // Act
+            var result = await _controller.GetVideosByUserId();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var dtos = Assert.IsAssignableFrom<IEnumerable<VideoDto>>(okResult.Value);
+            Assert.Single(dtos); // end. because _videos had only 1 with UserId=1
+        }
+
+        [Fact]
+        public async Task GetVideosByUserId_ReturnsUnauthorized_WhenUserIdIs0()
+        {
+            // Arrange
+            // Sätt claimsprincipal med NameIdentifier=0
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "0")
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(identity);
+
+            // Act
+            var result = await _controller.GetVideosByUserId();
+
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+        }
+
+        [Fact]
+        public async Task GetVideosByUserId_ReturnsOkEmptyList_WhenNoVideosFound()
+        {
+            // Arrange
+            _mockUnitOfWork
+                .Setup(u => u.Videos.GetVideosByUserIdAsync(1))
+                .ReturnsAsync(new List<Video>()); // tom
+
+            // Act
+            var result = await _controller.GetVideosByUserId();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var list = Assert.IsAssignableFrom<IEnumerable<Video>>(okResult.Value);
+            Assert.Empty(list);
+        }
 
 
     }
