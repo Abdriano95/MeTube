@@ -3,8 +3,10 @@ using MeTube.Client.Models;
 using MeTube.DTO;
 using Microsoft.JSInterop;
 using System.Diagnostics;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MeTube.Client.Services
 {
@@ -297,6 +299,27 @@ namespace MeTube.Client.Services
             {
                 Debug.WriteLine($"Error fetching users: {ex.Message}");
                 return Enumerable.Empty<UserDetails>();
+            }
+        }
+        // Get the username of the currently logged in user
+        public async Task<string> GetLogedInUserName()
+        {
+            await AddAuthorizationHeader();
+            try
+            {
+                Uri uri = new Uri(Constants.GetLogedInUsername);
+                var response = await _client.GetAsync(uri);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return "";
+                }
+
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                return $"Error: {ex.Message}";
             }
         }
     }

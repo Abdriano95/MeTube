@@ -302,6 +302,16 @@ namespace MeTube.API.Controllers
                 { "message", string.Join("", errorMessages)}
             });
         }
+        // This method retrieves the username of the logged-in user
+        [Authorize]
+        [HttpGet("logedInUsername")]
+        public async Task<IActionResult> GetLogedInUsername()
+        {
+            string name = User.FindFirst(ClaimTypes.Name)?.Value;
+            if (name == null)
+                return NotFound(new { Message = "" });
+            return Ok(name);
+        }
     }
 }
 
