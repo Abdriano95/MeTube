@@ -279,8 +279,11 @@ namespace MeTube.API.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateVideo(int id, [FromBody] UpdateVideoDto updateVideoDto)
         {
+            if (!User.IsInRole("Admin"))
+                return Forbid();
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
 
             await using var transaction = await _unitOfWork.BeginTransactionAsync();
             try
