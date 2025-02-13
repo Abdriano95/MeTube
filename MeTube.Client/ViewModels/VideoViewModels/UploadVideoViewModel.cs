@@ -54,16 +54,25 @@ namespace MeTube.Client.ViewModels
             _jsRuntime = jsRuntime;
         }
 
+        // Handle the event when a video file is selected by the user
+        // This method sets the selected video file to the VideoFile property
+        // It runs asynchronously to avoid blocking the UI thread
         public async Task HandleVideoFileSelected(InputFileChangeEventArgs e)
         {
             await Task.Run(() => VideoFile = e.File);
         }
 
+        // Handle the event when a thumbnail file is selected by the user
+        // This method sets the selected thumbnail file to the ThumbnailFile property
+        // It runs asynchronously to avoid blocking the UI thread
         public async Task HandleThumbnailFileSelected(InputFileChangeEventArgs e)
         {
             await Task.Run(() => ThumbnailFile = e.File);
         }
 
+        // Upload the video and its optional thumbnail to the server
+        // Validate all properties and ensure a video file is selected before uploading
+        // Handle any exceptions that occur during the upload process
         public async Task UploadVideoAsync()
         {
             try
@@ -99,17 +108,20 @@ namespace MeTube.Client.ViewModels
                     Genre = Genre
                 };
 
+                DateTime dateUploaded = DateTime.Now;
+                string uniqeVideWithDate = dateUploaded.ToString();
+
                 var uploadedVideo = await _videoService.UploadVideoAsync(
                     video,
                     videoMS,
-                    VideoFile.Name,
+                    VideoFile.Name+ uniqeVideWithDate,
                     thumbnailMS,
                     ThumbnailFile?.Name);
 
                 if (uploadedVideo != null)
                 {
                     SuccessMessage = "Video uploaded successfully!";
-                    await Task.Delay(2000); 
+                    await Task.Delay(2000);
                     _navigationManager.NavigateTo("/videos/manage");
                 }
                 else

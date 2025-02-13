@@ -25,7 +25,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         {
             _videoService = videoService;
         }
-
+        //This method loads all videos from the database and sets the Videos property to the result
         [RelayCommand]
         public async Task LoadVideosAsync()
         {
