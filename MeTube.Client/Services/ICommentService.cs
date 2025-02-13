@@ -1,5 +1,5 @@
 ﻿using MeTube.Client.Models;
-using MeTube.DTO;
+using MeTube.DTO.CommentDTOs;
 
 namespace MeTube.Client.Services
 {

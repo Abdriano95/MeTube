@@ -4,6 +4,7 @@ using MeTube.Client.Models;
 using MeTube.Client.Services;
 using MeTube.Client.ViewModels.VideoViewModels;
 using MeTube.DTO;
+using MeTube.DTO.CommentDTOs;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Moq;
@@ -513,6 +514,7 @@ namespace MeTube.Test.ViewModels
             _mockHistoryService
                 .Verify(s => s.AddHistoryAsync(It.Is<History>(h => h.VideoId == 10 && h.VideoTitle == "VidTitle")),
                         Times.Once);
+
         }
     }
 }

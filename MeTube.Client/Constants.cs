@@ -18,6 +18,7 @@
         public static string UpdateUser = $"{BaseUrl}/user";
         public static string ChangeRole = $"{BaseUrl}/user/changeRole/{{0}}";
         public static string CheckUserExistsUrl = $"{BaseUrl}/User/exists";
+        public static string GetLogedInUsername = $"{BaseUrl}/user/logedInUsername";
 
         // Video endpoints
         public static string VideoBaseUrl = $"{BaseUrl}/Video";
@@ -83,9 +84,20 @@
         // DELETE
         public static string HistoryAdminDeleteUrl(int historyId) => $"{HistoryAdminBaseUrl}/{historyId}";
 
+        // Comment endpoints
+        public static string CommentBaseUrl = $"{BaseUrl}/comments";
 
+        // GET
+        public static string CommentGetByVideoIdUrl(int videoId) => $"{CommentBaseUrl}/video/{videoId}";
+        public static string CommentGetPosterUsernameUrl(int userId) => $"{CommentBaseUrl}/username/{userId}";
 
+        // POST
+        public static string CommentAddUrl = CommentBaseUrl;
 
+        // PUT
+        public static string CommentUpdateUrl(int commentId) => $"{CommentBaseUrl}/{commentId}";
 
+        // DELETE
+        public static string CommentDeleteUrl(int commentId) => $"{CommentBaseUrl}/{commentId}";
     }
 }

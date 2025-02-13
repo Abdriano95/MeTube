@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using MeTube.Data.Entity;
-using MeTube.DTO;
+using MeTube.DTO.CommentDTOs;
 
 public class CommentProfile : Profile
 {
