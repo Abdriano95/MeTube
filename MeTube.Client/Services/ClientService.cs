@@ -17,8 +17,8 @@ namespace MeTube.Client.Services
         private HttpClient _client;
         private JsonSerializerOptions _serializerOptions;
         private IMapper _mapper;
-        private readonly IJSRuntime _jsRuntime;
-        public ClientService(HttpClient client, IMapper mapper, IJSRuntime jsruntime) 
+        private readonly IJSRuntimeWrapper _jsRuntime;
+        public ClientService(HttpClient client, IMapper mapper, IJSRuntimeWrapper jsruntime) 
         {
             _mapper = mapper;
             _jsRuntime = jsruntime;
