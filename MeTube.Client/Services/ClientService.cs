@@ -301,7 +301,7 @@ namespace MeTube.Client.Services
                 return Enumerable.Empty<UserDetails>();
             }
         }
-
+        // Get the username of the currently logged in user
         public async Task<string> GetLogedInUserName()
         {
             await AddAuthorizationHeader();
