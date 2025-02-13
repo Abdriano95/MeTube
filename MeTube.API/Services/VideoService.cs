@@ -1,11 +1,9 @@
-﻿using Azure;
-using Azure.Storage;
+﻿using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using MeTube.DTO.VideoDTOs;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.Extensions.Caching.Memory;
+using System.Diagnostics;
 
 namespace MeTube.API.Services
 {
@@ -95,12 +93,6 @@ namespace MeTube.API.Services
         public async Task<BlobResponseDto> UploadAsync(IFormFile blob)
         {
             BlobResponseDto response = new();
-            BlobClient client = _videoContainerClient.GetBlobClient(blob.FileName);
-
-            var blobHttpHeaders = new BlobHttpHeaders
-            {
-                ContentType = blob.ContentType
-            };
 
             var contentType = blob.ContentType;
             if (string.IsNullOrEmpty(contentType))
@@ -111,7 +103,6 @@ namespace MeTube.API.Services
                     contentType = "application/octet-stream";
                 }
             }
-
             var allowedTypes = new[] { "video/mp4", "video/webm" };
             if (!allowedTypes.Contains(contentType))
             {
@@ -122,29 +113,91 @@ namespace MeTube.API.Services
                 };
             }
 
-            await using (Stream? stream = blob.OpenReadStream())
+            var tempIn = Path.GetTempFileName(); 
+            var extension = Path.GetExtension(blob.FileName);
+            var tempInFinal = Path.ChangeExtension(tempIn, extension);
+
+            File.Move(tempIn, tempInFinal);
+            await using (var fs = new FileStream(tempInFinal, FileMode.Create))
             {
-                await client.UploadAsync(
-                    stream,
-                    new BlobUploadOptions { HttpHeaders = blobHttpHeaders },
-                    cancellationToken: default
-                );
+                await blob.CopyToAsync(fs);
             }
 
-            
-            var properties = await client.GetPropertiesAsync();
+            var isMp4 = contentType == "video/mp4";
+            string finalPathForUpload;
 
-            response.Status = $"File {blob.FileName} Uploaded Successfully";
-            response.Error = false;
-            response.Blob = new BlobDto
+            if (isMp4)
             {
-                Uri = client.Uri.AbsoluteUri,
-                Name = client.Name,
-                ContentType = properties.Value.ContentType
-            };
+                var tempOut = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}_faststart.mp4");
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "ffmpeg",
+                    Arguments = $"-i \"{tempInFinal}\" -c copy -movflags +faststart \"{tempOut}\"",
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using (var process = new Process { StartInfo = startInfo })
+                {
+                    process.Start();
+                    string stderr = await process.StandardError.ReadToEndAsync();
+                    process.WaitForExit();
+                    if (process.ExitCode != 0)
+                    {
+                        return new BlobResponseDto
+                        {
+                            Error = true,
+                            Status = $"ffmpeg failed: {stderr}"
+                        };
+                    }
+                }
+
+                finalPathForUpload = tempOut; 
+            }
+            else
+            {
+                finalPathForUpload = tempInFinal;
+            }
+
+            try
+            {
+                var client = _videoContainerClient.GetBlobClient(Path.GetFileName(finalPathForUpload));
+
+                var blobHttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = contentType
+                };
+
+                await using (var uploadFs = new FileStream(finalPathForUpload, FileMode.Open, FileAccess.Read))
+                {
+                    await client.UploadAsync(uploadFs, new BlobUploadOptions { HttpHeaders = blobHttpHeaders });
+                }
+
+                var properties = await client.GetPropertiesAsync();
+                response.Status = $"File {Path.GetFileName(finalPathForUpload)} Uploaded Successfully";
+                response.Error = false;
+                response.Blob = new BlobDto
+                {
+                    Uri = client.Uri.AbsoluteUri,
+                    Name = client.Name,
+                    ContentType = properties.Value.ContentType
+                };
+            }
+            catch (Exception ex)
+            {
+                response.Error = true;
+                response.Status = "Upload failed: " + ex.Message;
+            }
+            finally
+            {
+                if (File.Exists(tempInFinal)) File.Delete(tempInFinal);
+            }
 
             return response;
         }
+
 
         // Delete thumbnail
         public async Task<BlobResponseDto> DeleteThumbnailAsync(string blobFilename)
