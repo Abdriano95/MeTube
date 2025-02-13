@@ -16,5 +16,6 @@ namespace MeTube.Client.Services
         Task<bool> UpdateUserAsync(int id, UpdateUserDto updateUserDto);
         Task AddAuthorizationHeader();
         Task<Dictionary<string, string>> DoesUserExistAsync(Dictionary<string, string> userData);
+        Task<string> GetLogedInUserName();
     }
 }
