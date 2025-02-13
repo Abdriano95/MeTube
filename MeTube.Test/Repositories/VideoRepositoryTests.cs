@@ -416,5 +416,308 @@ namespace MeTube.Test.Repositories
             username.Should().BeEmpty();
             _mockVideoRepo.Verify(repo => repo.GetVideoUploaderUsernameAsync(999), Times.Once);
         }
+
+        [Fact]
+        public async Task GetRecommendedVideosForUserAsync_UserWithLikedVideos_ShouldReturnRecommendedVideos()
+        {
+            // Arrange
+            var userId = 1;
+            var likedVideoIds = new List<int> { 1, 2 };
+            var likedGenres = new List<string> { "Programming", "Programming" };
+            var recommendedVideos = new List<Video>
+            {
+                new Video { Id = 3, UserId = 2, Description = "Something someting", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+                new Video { Id = 4, UserId = 3, Description = "Something someting", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+            };
+
+            _mockVideoRepo
+                .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
+                .ReturnsAsync(recommendedVideos);
+
+            // Act
+            var result = await _mockVideoRepo.Object.GetRecommendedVideosForUserAsync(userId, 5);
+
+            // Assert
+            result.Should().NotBeNull().And.HaveCount(2);
+            result.First().Genre.Should().Be("Programming");
+
+            _mockVideoRepo.Verify(repo => repo.GetRecommendedVideosForUserAsync(userId, 5), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetRecommendedVideosForUserAsync_UserWithoutLikedVideos_ShouldReturnRecentVideos()
+        {
+            // Arrange
+            var userId = 1;
+            var recentVideos = new List<Video>
+            {
+                new Video { Id = 5, UserId = 4, Description = "Something someting", Title = "Recent Video 1", Genre = "Music", DateUploaded = DateTime.Now },
+                new Video { Id = 6, UserId = 5, Description = "Something someting", Title = "Recent Video 2", Genre = "Music", DateUploaded = DateTime.Now }
+            };
+
+            _mockVideoRepo
+                .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
+                .ReturnsAsync(recentVideos);
+
+            // Act
+            var result = await _mockVideoRepo.Object.GetRecommendedVideosForUserAsync(userId, 5);
+
+            // Assert
+            result.Should().NotBeNull().And.HaveCount(2);
+            result.First().Title.Should().Contain("Recent");
+
+            _mockVideoRepo.Verify(repo => repo.GetRecommendedVideosForUserAsync(userId, 5), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetRecommendedVideosForUserAsync_UserWithLikedVideosButNoGenres_ShouldReturnEmptyList()
+        {
+            // Arrange
+            var userId = 1;
+            var emptyList = new List<Video>();
+
+            _mockVideoRepo
+                .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
+                .ReturnsAsync(emptyList);
+
+            // Act
+            var result = await _mockVideoRepo.Object.GetRecommendedVideosForUserAsync(userId, 5);
+
+            // Assert
+            result.Should().NotBeNull().And.BeEmpty();
+
+            _mockVideoRepo.Verify(repo => repo.GetRecommendedVideosForUserAsync(userId, 5), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetRecommendedVideosForUserAsync_UserWithMultipleGenresLiked_ShouldReturnTopGenreVideos()
+        {
+            // Arrange
+            var userId = 1;
+            var likedVideoIds = new List<int> { 1, 2, 3 };
+            var likedGenres = new List<string> { "Programming", "Music", "Programming" };
+            var recommendedVideos = new List<Video>
+           {
+               new Video { Id = 4, UserId = 2, Description = "Something someting", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+               new Video { Id = 5, UserId = 3, Description = "Something someting", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+           };
+
+            _mockVideoRepo
+                .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
+                .ReturnsAsync(recommendedVideos);
+
+            // Act
+            var result = await _mockVideoRepo.Object.GetRecommendedVideosForUserAsync(userId, 5);
+
+            // Assert
+            result.Should().NotBeNull().And.HaveCount(2);
+            result.First().Genre.Should().Be("Programming");
+
+            _mockVideoRepo.Verify(repo => repo.GetRecommendedVideosForUserAsync(userId, 5), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetRecommendedVideosForUserAsync_UserWithOneLikedVideo_ShouldReturnRecommendedVideos()
+        {
+            // Arrange
+            var userId = 1;
+            var likedVideoIds = new List<int> { 1 };
+            var likedGenres = new List<string> { "Programming" };
+            var recommendedVideos = new List<Video>
+           {
+               new Video { Id = 2, UserId = 2, Description = "Something someting", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+               new Video { Id = 3, UserId = 3, Description = "Something someting", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+           };
+
+            _mockVideoRepo
+                .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
+                .ReturnsAsync(recommendedVideos);
+
+            // Act
+            var result = await _mockVideoRepo.Object.GetRecommendedVideosForUserAsync(userId, 5);
+
+            // Assert
+            result.Should().NotBeNull().And.HaveCount(2);
+            result.First().Genre.Should().Be("Programming");
+
+            _mockVideoRepo.Verify(repo => repo.GetRecommendedVideosForUserAsync(userId, 5), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetRecommendedVideosForUserAsync_UserWithNoVideos_ShouldReturnRecentVideos()
+        {
+            // Arrange
+            var userId = 1;
+            var recentVideos = new List<Video>
+           {
+               new Video { Id = 1, UserId = 2, Description = "Something someting", Title = "Recent Video 1", Genre = "Music", DateUploaded = DateTime.Now },
+               new Video { Id = 2, UserId = 3, Description = "Something someting", Title = "Recent Video 2", Genre = "Music", DateUploaded = DateTime.Now }
+           };
+
+            _mockVideoRepo
+                .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
+                .ReturnsAsync(recentVideos);
+
+            // Act
+            var result = await _mockVideoRepo.Object.GetRecommendedVideosForUserAsync(userId, 5);
+
+            // Assert
+            result.Should().NotBeNull().And.HaveCount(2);
+            result.First().Title.Should().Contain("Recent");
+
+            _mockVideoRepo.Verify(repo => repo.GetRecommendedVideosForUserAsync(userId, 5), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetRecommendedVideosForUserAsync_UserWithLikedVideosFromSameUser_ShouldExcludeOwnVideos()
+        {
+            // Arrange
+            var userId = 1;
+            var likedVideoIds = new List<int> { 1, 2 };
+            var likedGenres = new List<string> { "Programming", "Programming" };
+            var recommendedVideos = new List<Video>
+           {
+               new Video { Id = 3, UserId = 2, Description = "Something someting", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+               new Video { Id = 4, UserId = 3, Description = "Something someting", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+           };
+
+            _mockVideoRepo
+                .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
+                .ReturnsAsync(recommendedVideos);
+
+            // Act
+            var result = await _mockVideoRepo.Object.GetRecommendedVideosForUserAsync(userId, 5);
+
+            // Assert
+            result.Should().NotBeNull().And.HaveCount(2);
+            result.First().UserId.Should().NotBe(userId);
+
+            _mockVideoRepo.Verify(repo => repo.GetRecommendedVideosForUserAsync(userId, 5), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetRecommendedVideosForUserAsync_UserWithNoMatchingGenreVideos_ShouldReturnEmptyList()
+        {
+            // Arrange
+            var userId = 1;
+            var emptyList = new List<Video>();
+
+            _mockVideoRepo
+                .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
+                .ReturnsAsync(emptyList);
+
+            // Act
+            var result = await _mockVideoRepo.Object.GetRecommendedVideosForUserAsync(userId, 5);
+
+            // Assert
+            result.Should().NotBeNull().And.BeEmpty();
+
+            _mockVideoRepo.Verify(repo => repo.GetRecommendedVideosForUserAsync(userId, 5), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetRecommendedVideosForUserAsync_UserWithAllLikedVideos_ShouldNotRecommendAlreadyLikedVideos()
+        {
+            // Arrange
+            var userId = 1;
+            var likedVideoIds = new List<int> { 1, 2 };
+            var likedGenres = new List<string> { "Programming", "Programming" };
+            var recommendedVideos = new List<Video>();
+
+            _mockVideoRepo
+                .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
+                .ReturnsAsync(recommendedVideos);
+
+            // Act
+            var result = await _mockVideoRepo.Object.GetRecommendedVideosForUserAsync(userId, 5);
+
+            // Assert
+            result.Should().NotBeNull().And.BeEmpty();
+
+            _mockVideoRepo.Verify(repo => repo.GetRecommendedVideosForUserAsync(userId, 5), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetRecommendedVideosForUserAsync_UserWithDeletedLikedVideos_ShouldHandleGracefully()
+        {
+            // Arrange
+            var userId = 1;
+            var likedVideoIds = new List<int> { 1, 2 };
+            var likedGenres = new List<string> { "Programming", "Programming" };
+            var recommendedVideos = new List<Video>
+           {
+               new Video { Id = 3, UserId = 2, Description = "something something", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+               new Video { Id = 4, UserId = 3, Description = "something something", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+           };
+
+            _mockVideoRepo
+                .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
+                .ReturnsAsync(recommendedVideos);
+
+            // Act
+            var result = await _mockVideoRepo.Object.GetRecommendedVideosForUserAsync(userId, 5);
+
+            // Assert
+            result.Should().NotBeNull().And.HaveCount(2);
+            result.First().Genre.Should().Be("Programming");
+
+            _mockVideoRepo.Verify(repo => repo.GetRecommendedVideosForUserAsync(userId, 5), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetRecommendedVideosForUserAsync_UserWithLikedVideosWithoutGenre_ShouldHandleGracefully()
+        {
+            // Arrange
+            var userId = 1;
+            var likedVideoIds = new List<int> { 1, 2 };
+            var likedGenres = new List<string> { "Programming", null };
+            var recommendedVideos = new List<Video>
+               {
+                   new Video { Id = 3, UserId = 2, Description = "Something something",  Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+                   new Video { Id = 4, UserId = 3, Description = "someting someting" ,Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+               };
+
+            _mockVideoRepo
+                .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
+                .ReturnsAsync(recommendedVideos);
+
+            // Act
+            var result = await _mockVideoRepo.Object.GetRecommendedVideosForUserAsync(userId, 5);
+
+            // Assert
+            result.Should().NotBeNull().And.HaveCount(2);
+            result.First().Genre.Should().Be("Programming");
+
+            _mockVideoRepo.Verify(repo => repo.GetRecommendedVideosForUserAsync(userId, 5), Times.Once);
+        }
+
+
+        [Fact]
+        public async Task GetRecommendedVideosForUserAsync_UserWithInvalidGenreValues_ShouldHandleGracefully()
+        {
+            // Arrange
+            var userId = 1;
+            var likedVideoIds = new List<int> { 1, 2 };
+            var likedGenres = new List<string> { "Programming", "InvalidGenre" };
+            var recommendedVideos = new List<Video>
+           {
+               new Video { Id = 3, UserId = 2, Description = "Something something" ,Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+               new Video { Id = 4, UserId = 3, Description = "Something something", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+           };
+
+            _mockVideoRepo
+                .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
+                .ReturnsAsync(recommendedVideos);
+
+            // Act
+            var result = await _mockVideoRepo.Object.GetRecommendedVideosForUserAsync(userId, 5);
+
+            // Assert
+            result.Should().NotBeNull().And.HaveCount(2);
+            result.First().Genre.Should().Be("Programming");
+
+            _mockVideoRepo.Verify(repo => repo.GetRecommendedVideosForUserAsync(userId, 5), Times.Once);
+        }
+
     }
 }

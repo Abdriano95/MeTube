@@ -18,5 +18,6 @@ namespace MeTube.Data.Repository
         void UpdateVideo(Video video);
         Task DeleteVideo(Video video);
         Task<string> GetVideoUploaderUsernameAsync(int videoId);
+        Task<IEnumerable<Video>> GetRecommendedVideosForUserAsync(int userId, int maxCount = 5);
     }
 }
