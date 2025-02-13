@@ -10,10 +10,10 @@ namespace MeTube.Client.Services
 {
     public class UserService : IUserService
     {
-        private readonly ClientService _clientService;
+        private readonly IClientService _clientService;
         private readonly IJSRuntime _jsRuntime;
         private readonly HttpClient _httpClient;
-        public UserService(ClientService clientservice, IJSRuntime jsRuntime, HttpClient httpClient)
+        public UserService(IClientService clientservice, IJSRuntime jsRuntime, HttpClient httpClient)
         {
             _clientService = clientservice;
             _jsRuntime = jsRuntime;
