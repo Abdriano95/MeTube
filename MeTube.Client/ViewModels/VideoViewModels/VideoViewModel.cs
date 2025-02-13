@@ -17,7 +17,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
     {
         private readonly IVideoService _videoService;
         private readonly ICommentService _commentService;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
         private readonly ILikeService _likeService;
         private readonly IHistoryService _historyService;
         private readonly NavigationManager _navigationManager;
@@ -41,7 +41,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         public VideoViewModel(IVideoService videoService, 
                               ILikeService likeService,
                               ICommentService commentService,
-                              UserService userService,
+                              IUserService userService,
                               IMapper mapper,
                               NavigationManager navigationManager,
                               IHistoryService historyService)
