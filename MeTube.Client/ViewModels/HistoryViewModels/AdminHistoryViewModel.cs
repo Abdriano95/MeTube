@@ -44,7 +44,7 @@ public partial class AdminHistoryViewModel
     /// Collection of watch history entries for the selected user
     /// </summary>
     [ObservableProperty]
-    private ObservableCollection<HistoryAdmin> _histories;
+    private ObservableCollection<HistoryAdmin> _histories = new();
 
     /// <summary>
     /// Collection of all users in the system
@@ -178,10 +178,18 @@ public partial class AdminHistoryViewModel
             Histories.Clear();
 
             var list = await _adminHistoryService.GetHistoryByUserAsync(SelectedUserId);
-            foreach (var item in list)
+            if (list != null)
             {
-                Histories.Add(item);
+                foreach (var item in list)
+                {
+                    Histories.Add(item);
+                }
             }
+            else
+            {
+                InfoMessage = $"No history found for user {SelectedUser?.Username}.";
+            }
+
 
             if (Histories.Count == 0)
             {
@@ -218,42 +226,43 @@ public partial class AdminHistoryViewModel
             if (SelectedUserId == 0 || SelectedVideoId == 0)
             {
                 ErrorMessage = "Please select both a user and a video.";
-                Console.WriteLine("[DEBUG] Validation failed: Missing User or Video.");
                 return;
             }
 
             EditingHistory.UserId = SelectedUserId;
             EditingHistory.VideoId = SelectedVideoId;
 
-            Console.WriteLine($"[DEBUG] Creating history: UserId={EditingHistory.UserId}, VideoId={EditingHistory.VideoId}");
 
             var created = await _adminHistoryService.CreateHistoryAsync(EditingHistory);
 
-            if (created == null)
+
+
+            if (created != null)
+            {
+                created.UserName = Users.FirstOrDefault(u => u.Id == created.UserId)?.Username ?? "Unknown";
+                created.VideoTitle = Videos.FirstOrDefault(v => v.Id == created.VideoId)?.Title ?? "Unknown";
+
+                Histories.Add(created);
+            }
+            else
             {
                 ErrorMessage = "Failed to create history. Check logs or server response.";
-                Console.WriteLine("[DEBUG] CreateHistoryAsync returned null!");
                 return;
             }
 
-            Histories.Add(created);
-            Console.WriteLine($"[DEBUG] History added! New count: {Histories.Count}");
 
             EditingHistory = new HistoryAdmin();
-
-            // reload history
-            await LoadHistoriesAsync();
         }
         catch (Exception ex)
         {
             ErrorMessage = $"Error creating history: {ex.Message}";
-            Console.WriteLine($"[DEBUG] Exception: {ex.Message}");
         }
         finally
         {
             IsLoading = false;
         }
     }
+
 
 
 

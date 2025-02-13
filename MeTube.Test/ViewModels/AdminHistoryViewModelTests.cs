@@ -81,6 +81,27 @@ namespace MeTube.Test.ViewModels
             Assert.Contains("No history found", _viewModel.InfoMessage);
         }
 
+        [Fact]
+        public async Task LoadHistoriesAsync_WhenUserSelected_ShouldPopulateHistories()
+        {
+            // Arrange
+            _viewModel.SelectedUserId = 1;
+            var histories = new List<HistoryAdmin>
+                            {
+                                new HistoryAdmin { Id = 1, UserId = 1, VideoId = 1 }
+                            };
+
+            _mockAdminHistoryService.Setup(s => s.GetHistoryByUserAsync(1)).ReturnsAsync(histories);
+
+            // Act
+            await _viewModel.LoadHistoriesAsync();
+
+            // Assert
+            Assert.Single(_viewModel.Histories);
+            Assert.Equal(1, _viewModel.Histories[0].Id);
+        }
+
+
         // ------------------------------------------------------------------
         // LoadAllUsersAndVideosAsync TESTS
         // ------------------------------------------------------------------
@@ -126,33 +147,87 @@ namespace MeTube.Test.ViewModels
             Assert.Contains("Error loading users/videos", _viewModel.ErrorMessage);
         }
 
+        [Fact]
+        public async Task LoadAllUsersAndVideosAsync_WhenSuccessful_ShouldPopulateUsersAndVideos()
+        {
+            // Arrange
+            var users = new List<UserDetails> { new UserDetails { Id = 1, Username = "User1" } };
+            var videos = new List<Video> { new Video { Id = 1, Title = "Video1" } };
+
+            _mockUserService.Setup(s => s.GetAllUsersDetailsAsync()).ReturnsAsync(users);
+            _mockVideoService.Setup(s => s.GetAllVideosAsync()).ReturnsAsync(videos);
+
+            // Act
+            await _viewModel.LoadAllUsersAndVideosAsync();
+
+            // Assert
+            Assert.Single(_viewModel.Users);
+            Assert.Single(_viewModel.Videos);
+            Assert.Equal("User1", _viewModel.Users[0].Username);
+            Assert.Equal("Video1", _viewModel.Videos[0].Title);
+        }
+
+
         // ------------------------------------------------------------------
         // CreateHistoryAsync TESTS
         // ------------------------------------------------------------------
-
         [Fact]
-        public async Task CreateHistoryAsync_WithValidResponse_ShouldAddToHistories()
+        public async Task CreateHistoryAsync_WhenServiceFails_ShouldSetErrorMessage()
         {
             // Arrange
-            var newHistory = new HistoryAdmin { Id = 1, UserId = 1, VideoId = 1 };
             _viewModel.SelectedUserId = 1;
             _viewModel.SelectedVideoId = 1;
-
-            _mockAdminHistoryService.Setup(s => s.CreateHistoryAsync(It.IsAny<HistoryAdmin>()))
-                                    .ReturnsAsync(newHistory);
-
-            Console.WriteLine("[DEBUG] Running CreateHistoryAsync test...");
+            _mockAdminHistoryService
+                .Setup(s => s.CreateHistoryAsync(It.IsAny<HistoryAdmin>()))
+                .ReturnsAsync((HistoryAdmin)null); // Simulera att tjänsten misslyckas
 
             // Act
             await _viewModel.CreateHistoryAsync();
 
-            Console.WriteLine($"[DEBUG] Histories count after: {_viewModel.Histories.Count}");
+            // Assert
+            Assert.Equal("Failed to create history. Check logs or server response.", _viewModel.ErrorMessage);
+            Assert.Empty(_viewModel.Histories); // Ingen historia ska ha lagts till
+        }
+
+        [Fact]
+        public async Task CreateHistoryAsync_WhenSuccessful_ShouldAddHistoryToCollection()
+        {
+            // Arrange
+            var newHistory = new HistoryAdmin { UserId = 1, VideoId = 1 };
+            _viewModel.SelectedUserId = 1;
+            _viewModel.SelectedVideoId = 1;
+
+            _mockAdminHistoryService
+                .Setup(s => s.CreateHistoryAsync(It.IsAny<HistoryAdmin>()))
+                .ReturnsAsync(newHistory);
+
+            // Act
+            await _viewModel.CreateHistoryAsync();
 
             // Assert
-            Assert.NotNull(newHistory);
-            Assert.Single(_viewModel.Histories);
-            Assert.Empty(_viewModel.ErrorMessage);
+            Assert.Contains(_viewModel.Histories, h => h.UserId == 1 && h.VideoId == 1);
         }
+
+
+        [Fact]
+        public async Task CreateHistoryAsync_WhenExceptionThrown_ShouldSetErrorMessage()
+        {
+            // Arrange
+            _viewModel.SelectedUserId = 1;
+            _viewModel.SelectedVideoId = 1;
+
+            _mockAdminHistoryService
+                .Setup(s => s.CreateHistoryAsync(It.IsAny<HistoryAdmin>()))
+                .ThrowsAsync(new Exception("Unexpected error")); // Simulera en exception
+
+            // Act
+            await _viewModel.CreateHistoryAsync();
+
+            // Assert
+            Assert.Contains("Error creating history: Unexpected error", _viewModel.ErrorMessage);
+        }
+
+
 
 
         [Fact]
@@ -208,22 +283,63 @@ namespace MeTube.Test.ViewModels
             Assert.Contains("Failed to delete history", _viewModel.ErrorMessage);
         }
 
+        [Fact]
+        public async Task DeleteHistoryAsync_WhenSuccessful_ShouldRemoveHistoryFromList()
+        {
+            // Arrange
+            var history = new HistoryAdmin { Id = 1, UserId = 1, VideoId = 1 };
+            _viewModel.Histories.Add(history);
+
+            _mockAdminHistoryService.Setup(s => s.DeleteHistoryAsync(1)).ReturnsAsync(true);
+
+            // Act
+            await _viewModel.DeleteHistoryAsync(history);
+
+            // Assert
+            Assert.Empty(_viewModel.Histories);
+        }
+
+
+        // ------------------------------------------------------------------
+        // UpdateHistoryAsync TESTS
+        // 
+        [Fact]
+        public async Task UpdateHistoryAsync_WhenSuccessful_ShouldUpdateHistoryInList()
+        {
+            // Arrange
+            var history = new HistoryAdmin { Id = 1, UserId = 1, VideoId = 1, VideoTitle = "Old Title" };
+            _viewModel.Histories.Add(history);
+            _viewModel.EditingHistory = new HistoryAdmin { Id = 1, UserId = 1, VideoId = 1, VideoTitle = "New Title" };
+
+            _mockAdminHistoryService.Setup(s => s.UpdateHistoryAsync(It.IsAny<HistoryAdmin>())).ReturnsAsync(true);
+
+            // Act
+            await _viewModel.UpdateHistoryAsync();
+
+            // Assert
+            Assert.Equal("New Title", _viewModel.Histories[0].VideoTitle);
+        }
+
+
+
         // ------------------------------------------------------------------
         // EditHistory TESTS
         // ------------------------------------------------------------------
 
         [Fact]
-        public void EditHistory_ShouldCopyHistoryAndSetSelectedUserAndVideo()
+        public void EditHistory_ShouldSetEditingHistoryAndSelectedIds()
         {
             // Arrange
-            var history = new HistoryAdmin { Id = 1, UserId = 10, VideoId = 100 };
+            var history = new HistoryAdmin { Id = 1, UserId = 2, VideoId = 3, UserName = "TestUser", VideoTitle = "TestVideo" };
 
             // Act
             _viewModel.EditHistory(history);
 
             // Assert
-            Assert.Equal(history.UserId, _viewModel.SelectedUserId);
-            Assert.Equal(history.VideoId, _viewModel.SelectedVideoId);
+            Assert.Equal(1, _viewModel.EditingHistory.Id);
+            Assert.Equal(2, _viewModel.SelectedUserId);
+            Assert.Equal(3, _viewModel.SelectedVideoId);
         }
+
     }
 }
