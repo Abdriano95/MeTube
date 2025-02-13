@@ -11,5 +11,7 @@ namespace MeTube.API.Services
         Task<BlobResponseDto> UploadAsync(IFormFile blob);
         Task<BlobResponseDto> DeleteThumbnailAsync(string blobFilename);
         Task<BlobResponseDto> DeleteAsync(string blobFilename);
+        Task<Stream> DownloadRangeAsync(string blobName, long start, long end);
+        Task<BlobProperties> GetBlobPropertiesAsync(string blobName);
     }
 }

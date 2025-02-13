@@ -1,8 +1,10 @@
-﻿using Azure.Storage;
+﻿using Azure;
+using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using MeTube.DTO.VideoDTOs;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Caching.Memory;
 using System.Diagnostics;
 
 namespace MeTube.API.Services
@@ -12,6 +14,8 @@ namespace MeTube.API.Services
         private readonly BlobContainerClient _videoContainerClient;
         private readonly BlobContainerClient _thumbnailContainerClient;
         private readonly IConfiguration _configuration;
+        private readonly MemoryCache _cache;
+        private readonly int _cacheTimeout = 300;
 
         public VideoService(IConfiguration configuration)
         {
@@ -31,6 +35,11 @@ namespace MeTube.API.Services
             var blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
             _videoContainerClient = blobServiceClient.GetBlobContainerClient("videos");
             _thumbnailContainerClient = blobServiceClient.GetBlobContainerClient("thumbnails");
+
+            _cache = new MemoryCache(new MemoryCacheOptions
+            {
+                SizeLimit = 524288000 // 500MB cache limit
+            });
 
             _videoContainerClient.CreateIfNotExists();
             _thumbnailContainerClient.CreateIfNotExists();
@@ -234,6 +243,54 @@ namespace MeTube.API.Services
                 response.Error = true;
             }
             return response;
+        }
+
+
+        // DownloadRange (For Streaming videos)
+        public async Task<Stream> DownloadRangeAsync(string blobName, long start, long end)
+        {
+            var blobClient = _videoContainerClient.GetBlobClient(blobName);
+
+            var options = new BlobDownloadOptions
+            {
+                Range = new HttpRange(start, end - start + 1)
+            };
+
+            BlobDownloadStreamingResult download;
+            try
+            {
+                var result = await blobClient.DownloadStreamingAsync(options);
+                download = result.Value;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Could not partial download {blobName}", ex);
+            }
+
+            return download.Content;
+        }
+
+        public async Task<BlobProperties> GetBlobPropertiesAsync(string blobName)
+        {
+            var cacheKey = $"properties_{blobName}";
+
+            // Try to get properties from cache
+            if (_cache.TryGetValue(cacheKey, out BlobProperties properties))
+            {
+                return properties;
+            }
+
+            var blobClient = _videoContainerClient.GetBlobClient(blobName);
+            var response = await blobClient.GetPropertiesAsync();
+
+            // Cache the properties
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetSize(1) // Minimal size for metadata
+                .SetSlidingExpiration(TimeSpan.FromSeconds(_cacheTimeout));
+
+            _cache.Set(cacheKey, response.Value, cacheEntryOptions);
+
+            return response.Value;
         }
     }
 }

@@ -365,6 +365,74 @@ namespace MeTube.API.Controllers
             return NoContent();
         }
 
+        // GET: api/Video/stream/{id}
+        [HttpGet("stream/{id}")]
+        public async Task<IActionResult> StreamVideo(int id)
+        {
+            // 1. Get video entity from Database
+            var video = await _unitOfWork.Videos.GetVideoByIdAsync(id);
+            if (video == null || string.IsNullOrEmpty(video.BlobName))
+                return NotFound();
+
+            var properties = await _videoService.GetBlobPropertiesAsync(video.BlobName);
+            if (properties == null)
+                return NotFound("Video blob not found in storage");
+
+            long fileSize = properties.ContentLength;
+            string contentType = "video/mp4";
+
+            var rangeHeader = Request.Headers["Range"].ToString();
+
+            if (string.IsNullOrEmpty(rangeHeader))
+            {
+                // No range => return full file
+                Response.StatusCode = 200;
+                Response.ContentType = contentType;
+                Response.Headers["Accept-Ranges"] = "bytes";
+                Response.Headers["Content-Length"] = fileSize.ToString();
+
+                // Return entire file
+                var fullStream = await _videoService.DownloadRangeAsync(video.BlobName, 0, fileSize - 1);
+                return File(fullStream, contentType, enableRangeProcessing: true);
+            }
+            else
+            {
+                var (start, end) = ParseRange(rangeHeader, fileSize);
+                if (start >= fileSize)
+                {
+                    // Invalid range => 416
+                    Response.Headers["Content-Range"] = $"bytes */{fileSize}";
+                    return StatusCode(416);
+                }
+
+                end = Math.Min(end, fileSize - 1);
+                long length = end - start + 1;
+
+                // partial content
+                Response.StatusCode = 206;
+                Response.ContentType = contentType;
+                Response.Headers["Accept-Ranges"] = "bytes";
+                Response.Headers["Content-Length"] = length.ToString();
+                Response.Headers["Content-Range"] = $"bytes {start}-{end}/{fileSize}";
+
+                var partialStream = await _videoService.DownloadRangeAsync(video.BlobName, start, end);
+                return File(partialStream, contentType, enableRangeProcessing: true);
+            }
+        }
+
+        private (long start, long end) ParseRange(string rangeHeader, long fileSize)
+        {
+            rangeHeader = rangeHeader.Replace("bytes=", "");
+            var parts = rangeHeader.Split('-');
+            long start = 0;
+            long end = fileSize - 1;
+
+            if (long.TryParse(parts[0], out var s)) start = s;
+            if (parts.Length > 1 && long.TryParse(parts[1], out var e)) end = e;
+
+            return (start, end);
+        }
+
         // method to validate the video file. Conditions: file size max 500MB, file type mp4
         private bool ValidateVideoFile(IFormFile file)
         {
