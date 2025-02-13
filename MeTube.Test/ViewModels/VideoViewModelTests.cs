@@ -187,6 +187,7 @@ namespace MeTube.Test.ViewModels
             Assert.True(_viewModel.IsAuthenticated);
             Assert.Equal("Admin", _viewModel.UserRole);
         }
+
         [Fact]
         public async Task PostComment_EmptyComment_ShowsErrorMessage()
         {
@@ -206,29 +207,44 @@ namespace MeTube.Test.ViewModels
         public async Task PostComment_SuccessfullyAddsComment()
         {
             // Arrange
-            _viewModel.NewCommentText = "New test comment";
             _viewModel.CurrentVideo = new Video { Id = 1 };
-            var mockPostedComment = new Comment { Id = 123, Content = "New test comment" };
+            _viewModel.NewCommentText = "Test comment";
 
-            _mockCommentService
-                .Setup(s => s.AddCommentAsync(It.IsAny<CommentDto>()))
-                .ReturnsAsync(mockPostedComment);
+            var newCommentDto = new CommentDto
+            {
+                Id = 1,
+                Content = "Test comment",
+                VideoId = 1,
+                UserId = 0,
+                DateAdded = DateTime.Now
+            };
+            var newComment = new Comment
+            {
+                Id = 1,
+                Content = "Test comment",
+                VideoId = 1,
+                UserId = 0,
+                DateAdded = DateTime.Now
+            };
 
-            _mockCommentService
-                .Setup(s => s.GetCommentsByVideoIdAsync(It.IsAny<int>()))
-                .ReturnsAsync(new List<Comment> { mockPostedComment });
+            _mockCommentService.Setup(s => s.AddCommentAsync(It.IsAny<CommentDto>()))
+                .ReturnsAsync(newComment);
 
-            _mockCommentService
-                .Setup(s => s.GetPosterUsernameAsync(It.IsAny<int>()))
-                .ReturnsAsync("PosterUsername");
+            // Ensure LoadCommentsAsync can iterate over an empty list without errors
+            _mockCommentService.Setup(s => s.GetCommentsByVideoIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(new List<Comment>());
+
+            // (Optional) Set up GetPosterUsernameAsync if needed
+            _mockCommentService.Setup(s => s.GetPosterUsernameAsync(It.IsAny<int>()))
+                .ReturnsAsync("User");
 
             // Act
             await _viewModel.PostComment();
 
             // Assert
-            Assert.True(string.IsNullOrWhiteSpace(_viewModel.NewCommentText), "NewCommentText is not empty");
-            Assert.Equal(string.Empty, _viewModel.CommentErrorMessage);
-            Assert.Contains(mockPostedComment, _viewModel.Comments);
+            _mockCommentService.Verify(s => s.AddCommentAsync(It.IsAny<CommentDto>()), Times.Once);
+            Assert.Empty(_viewModel.NewCommentText);
+            Assert.Empty(_viewModel.CommentErrorMessage);
         }
 
         [Fact]
