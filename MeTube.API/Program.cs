@@ -73,8 +73,6 @@ namespace MeTube.API
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MeTube API", Version = "v1" });
-
-                // L�gg till denna anpassade operation filter
                 c.OperationFilter<FileUploadOperationFilter>();
                 c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                 {
@@ -114,6 +112,7 @@ namespace MeTube.API
             // Add UnitOfWork 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddSwaggerGen();
+
             // Add AutoMapper
             builder.Services.AddAutoMapper(typeof(UserProfile));
             builder.Services.AddAutoMapper(typeof(UserProfile), typeof(VideoProfile));
