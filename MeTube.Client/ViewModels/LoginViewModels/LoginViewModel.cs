@@ -39,12 +39,15 @@ namespace MeTube.Client.ViewModels.LoginViewModels
             _jsRuntime = jsRuntime;
             _navigation = navigation;
         }
+        // Method to handle the login button click event
         public async Task LoginButton()
         {
+            // Validate all properties
             ValidateAllProperties();
             PasswordError = string.Empty;
             if (HasErrors)
             {
+                // Get and display validation errors for username and password
                 var usernameErrors = GetErrors(nameof(Username)).OfType<ValidationResult>().Select(e => e.ErrorMessage);
                 var passwordErrors = GetErrors(nameof(Password)).OfType<ValidationResult>().Select(e => e.ErrorMessage);
                 UsernameError = string.Join("\n", usernameErrors);
@@ -52,10 +55,12 @@ namespace MeTube.Client.ViewModels.LoginViewModels
                 return;
             }
 
+            // Attempt to log in the user
             var userFound = await _userService.LoginAsync(Username, Password);
 
-            if (userFound != null) 
+            if (userFound != null)
             {
+                // Get and store the JWT token if login is successful
                 string token = await _userService.GetTokenAsync(Username, Password);
                 if (!string.IsNullOrEmpty(token))
                     await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "jwtToken", token);
@@ -65,17 +70,39 @@ namespace MeTube.Client.ViewModels.LoginViewModels
             }
             else
             {
-                 await _jsRuntime.InvokeVoidAsync("alert", "Wrong username or password!");
-                 ClearAllFields();
+                // Display an error message if login fails
+                await _jsRuntime.InvokeVoidAsync("alert", "Wrong username or password!");
+                ClearAllFields();
                 return;
             }
+            // Navigate to the home page
             _navigation.NavigateTo("", forceLoad: true);
-
         }
+        // Method to clear all input fields
         private void ClearAllFields()
         {
             Username = string.Empty;
             Password = string.Empty;
+        }
+
+        // Method to handle the logout process
+        public async Task Logout()
+        {
+            // Confirm the logout action with the user
+            bool secureLogoff = await _jsRuntime.InvokeAsync<bool>("confirm", $"You sure you want to log-off?");
+            if (secureLogoff)
+            {
+                // Remove the JWT token from local storage and display a logoff message
+                await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "jwtToken");
+                await _jsRuntime.InvokeVoidAsync("alert", "User loged-off!");
+                _navigation.NavigateTo("/login", forceLoad: true);
+            }
+            else
+            {
+                // Display an error message if logoff is not confirmed
+                await _jsRuntime.InvokeVoidAsync("alert", "Unable to succesfully log-off user!");
+                _navigation.NavigateTo(_navigation.Uri, forceLoad: true);
+            }
         }
     }
 }

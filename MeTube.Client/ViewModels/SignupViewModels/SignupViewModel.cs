@@ -54,6 +54,7 @@ namespace MeTube.Client.ViewModels.SignupViewModels
             _navigation = navigation;
         }
 
+        // Clears all input fields
         private void ClearAllFields()
         {
             Username = string.Empty;
@@ -61,6 +62,7 @@ namespace MeTube.Client.ViewModels.SignupViewModels
             Password = string.Empty;
         }
 
+        // Checks if the user already exists
         private async Task<bool> CheckIfUserExist()
         {
             Dictionary<string, string> response = await _userService.DoesUserExistAsync(Username, Email);
@@ -75,6 +77,7 @@ namespace MeTube.Client.ViewModels.SignupViewModels
                 return false;
         }
 
+        // Handles the signup button click event
         public async Task SignupButton()
         {
             ValidateAllProperties();
@@ -89,11 +92,11 @@ namespace MeTube.Client.ViewModels.SignupViewModels
                 EmailError = string.Join("\n", emailErrors);
                 return;
             }
-
+            //If user dont exist
             var userExist = await CheckIfUserExist();
             if (userExist)
                 return;
-
+            //Creates a new user wiht filled in details
             var newUser = new User
             {
                 Username = Username,
@@ -109,9 +112,10 @@ namespace MeTube.Client.ViewModels.SignupViewModels
             }
             else
             {
-                await _jsRuntime.InvokeVoidAsync("alert", "Account succesfully created!");
+                await _jsRuntime.InvokeVoidAsync("alert", "Account successfully created!");
                 ClearAllFields();
-                _navigation.NavigateTo("/login", forceLoad: true);
+                if (_navigation != null)
+                    _navigation.NavigateTo("/login", forceLoad: true);
             }
         }
     }
