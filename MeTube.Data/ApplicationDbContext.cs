@@ -1,7 +1,6 @@
 ﻿using MeTube.Data.Entity;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace MeTube.Data
 {
     public class ApplicationDbContext : DbContext
@@ -11,9 +10,6 @@ namespace MeTube.Data
         public virtual DbSet<History> Histories { get; set; } = null!;
         public virtual DbSet<Comment> Comments { get; set; } = null!;
         public virtual DbSet<Like> Likes { get; set; } = null!;
-
-
-
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -48,7 +44,6 @@ namespace MeTube.Data
                 // Relation with likes
                 entity.HasMany(u => u.Likes).WithOne(l => l.User).HasForeignKey(l => l.UserID).OnDelete(DeleteBehavior.Restrict);
             });
-
 
             // Configure Video entity
             modelBuilder.Entity<Video>(entity =>
