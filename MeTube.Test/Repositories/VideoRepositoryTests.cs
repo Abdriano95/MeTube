@@ -425,10 +425,10 @@ namespace MeTube.Test.Repositories
             var likedVideoIds = new List<int> { 1, 2 };
             var likedGenres = new List<string> { "Programming", "Programming" };
             var recommendedVideos = new List<Video>
-    {
-        new Video { Id = 3, UserId = 2, Description = "Something someting", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
-        new Video { Id = 4, UserId = 3, Description = "Something someting", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
-    };
+            {
+                new Video { Id = 3, UserId = 2, Description = "Something someting", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+                new Video { Id = 4, UserId = 3, Description = "Something someting", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+            };
 
             _mockVideoRepo
                 .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
@@ -450,10 +450,10 @@ namespace MeTube.Test.Repositories
             // Arrange
             var userId = 1;
             var recentVideos = new List<Video>
-    {
-        new Video { Id = 5, UserId = 4, Description = "Something someting", Title = "Recent Video 1", Genre = "Music", DateUploaded = DateTime.Now },
-        new Video { Id = 6, UserId = 5, Description = "Something someting", Title = "Recent Video 2", Genre = "Music", DateUploaded = DateTime.Now }
-    };
+            {
+                new Video { Id = 5, UserId = 4, Description = "Something someting", Title = "Recent Video 1", Genre = "Music", DateUploaded = DateTime.Now },
+                new Video { Id = 6, UserId = 5, Description = "Something someting", Title = "Recent Video 2", Genre = "Music", DateUploaded = DateTime.Now }
+            };
 
             _mockVideoRepo
                 .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
@@ -497,10 +497,10 @@ namespace MeTube.Test.Repositories
             var likedVideoIds = new List<int> { 1, 2, 3 };
             var likedGenres = new List<string> { "Programming", "Music", "Programming" };
             var recommendedVideos = new List<Video>
-       {
-           new Video { Id = 4, UserId = 2, Description = "Something someting", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
-           new Video { Id = 5, UserId = 3, Description = "Something someting", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
-       };
+           {
+               new Video { Id = 4, UserId = 2, Description = "Something someting", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+               new Video { Id = 5, UserId = 3, Description = "Something someting", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+           };
 
             _mockVideoRepo
                 .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
@@ -524,10 +524,10 @@ namespace MeTube.Test.Repositories
             var likedVideoIds = new List<int> { 1 };
             var likedGenres = new List<string> { "Programming" };
             var recommendedVideos = new List<Video>
-       {
-           new Video { Id = 2, UserId = 2, Description = "Something someting", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
-           new Video { Id = 3, UserId = 3, Description = "Something someting", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
-       };
+           {
+               new Video { Id = 2, UserId = 2, Description = "Something someting", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+               new Video { Id = 3, UserId = 3, Description = "Something someting", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+           };
 
             _mockVideoRepo
                 .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
@@ -549,10 +549,10 @@ namespace MeTube.Test.Repositories
             // Arrange
             var userId = 1;
             var recentVideos = new List<Video>
-       {
-           new Video { Id = 1, UserId = 2, Description = "Something someting", Title = "Recent Video 1", Genre = "Music", DateUploaded = DateTime.Now },
-           new Video { Id = 2, UserId = 3, Description = "Something someting", Title = "Recent Video 2", Genre = "Music", DateUploaded = DateTime.Now }
-       };
+           {
+               new Video { Id = 1, UserId = 2, Description = "Something someting", Title = "Recent Video 1", Genre = "Music", DateUploaded = DateTime.Now },
+               new Video { Id = 2, UserId = 3, Description = "Something someting", Title = "Recent Video 2", Genre = "Music", DateUploaded = DateTime.Now }
+           };
 
             _mockVideoRepo
                 .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
@@ -576,10 +576,10 @@ namespace MeTube.Test.Repositories
             var likedVideoIds = new List<int> { 1, 2 };
             var likedGenres = new List<string> { "Programming", "Programming" };
             var recommendedVideos = new List<Video>
-       {
-           new Video { Id = 3, UserId = 2, Description = "Something someting", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
-           new Video { Id = 4, UserId = 3, Description = "Something someting", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
-       };
+           {
+               new Video { Id = 3, UserId = 2, Description = "Something someting", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+               new Video { Id = 4, UserId = 3, Description = "Something someting", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+           };
 
             _mockVideoRepo
                 .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
@@ -645,10 +645,10 @@ namespace MeTube.Test.Repositories
             var likedVideoIds = new List<int> { 1, 2 };
             var likedGenres = new List<string> { "Programming", "Programming" };
             var recommendedVideos = new List<Video>
-       {
-           new Video { Id = 3, UserId = 2, Description = "something something", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
-           new Video { Id = 4, UserId = 3, Description = "something something", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
-       };
+           {
+               new Video { Id = 3, UserId = 2, Description = "something something", Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+               new Video { Id = 4, UserId = 3, Description = "something something", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+           };
 
             _mockVideoRepo
                 .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
@@ -672,10 +672,10 @@ namespace MeTube.Test.Repositories
             var likedVideoIds = new List<int> { 1, 2 };
             var likedGenres = new List<string> { "Programming", null };
             var recommendedVideos = new List<Video>
-       {
-           new Video { Id = 3, UserId = 2, Description = "Something something",  Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
-           new Video { Id = 4, UserId = 3, Description = "someting someting" ,Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
-       };
+               {
+                   new Video { Id = 3, UserId = 2, Description = "Something something",  Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+                   new Video { Id = 4, UserId = 3, Description = "someting someting" ,Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+               };
 
             _mockVideoRepo
                 .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))
@@ -700,10 +700,10 @@ namespace MeTube.Test.Repositories
             var likedVideoIds = new List<int> { 1, 2 };
             var likedGenres = new List<string> { "Programming", "InvalidGenre" };
             var recommendedVideos = new List<Video>
-       {
-           new Video { Id = 3, UserId = 2, Description = "Something something" ,Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
-           new Video { Id = 4, UserId = 3, Description = "Something something", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
-       };
+           {
+               new Video { Id = 3, UserId = 2, Description = "Something something" ,Title = "Recommended Video 1", Genre = "Programming", DateUploaded = DateTime.Now },
+               new Video { Id = 4, UserId = 3, Description = "Something something", Title = "Recommended Video 2", Genre = "Programming", DateUploaded = DateTime.Now }
+           };
 
             _mockVideoRepo
                 .Setup(repo => repo.GetRecommendedVideosForUserAsync(userId, 5))

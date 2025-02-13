@@ -86,73 +86,96 @@ namespace MeTube.Data.Repository
         }
 
         /// <summary>
-        /// Gets a list of recommended videos for a user based on their liked videos.
+        /// Retrieves a list of recommended videos for a given user, prioritizing genres of liked videos
+        /// and then supplementing with random videos if necessary. 
         /// </summary>
-        /// <param name="userId">The ID of the user for whom to get recommended videos.</param>
-        /// <param name="maxCount">The maximum number of recommended videos to return. Default is 5.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a list of recommended videos.</returns>
+        /// <param name="userId">The ID of the user for whom to retrieve recommendations.</param>
+        /// <param name="maxCount">The maximum number of recommended videos to return (default is 5).</param>
+        /// <returns>A task that represents the asynchronous operation, returning a collection of recommended videos.</returns>
         /// <remarks>
-        /// The method performs the following steps:
-        /// 1. Retrieves all liked video IDs for the user.
-        /// 2. If the user has not liked any videos, it returns the most recently uploaded videos.
-        /// 3. Retrieves the genres of the liked videos.
-        /// 4. Determines the top genre from the liked videos.
-        /// 5. Retrieves other videos in the top genre, excluding the user's own videos and already liked videos.
+        /// Algorithm steps:
+        /// 1. Retrieves all liked video IDs for the specified user.
+        /// 2. If the user has no likes, returns a random set of <paramref name="maxCount"/> videos, excluding the user's own.
+        /// 3. Otherwise, groups all liked videos by genre and sorts them by descending frequency.
+        /// 4. Iterates over each genre chunk and picks up to a fixed number of videos (genreChunkSize) from that genre,
+        ///    excluding the user's own uploads and already liked videos.
+        /// 5. If the total count is still below <paramref name="maxCount"/>, fills the remaining slots with random videos
+        ///    (again excluding liked and user-owned videos).
         /// </remarks>
         public async Task<IEnumerable<Video>> GetRecommendedVideosForUserAsync(int userId, int maxCount = 5)
         {
-            // 1) Get all liked video IDs for the user
+            // 1) Collect all video IDs liked by this user
             var likedVideoIds = await DbContext.Likes
                 .Where(l => l.UserID == userId)
                 .Select(l => l.VideoID)
                 .ToListAsync();
 
+            // 2) If user has no likes, return random videos (excluding user's own)
             if (!likedVideoIds.Any())
             {
-                // If user has not liked any videos, randomize 5 videos, or return empty list
                 return await DbContext.Videos
-                    .OrderByDescending(v => v.DateUploaded)
+                    .Where(v => v.UserId != userId)      // Exclude user's own videos
+                    .OrderBy(x => Guid.NewGuid())        // Randomize order
                     .Take(maxCount)
                     .ToListAsync();
             }
 
-            // 2) Get all genres for the liked videos
+            // 3) Group all liked videos by genre
             var likedGenres = await DbContext.Videos
                 .Where(v => likedVideoIds.Contains(v.Id))
                 .Select(v => v.Genre)
                 .ToListAsync();
 
+            var groupedGenres = likedGenres
+                .GroupBy(g => g)
+                .OrderByDescending(g => g.Count())
+                .ToList();
 
-            // E.g. find "top genre" or take random
-            var topGenre = likedGenres.GroupBy(g => g)
-                                      .OrderByDescending(g => g.Count()).ToList();
-                                      
-            int genreIndex = 0;
-            while (genreIndex < topGenre.Count())
+            var recommended = new List<Video>();
+            const int genreChunkSize = 2;  // Example: pick up to 2 from each genre
+
+            // 4) Iterate through genres in priority order
+            foreach (var genreGroup in groupedGenres)
             {
-                var recommended = await DbContext.Videos
-                                    .Where(v => v.Genre == topGenre[genreIndex].Key && !likedVideoIds.Contains(v.Id))
-                                    .OrderByDescending(v => v.DateUploaded)
-                                    .Take(maxCount)
-                                    .ToListAsync();
+                if (recommended.Count >= maxCount) break;
 
-                if (recommended.Count > 0)
-                {
-                    return recommended;
-                    
-                }
+                var genreName = genreGroup.Key;
+                int needed = maxCount - recommended.Count;
+                int chunk = Math.Min(genreChunkSize, needed);
 
-                genreIndex++;
-            }
-            // 3) Get other videos in that genre
-            //    Exclude users own videos, or redan already liked videos
-
-            return await DbContext.Videos
+                // Fetch up to 'chunk' videos in this genre, excluding liked and user-owned
+                var genreVideos = await DbContext.Videos
+                    .Where(v => v.Genre == genreName
+                             && !likedVideoIds.Contains(v.Id)
+                             && v.UserId != userId)   // Exclude user's own
                     .OrderByDescending(v => v.DateUploaded)
-                    .Take(maxCount)
+                    .Take(chunk)
                     .ToListAsync();
-        }
 
+                recommended.AddRange(genreVideos);
+            }
+
+            // 5) If still under maxCount, fill the remainder with random videos 
+            if (recommended.Count < maxCount)
+            {
+                var excludedIds = new HashSet<int>(likedVideoIds);
+                foreach (var r in recommended)
+                    excludedIds.Add(r.Id);
+
+                int needed = maxCount - recommended.Count;
+
+                var randomFill = await DbContext.Videos
+                    .Where(v => !excludedIds.Contains(v.Id)
+                             && v.UserId != userId)   // Exclude user's own again
+                    .OrderBy(x => Guid.NewGuid())
+                    .Take(needed)
+                    .ToListAsync();
+
+                recommended.AddRange(randomFill);
+            }
+
+            return recommended;
+        }
 
     }
 }
