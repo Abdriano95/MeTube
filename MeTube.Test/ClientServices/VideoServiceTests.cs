@@ -428,7 +428,102 @@ namespace MeTube.Test.ClientServices
             var result = await _videoService.GetUploaderUsernameAsync(55);
             Assert.Null(result);
         }
+
+        [Fact]
+        public async Task GetRecommendedVideosAsync_WithEmptyResponse_ShouldReturnEmptyList()
+        {
+            // Arrange
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("[]")
+                });
+
+            _mockMapper.Setup(m => m.Map<List<Video>>(It.IsAny<List<VideoDto>>()))
+                       .Returns(new List<Video>());
+
+            // Act
+            var result = await _videoService.GetRecommendedVideosAsync();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        // test to see if videos are returned mapped correctly
+        public async Task GetRecommendedVideosAsync_WithVideos_ShouldReturnVideos()
+        {
+            // Arrange
+            var videoDtos = new List<VideoDto>
+                            {
+                                new VideoDto { Id = 1, Title = "Video 1" },
+                                new VideoDto { Id = 2, Title = "Video 2" }
+                            };
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(JsonSerializer.Serialize(videoDtos))
+                });
+            _mockMapper.Setup(m => m.Map<List<Video>>(It.IsAny<List<VideoDto>>()))
+                       .Returns(new List<Video>
+                       {
+                       new Video { Id = 1, Title = "Video 1" },
+                       new Video { Id = 2, Title = "Video 2" }
+                       });
+            // Act
+            var result = await _videoService.GetRecommendedVideosAsync();
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotEmpty(result);
+            Assert.Equal(2, result.Count);
+            Assert.Equal("Video 1", result[0].Title);
+            Assert.Equal("Video 2", result[1].Title);
+        }
+
+        [Fact]
+        public async Task GetRecommendedVideosAsync_WithValidResponse_ShouldReturnMappedVideos()
+        {
+            // Arrange
+            var videoDtos = new List<VideoDto>
+                            {
+                                new VideoDto { Id = 1, Title = "Video 1" },
+                                new VideoDto { Id = 2, Title = "Video 2" }
+                            };
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(JsonSerializer.Serialize(videoDtos))
+                });
+            _mockMapper.Setup(m => m.Map<List<Video>>(It.IsAny<List<VideoDto>>()))
+                       .Returns(new List<Video>
+                       {
+                       new Video { Id = 1, Title = "Video 1" },
+                       new Video { Id = 2, Title = "Video 2" }
+                       });
+            // Act
+            var result = await _videoService.GetRecommendedVideosAsync();
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotEmpty(result);
+            Assert.Equal(2, result.Count);
+            Assert.Equal("Video 1", result[0].Title);
+            Assert.Equal("Video 2", result[1].Title);
+        }
     }
-
-
 }  
