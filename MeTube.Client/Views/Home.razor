@@ -5,6 +5,41 @@
 @inject VideoListViewModel ViewModel
 @inject NavigationManager NavigationManager
 
+<h3>Recommended videos</h3>
+@if (ViewModel.IsLoading)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    @if (ViewModel.RecommendedVideos.Any())
+    {
+        <div class="video-grid">
+            @foreach (var video in ViewModel.RecommendedVideos)
+            {
+                <div class="video-card" @onclick="() => NavigateToVideo(video.Id.ToString())">
+                    <img src="@GetThumbnailUrl(video)"
+                         alt="@video.Title"
+                         class="thumbnail" />
+                    <div class="video-info">
+                        <h4>@video.Title</h4>
+                        <p class="author">By @video.UploaderUsername</p>
+                        <p class="date">@video.DateUploaded.ToString("dd MMM yyyy")</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>Either you are not logged in or you have not liked enough videos to get recommendations</p>
+    }
+}
+
+<hr />
+
 <h3>Last uploaded videos</h3>
 
 @if (ViewModel.IsLoading)
@@ -20,8 +55,8 @@ else
         {
             <div class="video-card" @onclick="() => NavigateToVideo(video.Id.ToString())">
                 <img src="@GetThumbnailUrl(video)"
-                     alt="@video.Title"
-                     class="thumbnail" />
+                alt="@video.Title"
+                class="thumbnail" />
                 <div class="video-info">
                     <h4>@video.Title</h4>
                     <p class="author">By @video.UploaderUsername</p>
@@ -36,6 +71,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         await ViewModel.LoadVideosAsync();
+        await ViewModel.LoadRecommendedVideosAsync();
     }
 
     private string GetThumbnailUrl(Video video)

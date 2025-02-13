@@ -17,7 +17,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
     {
         private readonly IVideoService _videoService;
         private readonly ICommentService _commentService;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
         private readonly ILikeService _likeService;
         private readonly IHistoryService _historyService;
         private readonly NavigationManager _navigationManager;
@@ -41,7 +41,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         public VideoViewModel(IVideoService videoService, 
                               ILikeService likeService,
                               ICommentService commentService,
-                              UserService userService,
+                              IUserService userService,
                               IMapper mapper,
                               NavigationManager navigationManager,
                               IHistoryService historyService)
@@ -177,7 +177,11 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                 CurrentVideo = await _videoService.GetVideoByIdAsync(videoId);
                 if (CurrentVideo != null)
                 {
+
                     CurrentVideo.VideoUrl = Constants.VideoStreamUrl(videoId);
+                    UploaderUsername = await _videoService.GetUploaderUsernameAsync(videoId);
+                    HasUserLiked = await _likeService.HasUserLikedVideoAsync(videoId);
+                    LikeCount = await _likeService.GetLikeCountForVideoAsync(videoId);
                     await LoadCommentsAsync(videoId);
                 }
                 else
@@ -186,11 +190,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                     _navigationManager.NavigateTo("/");
                     return;
                 }
-                CurrentVideo.VideoUrl = Constants.VideoStreamUrl(videoId);
-                UploaderUsername = await _videoService.GetUploaderUsernameAsync(videoId);
-                HasUserLiked = await _likeService.HasUserLikedVideoAsync(videoId);
-                LikeCount = await _likeService.GetLikeCountForVideoAsync(videoId);
-                await LoadCommentsAsync(videoId);
+                
             }
             catch (Exception ex)
             {

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
+
 namespace MeTube.API.Controllers
 {
     [ApiController]
@@ -85,6 +86,30 @@ namespace MeTube.API.Controllers
             }
             else
                 return Ok(new List<Video>());
+        }
+
+        // GET: api/Video/recommended
+        [Authorize]
+        [HttpGet("recommended")]
+        public async Task<IActionResult> GetRecommendedVideos()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (userId == 0)
+                return Unauthorized();
+            var videos = await _unitOfWork.Videos.GetRecommendedVideosForUserAsync(userId, 5);
+            if (videos.Any())
+            {
+                var videoDtos = new List<VideoDto>();
+                foreach (var video in videos)
+                {
+                    var dto = _mapper.Map<VideoDto>(video);
+                    dto.BlobExists = await _videoService.BlobExistsAsync(video.BlobName);
+                    videoDtos.Add(dto);
+                }
+                return Ok(videoDtos);
+            }
+            else
+                return Ok(new List<VideoDto>());
         }
 
         // POST: api/Video
@@ -254,8 +279,11 @@ namespace MeTube.API.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateVideo(int id, [FromBody] UpdateVideoDto updateVideoDto)
         {
+            if (!User.IsInRole("Admin"))
+                return Forbid();
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
 
             await using var transaction = await _unitOfWork.BeginTransactionAsync();
             try

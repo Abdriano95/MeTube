@@ -7,6 +7,7 @@ namespace MeTube.Client.Services
     {
         Task<bool> RegisterUserAsync(User user);
         Task<LoginResponse?> LoginAsync(string username, string password);
+        Task<bool> LogoutAsync();
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<IEnumerable<UserDetails>> GetAllUsersDetailsAsync();
         Task<int?> GetUserIdByEmailAsync(string email);

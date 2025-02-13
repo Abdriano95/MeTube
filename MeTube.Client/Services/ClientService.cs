@@ -1,12 +1,8 @@
 ﻿using AutoMapper;
 using MeTube.Client.Models;
 using MeTube.DTO;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.JSInterop;
-using Microsoft.VisualBasic;
 using System.Diagnostics;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -17,8 +13,8 @@ namespace MeTube.Client.Services
         private HttpClient _client;
         private JsonSerializerOptions _serializerOptions;
         private IMapper _mapper;
-        private readonly IJSRuntime _jsRuntime;
-        public ClientService(HttpClient client, IMapper mapper, IJSRuntime jsruntime) 
+        private readonly IJSRuntimeWrapper _jsRuntime;
+        public ClientService(HttpClient client, IMapper mapper, IJSRuntimeWrapper jsruntime) 
         {
             _mapper = mapper;
             _jsRuntime = jsruntime;

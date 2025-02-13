@@ -13,16 +13,19 @@ namespace MeTube.Client.ViewModels.VideoViewModels
         private readonly IVideoService _videoService;
 
         [ObservableProperty]
-        private ObservableCollection<Video> videos; 
+        private ObservableCollection<Video> videos;
+
+        [ObservableProperty]
+        private ObservableCollection<Video> recommendedVideos;
         public bool IsLoading { get; set; }
 
 
 
         public VideoListViewModel(IVideoService videoService)
         {
-            _videoService = videoService;     
+            _videoService = videoService;
         }
-
+        //This method loads all videos from the database and sets the Videos property to the result
         [RelayCommand]
         public async Task LoadVideosAsync()
         {
@@ -45,6 +48,39 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             }
         }
 
+        [RelayCommand]
+        public async Task LoadRecommendedVideosAsync()
+        {
+            IsLoading = true;
+            try
+            {
+ 
+                var videos = await _videoService.GetRecommendedVideosAsync();
+
+
+                if (videos == null)
+                {
+                    videos = new List<Video>();
+                    videos.Clear();
+                }
+                else
+                {
+
+
+                    RecommendedVideos = new ObservableCollection<Video>(videos);
+
+
+                    foreach (var video in RecommendedVideos)
+                    {
+                        video.UploaderUsername = await _videoService.GetUploaderUsernameAsync(video.Id);
+                    }
+                }
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
 
     }
 }
