@@ -145,5 +145,10 @@ namespace MeTube.Client.Services
         {
             return _clientService.GetAllUsersDetailsAsync();
         }
+
+        public Task<string> GetLogedInUserName()
+        {
+            return _clientService.GetLogedInUserName();
+        }
     }
 }
