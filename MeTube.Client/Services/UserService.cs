@@ -11,9 +11,9 @@ namespace MeTube.Client.Services
     public class UserService : IUserService
     {
         private readonly IClientService _clientService;
-        private readonly IJSRuntime _jsRuntime;
+        private readonly IJSRuntimeWrapper _jsRuntime;
         private readonly HttpClient _httpClient;
-        public UserService(IClientService clientservice, IJSRuntime jsRuntime, HttpClient httpClient)
+        public UserService(IClientService clientservice, IJSRuntimeWrapper jsRuntime, HttpClient httpClient)
         {
             _clientService = clientservice;
             _jsRuntime = jsRuntime;
@@ -85,10 +85,10 @@ namespace MeTube.Client.Services
             if (string.IsNullOrEmpty(token))
             {
                 return new Dictionary<string, string>
-                    {
-                        { "IsAuthenticated", "false" },
-                        { "Role", "Customer" }
-                    };
+            {
+                { "IsAuthenticated", "false" },
+                { "Role", "Customer" }
+            };
             }
 
             var handler = new JwtSecurityTokenHandler();
@@ -97,9 +97,10 @@ namespace MeTube.Client.Services
             var role = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? "User";
 
             return new Dictionary<string, string>
-                {
-                    { "IsAuthenticated", "true" },
-                    { "Role", role }};
+        {
+            { "IsAuthenticated", "true" },
+            { "Role", role }
+        };
         }
 
         // Deletes a user by ID asynchronously.

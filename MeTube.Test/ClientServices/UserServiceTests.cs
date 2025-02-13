@@ -15,14 +15,14 @@ namespace MeTube.Test.ClientServices
     public class UserServiceTests
     {
         private readonly Mock<IClientService> _mockClientService;
-        private readonly Mock<IJSRuntime> _mockJsRuntime;
+        private readonly Mock<IJSRuntimeWrapper> _mockJsRuntime;
         private readonly Mock<HttpClient> _mockHttpClient;
         private readonly UserService _userService;
 
         public UserServiceTests()
         {
             _mockClientService = new Mock<IClientService>();
-            _mockJsRuntime = new Mock<IJSRuntime>();
+            _mockJsRuntime = new Mock<IJSRuntimeWrapper>();
             _mockHttpClient = new Mock<HttpClient>();
             _userService = new UserService(_mockClientService.Object, _mockJsRuntime.Object, _mockHttpClient.Object);
         }
@@ -101,12 +101,9 @@ namespace MeTube.Test.ClientServices
         [Fact]
         public async Task IsUserAuthenticated_ShouldReturnAuthenticationStatus()
         {
-            var token = "token";
+            // Create a valid JWT token
+            var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
             _mockJsRuntime.Setup(x => x.InvokeAsync<string>("localStorage.getItem", "jwtToken")).ReturnsAsync(token);
-
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.CreateJwtSecurityToken();
-            _mockClientService.Setup(x => x.GetUserIdByEmailAsync(It.IsAny<string>())).ReturnsAsync(1);
 
             var result = await _userService.IsUserAuthenticated();
 

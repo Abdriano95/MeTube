@@ -53,7 +53,8 @@ namespace MeTube.Client
             builder.Services.AddTransient<UserHistoryViewModel>();
             builder.Services.AddTransient<AdminHistoryViewModel>();
 
-            builder.Services.AddSingleton<IClientService, ClientService>();
+            builder.Services.AddSingleton<IJSRuntimeWrapper, JSRuntimeWrapper>();
+            builder.Services.AddSingleton<IClientService,ClientService>();
             builder.Services.AddSingleton<IUserService, UserService>();
             builder.Services.AddScoped<IVideoService, VideoService>();
             builder.Services.AddScoped<ILikeService, LikeService>();
