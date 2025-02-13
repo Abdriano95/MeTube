@@ -20,17 +20,14 @@ namespace MeTube.Client.ViewModels
         private Video? currentVideo;
 
         [ObservableProperty]
-        //[Required(ErrorMessage = "Title is required")]
         [StringLength(100, MinimumLength = 0, ErrorMessage = "Title must be between 3 and 100 characters")]
         private string title = string.Empty;
 
         [ObservableProperty]
-        //[Required(ErrorMessage = "Description is required")]
         [StringLength(1000, MinimumLength = 0, ErrorMessage = "Description must be between 10 and 1000 characters")]
         private string description = string.Empty;
 
         [ObservableProperty]
-        //[Required(ErrorMessage = "Genre is required")]
         [StringLength(30, MinimumLength = 3, ErrorMessage = "Please select a genre")]
         private string genre = string.Empty;
 
@@ -61,6 +58,9 @@ namespace MeTube.Client.ViewModels
             _likeService = likeService;
         }
 
+        // Load likes for a specific video by its ID  
+        // Fetch likes from the like service  
+        // Handle any exceptions that occur  
         public async Task LoadLikesAsync(int videoId)
         {
             try
@@ -73,6 +73,9 @@ namespace MeTube.Client.ViewModels
             }
         }
 
+        // Load video details and its likes by video ID  
+        // Fetch video details from the video service  
+        // Handle any exceptions that occur  
         public async Task LoadVideoAsync(int videoId)
         {
             try
@@ -103,6 +106,9 @@ namespace MeTube.Client.ViewModels
             }
         }
 
+        // Remove a like from a video as an admin  
+        // Confirm the action with the user  
+        // Handle any exceptions that occur  
         public async Task RemoveLikeAsAdmin(int userId)
         {
             if (CurrentVideo == null) return;
@@ -127,6 +133,9 @@ namespace MeTube.Client.ViewModels
             }
         }
 
+        // Update the metadata of the current video  
+        // Validate all properties of the view model  
+        // Handle any exceptions that occur  
         public async Task UpdateMetadataAsync()
         {
             if (CurrentVideo == null) return;
@@ -165,6 +174,9 @@ namespace MeTube.Client.ViewModels
             }
         }
 
+        // Update the video file of the current video  
+        // Open a stream for the new video file  
+        // Handle any exceptions that occur  
         public async Task UpdateVideoFileAsync()
         {
             if (CurrentVideo == null || NewVideoFile == null) return;
@@ -172,6 +184,7 @@ namespace MeTube.Client.ViewModels
             try
             {
                 IsLoading = true;
+                
                 using var videoStream = NewVideoFile.OpenReadStream(500 * 1024 * 1024); // Max 500MB
                 DateTime dateUploaded = DateTime.Now;
                 string uniqeVideWithDate = dateUploaded.ToString();
@@ -197,6 +210,9 @@ namespace MeTube.Client.ViewModels
             }
         }
 
+        // Update the thumbnail of the current video  
+        // Open a stream for the new thumbnail file  
+        // Handle any exceptions that occur  
         public async Task UpdateThumbnailAsync()
         {
             if (CurrentVideo == null || NewThumbnailFile == null) return;
@@ -204,7 +220,7 @@ namespace MeTube.Client.ViewModels
             try
             {
                 IsLoading = true;
-                using var thumbnailStream = NewThumbnailFile.OpenReadStream(5 * 1024 * 1024); // Max 5MB
+                using var thumbnailStream = NewThumbnailFile.OpenReadStream(5 * 1024 * 1024); // Max 5MB  
                 var updatedVideo = await _videoService.UpdateVideoThumbnailAsync(CurrentVideo.Id, thumbnailStream, NewThumbnailFile.Name);
 
                 if (updatedVideo != null)
@@ -227,6 +243,9 @@ namespace MeTube.Client.ViewModels
             }
         }
 
+        // Reset the thumbnail of the current video to the default  
+        // Confirm the action with the user  
+        // Handle any exceptions that occur  
         public async Task ResetToDefaultThumbnailAsync()
         {
             if (CurrentVideo == null) return;
@@ -237,17 +256,17 @@ namespace MeTube.Client.ViewModels
                 var confirmed = await _jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to reset to the default thumbnail?");
                 if (!confirmed) return;
 
-                // Implementation needed based on your requirements
                 bool resetOk = await _videoService.ResetThumbnail(CurrentVideo.Id);
-                if(resetOk)
+                if (resetOk)
                 {
                     await _jsRuntime.InvokeVoidAsync("alert", "Reset to default thumbnail successful!");
                     NewThumbnailFile = null;
                     await LoadVideoAsync(CurrentVideo.Id);
                 }
                 else
+                {
                     await _jsRuntime.InvokeVoidAsync("alert", "Reset to default thumbnail not successful!");
-
+                }
             }
             catch (Exception)
             {

@@ -37,6 +37,9 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             _jsRuntime = jsRuntime;
         }
 
+        // Load videos uploaded by the current user
+        // Clear any existing videos in the collection
+        // Handle any exceptions that occur during the process
         public async Task LoadUserVideosAsync()
         {
             try
@@ -64,6 +67,9 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             }
         }
 
+        // Load all videos available in the system
+        // Clear any existing videos in the collection
+        // Handle any exceptions that occur during the process
         public async Task LoadAllVideos()
         {
             try
@@ -91,23 +97,35 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             }
         }
 
+        // Navigate to the edit page for a specific video
+        // Construct the URL using the video ID
+        // Use the NavigationManager to perform the navigation
         public void NavigateToEdit(int videoId)
         {
             _navigationManager.NavigateTo($"/videos/edit/{videoId}");
         }
 
+        // Show the delete confirmation dialog for a specific video
+        // Set the video to be deleted
+        // Update the flag to show the confirmation dialog
         public void ShowDeleteConfirmation(Video video)
         {
             VideoToDelete = video;
             ShowDeleteConfirmationBool = true;
         }
 
+        // Hide the delete confirmation dialog
+        // Clear the video to be deleted
+        // Update the flag to hide the confirmation dialog
         public void HideDeleteConfirmation()
         {
             VideoToDelete = null;
             ShowDeleteConfirmationBool = false;
         }
 
+        // Confirm the deletion of a video
+        // Remove the video from the collection if deletion is successful
+        // Handle any exceptions that occur during the process
         public async Task ConfirmDeleteVideoAsync()
         {
             if (VideoToDelete == null) return;
@@ -120,7 +138,7 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                 {
                     UserVideos.Remove(VideoToDelete);
                     SuccessMessage = "Video successfully deleted!";
-                    await Task.Delay(2000); // Visa meddelandet i 2 sekunder
+                    await Task.Delay(2000); // Show the message for 2 seconds
                     SuccessMessage = string.Empty;
                 }
                 else
