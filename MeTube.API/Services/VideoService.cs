@@ -3,9 +3,9 @@ using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using MeTube.DTO.VideoDTOs;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Caching.Memory;
+using System.Diagnostics;
 
 namespace MeTube.API.Services
 {
@@ -41,7 +41,6 @@ namespace MeTube.API.Services
                 SizeLimit = 524288000 // 500MB cache limit
             });
 
-
             _videoContainerClient.CreateIfNotExists();
             _thumbnailContainerClient.CreateIfNotExists();
         }
@@ -51,27 +50,6 @@ namespace MeTube.API.Services
             var blobClient = _videoContainerClient.GetBlobClient(blobName);
             var response = await blobClient.ExistsAsync();
             return response.Value;
-        }
-
-        public async Task<List<BlobDto>> ListAsync()
-        {
-            List<BlobDto> blobs = new List<BlobDto>();
-
-            await foreach (var blobItem in _videoContainerClient.GetBlobsAsync())
-            {
-                string uri = _videoContainerClient.Uri.ToString();
-                string name = blobItem.Name;
-                string fullUri = $"{uri}/{name}";
-
-                blobs.Add(new BlobDto
-                {
-                    Uri = fullUri,
-                    Name = name,
-                    ContentType = blobItem.Properties.ContentType
-                });
-            }
-
-            return blobs;
         }
 
         // Thumbnail upload
@@ -124,12 +102,6 @@ namespace MeTube.API.Services
         public async Task<BlobResponseDto> UploadAsync(IFormFile blob)
         {
             BlobResponseDto response = new();
-            BlobClient client = _videoContainerClient.GetBlobClient(blob.FileName);
-
-            var blobHttpHeaders = new BlobHttpHeaders
-            {
-                ContentType = blob.ContentType
-            };
 
             var contentType = blob.ContentType;
             if (string.IsNullOrEmpty(contentType))
@@ -140,7 +112,6 @@ namespace MeTube.API.Services
                     contentType = "application/octet-stream";
                 }
             }
-
             var allowedTypes = new[] { "video/mp4", "video/webm" };
             if (!allowedTypes.Contains(contentType))
             {
@@ -151,56 +122,91 @@ namespace MeTube.API.Services
                 };
             }
 
-            await using (Stream? stream = blob.OpenReadStream())
+            var tempIn = Path.GetTempFileName(); 
+            var extension = Path.GetExtension(blob.FileName);
+            var tempInFinal = Path.ChangeExtension(tempIn, extension);
+
+            File.Move(tempIn, tempInFinal);
+            await using (var fs = new FileStream(tempInFinal, FileMode.Create))
             {
-                await client.UploadAsync(
-                    stream,
-                    new BlobUploadOptions { HttpHeaders = blobHttpHeaders },
-                    cancellationToken: default
-                );
+                await blob.CopyToAsync(fs);
             }
 
-            
-            var properties = await client.GetPropertiesAsync();
+            var isMp4 = contentType == "video/mp4";
+            string finalPathForUpload;
 
-            response.Status = $"File {blob.FileName} Uploaded Successfully";
-            response.Error = false;
-            response.Blob = new BlobDto
+            if (isMp4)
             {
-                Uri = client.Uri.AbsoluteUri,
-                Name = client.Name,
-                ContentType = properties.Value.ContentType
-            };
+                var tempOut = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}_faststart.mp4");
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "ffmpeg",
+                    Arguments = $"-i \"{tempInFinal}\" -c copy -movflags +faststart \"{tempOut}\"",
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using (var process = new Process { StartInfo = startInfo })
+                {
+                    process.Start();
+                    string stderr = await process.StandardError.ReadToEndAsync();
+                    process.WaitForExit();
+                    if (process.ExitCode != 0)
+                    {
+                        return new BlobResponseDto
+                        {
+                            Error = true,
+                            Status = $"ffmpeg failed: {stderr}"
+                        };
+                    }
+                }
+
+                finalPathForUpload = tempOut; 
+            }
+            else
+            {
+                finalPathForUpload = tempInFinal;
+            }
+
+            try
+            {
+                var client = _videoContainerClient.GetBlobClient(Path.GetFileName(finalPathForUpload));
+
+                var blobHttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = contentType
+                };
+
+                await using (var uploadFs = new FileStream(finalPathForUpload, FileMode.Open, FileAccess.Read))
+                {
+                    await client.UploadAsync(uploadFs, new BlobUploadOptions { HttpHeaders = blobHttpHeaders });
+                }
+
+                var properties = await client.GetPropertiesAsync();
+                response.Status = $"File {Path.GetFileName(finalPathForUpload)} Uploaded Successfully";
+                response.Error = false;
+                response.Blob = new BlobDto
+                {
+                    Uri = client.Uri.AbsoluteUri,
+                    Name = client.Name,
+                    ContentType = properties.Value.ContentType
+                };
+            }
+            catch (Exception ex)
+            {
+                response.Error = true;
+                response.Status = "Upload failed: " + ex.Message;
+            }
+            finally
+            {
+                if (File.Exists(tempInFinal)) File.Delete(tempInFinal);
+            }
 
             return response;
         }
 
-        public async Task<BlobDto?> DownloadAsync(string blobFilename)
-        {
-            BlobClient file = _videoContainerClient.GetBlobClient(blobFilename);
-
-            if (await file.ExistsAsync())
-            {
-                var data = await file.OpenReadAsync();
-
-                Stream blobContent = data;
-
-                var content = await file.DownloadContentAsync();
-
-                string name = blobFilename;
-
-                string contentType = content.Value.Details.ContentType;
-
-                return new BlobDto
-                {
-                    Name = name,
-                    ContentType = contentType,
-                    Content = blobContent
-                };
-            }
-
-            return null;
-        }
 
         // Delete thumbnail
         public async Task<BlobResponseDto> DeleteThumbnailAsync(string blobFilename)
@@ -239,6 +245,31 @@ namespace MeTube.API.Services
             return response;
         }
 
+
+        // DownloadRange (For Streaming videos)
+        public async Task<Stream> DownloadRangeAsync(string blobName, long start, long end)
+        {
+            var blobClient = _videoContainerClient.GetBlobClient(blobName);
+
+            var options = new BlobDownloadOptions
+            {
+                Range = new HttpRange(start, end - start + 1)
+            };
+
+            BlobDownloadStreamingResult download;
+            try
+            {
+                var result = await blobClient.DownloadStreamingAsync(options);
+                download = result.Value;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Could not partial download {blobName}", ex);
+            }
+
+            return download.Content;
+        }
+
         public async Task<BlobProperties> GetBlobPropertiesAsync(string blobName)
         {
             var cacheKey = $"properties_{blobName}";
@@ -260,60 +291,6 @@ namespace MeTube.API.Services
             _cache.Set(cacheKey, response.Value, cacheEntryOptions);
 
             return response.Value;
-        }
-
-        public async Task<Stream> DownloadRangeAsync(string blobName, long start, long end)
-        {
-            var blobClient = _videoContainerClient.GetBlobClient(blobName);
-            var cacheKey = $"{blobName}_{start}_{end}";
-
-            // Optimera caching - bara cache små segment
-            const int MAX_CACHE_SIZE = 1 * 1024 * 1024; // 1MB max cache segment
-            bool shouldCache = (end - start) <= MAX_CACHE_SIZE;
-
-            if (shouldCache && _cache.TryGetValue(cacheKey, out byte[] cachedData))
-            {
-                return new MemoryStream(cachedData);
-            }
-
-            try
-            {
-                // Optimera nedladdningsalternativ för streaming
-                var downloadOptions = new BlobDownloadOptions
-                {
-                    Range = new HttpRange(start, end - start + 1),
-                    // Ta bort onödiga villkor för bättre prestanda
-                    Conditions = null
-                };
-
-                var download = await blobClient.DownloadStreamingAsync(downloadOptions);
-
-                if (shouldCache)
-                {
-                    // För små segment, använd caching
-                    var memoryStream = new MemoryStream();
-                    await download.Value.Content.CopyToAsync(memoryStream, 81920); // 80KB buffer
-
-                    var cacheEntryOptions = new MemoryCacheEntryOptions()
-                        .SetSize(memoryStream.Length)
-                        .SetSlidingExpiration(TimeSpan.FromSeconds(_cacheTimeout));
-
-                    _cache.Set(cacheKey, memoryStream.ToArray(), cacheEntryOptions);
-
-                    memoryStream.Position = 0;
-                    return memoryStream;
-                }
-                else
-                {
-                    // För stora segment, returnera direkt stream
-                    return download.Value.Content;
-                }
-            }
-            catch (Exception ex)
-            {
-                // Logga felet om du har logging implementerat
-                throw;
-            }
         }
     }
 }

@@ -177,8 +177,6 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                 CurrentVideo = await _videoService.GetVideoByIdAsync(videoId);
                 if (CurrentVideo != null)
                 {
-
-                    CurrentVideo.VideoUrl = Constants.VideoStreamUrl(videoId);
                     UploaderUsername = await _videoService.GetUploaderUsernameAsync(videoId);
                     HasUserLiked = await _likeService.HasUserLikedVideoAsync(videoId);
                     LikeCount = await _likeService.GetLikeCountForVideoAsync(videoId);

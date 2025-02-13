@@ -41,7 +41,7 @@
                            crossorigin="anonymous"
                            playsinline
                            webkit-playsinline>
-                        <source src="@ViewModel.CurrentVideo.VideoUrl" type="video/mp4"
+                        <source src="@Constants.VideoGetStreamUrl(VideoId)" type="video/mp4"
                                 codecs="avc1.42E01E, mp4a.40.2">
                         Your browser does not support video playback.
                     </video>
@@ -231,7 +231,7 @@
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error in HandleVideoPlay: {ex}");
-            throw; // rethrow if you still want it to propagate to JS
+            throw;
         }
     }
 

@@ -69,7 +69,6 @@ namespace MeTube.Test.ViewModels
             // Assert
             _mockVideoService.Verify(x => x.GetVideoByIdAsync(videoId), Times.Once);
             Assert.Equal(expectedVideo, _viewModel.CurrentVideo);
-            Assert.Equal(Constants.VideoStreamUrl(videoId), _viewModel.CurrentVideo.VideoUrl);
 
             _mockVideoService.Verify(x => x.GetUploaderUsernameAsync(videoId), Times.Once);
             Assert.Equal(expectedUsername, _viewModel.UploaderUsername);
