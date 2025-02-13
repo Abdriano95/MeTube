@@ -99,7 +99,13 @@ namespace MeTube.API.Controllers
             var videos = await _unitOfWork.Videos.GetRecommendedVideosForUserAsync(userId, 5);
             if (videos.Any())
             {
-                var videoDtos = _mapper.Map<List<VideoDto>>(videos);
+                var videoDtos = new List<VideoDto>();
+                foreach (var video in videos)
+                {
+                    var dto = _mapper.Map<VideoDto>(video);
+                    dto.BlobExists = await _videoService.BlobExistsAsync(video.BlobName);
+                    videoDtos.Add(dto);
+                }
                 return Ok(videoDtos);
             }
             else

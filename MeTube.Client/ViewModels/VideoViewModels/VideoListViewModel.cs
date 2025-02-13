@@ -54,10 +54,10 @@ namespace MeTube.Client.ViewModels.VideoViewModels
             IsLoading = true;
             try
             {
-                // Anropar service
+ 
                 var videos = await _videoService.GetRecommendedVideosAsync();
 
-                // Dubbelkolla om du vill:
+
                 if (videos == null)
                 {
                     videos = new List<Video>();
@@ -66,10 +66,10 @@ namespace MeTube.Client.ViewModels.VideoViewModels
                 else
                 {
 
-                    // Skapa en ObservableCollection från listan
+
                     RecommendedVideos = new ObservableCollection<Video>(videos);
 
-                    // Sätt UploaderUsername för varje video, precis som du gör i LoadVideosAsync()
+
                     foreach (var video in RecommendedVideos)
                     {
                         video.UploaderUsername = await _videoService.GetUploaderUsernameAsync(video.Id);
