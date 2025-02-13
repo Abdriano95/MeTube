@@ -3,6 +3,7 @@ using MeTube.Client.Services;
 using MeTube.Client.ViewModels;
 using MeTube.Client.ViewModels.HistoryViewModels;
 using MeTube.Client.ViewModels.LoginViewModels;
+using MeTube.Client.ViewModels.LogoutViewModels;
 using MeTube.Client.ViewModels.ManageUsersViewModels;
 using MeTube.Client.ViewModels.SignupViewModels;
 using MeTube.Client.ViewModels.VideoViewModels;
@@ -42,6 +43,7 @@ namespace MeTube.Client
 
             builder.Services.AddTransient<SignupViewModel>();
             builder.Services.AddTransient<LoginViewModel>();
+            builder.Services.AddScoped<LogoutViewModel>();
             builder.Services.AddTransient<ManageUsersViewModel>();
             builder.Services.AddTransient<VideoViewModel>();
             builder.Services.AddTransient<VideoListViewModel>();
