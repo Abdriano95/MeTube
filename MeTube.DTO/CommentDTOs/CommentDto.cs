@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace MeTube.DTO
+namespace MeTube.DTO.CommentDTOs
 {
     public class CommentDto
     {

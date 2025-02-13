@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using MeTube.Data.Entity;
 using MeTube.Data.Repository;
-using MeTube.DTO;
+using MeTube.DTO.CommentDTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
