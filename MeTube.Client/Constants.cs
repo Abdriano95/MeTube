@@ -28,7 +28,6 @@
         public static string VideoGetByIdUrl(int id) => $"{VideoBaseUrl}/{id}"; // GET api/Video/{id}
 
         public static string VideoGetRecommendedUrl = $"{VideoBaseUrl}/recommended";
-        public static string VideoStreamUrl(int id) => $"{VideoBaseUrl}/stream/{id}"; // GET api/Video/stream/{id}
         public static string VideoGetByUserUrl = $"{VideoBaseUrl}/user"; // GET api/Video/user
         public static string VideoGetUploaderUsernameUrl(int videoId) => $"{VideoBaseUrl}/username/{videoId}";
 

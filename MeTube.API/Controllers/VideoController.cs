@@ -189,91 +189,6 @@ namespace MeTube.API.Controllers
             }
         }
 
-        [HttpGet("stream/{id}")]
-        public async Task<IActionResult> StreamVideo(int id)
-        {
-            var video = await _unitOfWork.Videos.GetVideoByIdAsync(id);
-            if (video == null || string.IsNullOrEmpty(video.BlobName))
-                return NotFound();
-
-            var blob = await _videoService.GetBlobPropertiesAsync(video.BlobName);
-            if (blob == null)
-                return NotFound("Video blob not found");
-
-            var contentLength = blob.ContentLength;
-            var contentType = "video/mp4"; // Explicit sätt content type till video/mp4
-
-            var rangeHeader = Request.Headers.Range.ToString();
-
-            // Sätt alla viktiga headers
-            Response.Headers.Append("Accept-Ranges", "bytes");
-            Response.Headers.Append("Cache-Control", "no-cache");
-            Response.Headers.Append("Connection", "keep-alive");
-            Response.Headers.Append("Access-Control-Allow-Origin", "*");
-            Response.Headers.Append("Access-Control-Allow-Headers", "Range");
-            Response.Headers.Append("Access-Control-Expose-Headers", "Accept-Ranges, Content-Encoding, Content-Length, Content-Range");
-
-            try
-            {
-                if (string.IsNullOrEmpty(rangeHeader))
-                {
-                    Response.StatusCode = 200;
-                    Response.ContentType = contentType;
-                    Response.Headers.Append("Content-Length", contentLength.ToString());
-
-                    return File(await _videoService.DownloadRangeAsync(video.BlobName, 0, contentLength - 1),
-                        contentType,
-                        enableRangeProcessing: true);
-                }
-
-                // Parse range
-                var rangeParts = rangeHeader.Replace("bytes=", "").Split('-');
-                var start = rangeParts.Length > 0 && long.TryParse(rangeParts[0], out var s) ? s : 0;
-                var end = rangeParts.Length > 1 && long.TryParse(rangeParts[1], out var e) ? e : contentLength - 1;
-
-                // Validate range
-                if (start >= contentLength)
-                {
-                    Response.Headers.Append("Content-Range", $"bytes */{contentLength}");
-                    return StatusCode(416);
-                }
-
-                // Adjust end if needed
-                if (end >= contentLength)
-                {
-                    end = contentLength - 1;
-                }
-
-                var length = end - start + 1;
-                Response.StatusCode = 206;
-                Response.ContentType = contentType;
-                Response.Headers.Append("Content-Length", length.ToString());
-                Response.Headers.Append("Content-Range", $"bytes {start}-{end}/{contentLength}");
-
-                return File(await _videoService.DownloadRangeAsync(video.BlobName, start, end),
-                    contentType,
-                    enableRangeProcessing: true);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Streaming error: {ex.Message}");
-            }
-        }
-
-        private int DetermineOptimalChunkSize(long fileSize)
-        {
-            // Adjust chunk size based on file size
-            if (fileSize > 1024 * 1024 * 1024) // > 1GB
-                return 10 * 1024 * 1024; // 10MB chunks
-            else if (fileSize > 512 * 1024 * 1024) // > 512MB
-                return 5 * 1024 * 1024; // 5MB chunks
-            else if (fileSize > 128 * 1024 * 1024) // > 128MB
-                return 2 * 1024 * 1024; // 2MB chunks
-            else
-                return 1 * 1024 * 1024; // 1MB chunks
-        }
-
-
         // PUT: api/Video/{id}
         [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}")]
@@ -470,32 +385,5 @@ namespace MeTube.API.Controllers
             }
             return true;
         }
-
-
-        private (long Start, long End, long Length) GetRangeFromHeader(string rangeHeader, long contentLength, int chunkSize)
-        {
-            if (string.IsNullOrEmpty(rangeHeader))
-            {
-                var endRangeDefault = Math.Min(chunkSize - 1, contentLength - 1);
-                return (0, endRangeDefault, endRangeDefault + 1);
-            }
-
-            var ranges = rangeHeader.Replace("bytes=", "").Split('-');
-            var start = ranges.Length > 0 && long.TryParse(ranges[0], out var s) ? s : 0;
-            var endRangeParsed = ranges.Length > 1 && long.TryParse(ranges[1], out var e) ? e : start + chunkSize - 1;
-
-            // Ensure end doesn't exceed content length
-            endRangeParsed = Math.Min(endRangeParsed, contentLength - 1);
-
-            // Ensure chunk size isn't too large
-            if (endRangeParsed - start + 1 > chunkSize)
-            {
-                endRangeParsed = start + chunkSize - 1;
-            }
-
-            return (start, endRangeParsed, endRangeParsed - start + 1);
-        }
-
-
     }
 }

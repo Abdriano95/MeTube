@@ -33,7 +33,6 @@
             <div class="col-lg-8 col-md-12">
                 <div class="video-container">
                     <video id="videoPlayer"
-                           @ref="videoElement"
                            controls
                            class="video-player"
                            controlsList="nodownload"
@@ -41,8 +40,7 @@
                            crossorigin="anonymous"
                            playsinline
                            webkit-playsinline>
-                        <source src="@ViewModel.CurrentVideo.VideoUrl" type="video/mp4"
-                                codecs="avc1.42E01E, mp4a.40.2">
+                        <source src="@ViewModel.CurrentVideo.VideoUrl" type="video/mp4"/>
                         Your browser does not support video playback.
                     </video>
 
@@ -175,10 +173,6 @@
 
     private string _newComment = string.Empty;
 
-    private bool videoLoaded = false;
-
-    private ElementReference videoElement;
-
     private DotNetObjectReference<VideoView> _dotNetHelper;
 
     private bool _historyRecorded;
@@ -190,15 +184,6 @@
         await ViewModel.LoadCommentsAsync(VideoId);
     }
 
-    private async Task OnVideoLoaded()
-    {
-        if (!videoLoaded)
-        {
-            videoLoaded = true;
-            await JSRuntime.InvokeVoidAsync("initializeVideoPlayer", videoElement);
-        }
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -206,7 +191,6 @@
             try
             {
                 _dotNetHelper = DotNetObjectReference.Create(this);
-                await Task.Delay(100);
                 await JSRuntime.InvokeVoidAsync("initializeVideoPlayer", _dotNetHelper);
                 await JSRuntime.InvokeVoidAsync("eval", "document.head.insertAdjacentHTML('beforeend', '<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\">')");
             }
@@ -231,7 +215,7 @@
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error in HandleVideoPlay: {ex}");
-            throw; // rethrow if you still want it to propagate to JS
+            throw; 
         }
     }
 
