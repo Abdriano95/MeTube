@@ -182,8 +182,9 @@ On this page you can see your entire video viewing history.
   - *User Story 3*: Video management and uploading functionality for users implemented.
   - *User Story 4*: Viewing of video content implemented.
   - *User Story 5*: Metadata implemented in the database and is deleted when video is deleted.
+  - *User Story 6*: The client side still had CRUD functionality (list) left to implement but, we implemented it before the start of sprint 2.
 - **Not Completed**:
-  - *User Story 6*: The client side still has CRUD functionality (list) left to implement.
+  - All user stories completed by the start of the next sprint.
 - **Issues**:
   - Problems with working vertically.
 
@@ -193,7 +194,7 @@ On this page you can see your entire video viewing history.
   - We did a lot, in a very short time span.
 - **What could be improved**:
   - We bit off more than we could chew.
-  - We should work on less user stories during our short sprints.
+  - We should work on less user stories during our rather short sprints.
 - **Amendments to process**:
   - Shorten the user stories during the next sprint.
   - Put less user stories in the Sprint Backlog.
@@ -216,28 +217,28 @@ On this page you can see your entire video viewing history.
   - *User Story 2*: An admin can now fully modify all videos and their contents.
   - *User Story 3*: The ability to like a video and remove the like is fully functional and tied to every user.
   - *User Story 4*: An admin has the ability to modify the likes of any video.
+  - *User Story 5*: We needed to implement the connection between the API and the client but, we finally finished it during the weekend before the next sprint.
+  - *User Story 6*: We fully impelemented the admin functionality for the comment management.
 - **Not Completed**:
-  - *User Story 5*: Need to implement the connection between the API and the client.
-  - *User Story 6*: Without the comment functionality fully implemented we couldnt start the development process for this user story.
+  - All user stories where completed. User story 5 & 6 where finished during the weekend, right before sprint 4 started.
 - **Issues**:
   - We had worsened our communication during this sprint.
   - We had less daily scrums this sprint.
-  - Many more user stories were incompleted.
+  - We had to crunch some of the final user stories at the end of the sprint.
 
 #### Retrospective
 - **What went well**:
   - We developed a solid workflow with pull requests, linked to testing.
-  - Most of the work was completed.
+  - All work was completed.
   - We assigned estimates for the user stories using Scrum Poker.
   - We refrained from writing specific tasks for the user stories and will change that approach to defining a DoD (Definition of Done).
 - **What could be improved**:
   - Better communication in the next sprint.
   - More daily scrums.
-  - Make sure that we have less user stories in the sprint backlog.
+  - More feature testing
 - **Amendments to process**:
   - More frequent check-ins, at least two times during a sprint.
-  - Improve the pull request workflow.
-  - Change from tasks to DoD in issues.
+  - We will start feature testing of the user stories that are already completed.
 
 ---
 
