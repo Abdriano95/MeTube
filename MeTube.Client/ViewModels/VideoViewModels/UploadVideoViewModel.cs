@@ -108,10 +108,13 @@ namespace MeTube.Client.ViewModels
                     Genre = Genre
                 };
 
+                DateTime dateUploaded = DateTime.Now;
+                string uniqeVideWithDate = dateUploaded.ToString();
+
                 var uploadedVideo = await _videoService.UploadVideoAsync(
                     video,
                     videoMS,
-                    VideoFile.Name,
+                    VideoFile.Name+ uniqeVideWithDate,
                     thumbnailMS,
                     ThumbnailFile?.Name);
 
