@@ -110,55 +110,254 @@ namespace MeTube.Data
 
         private void SeedData(ModelBuilder modelBuilder)
         {
+            // Fixed date for seeding
+            var baseDate = new DateTime(2024, 1, 1);
+
             // Seed Users
-            User user1 = new()
+            var users = new List<User>
             {
-                Id = 1,
-                Username = "johndoe1",
-                Password = "pwd123",
-                Email = "john.doe@example.com",
-                Role = "Admin"
+                new User
+                {
+                    Id = 1,
+                    Username = "admin",
+                    Password = "adminpwd123",
+                    Email = "admin@example.com",
+                    Role = "Admin"
+                },
+                new User
+                {
+                    Id = 2,
+                    Username = "john_doe",
+                    Password = "password123",
+                    Email = "john@example.com",
+                    Role = "User"
+                },
+                new User
+                {
+                    Id = 3,
+                    Username = "jane_smith",
+                    Password = "password456",
+                    Email = "jane@example.com",
+                    Role = "User"
+                },
+                new User
+                {
+                    Id = 4,
+                    Username = "tech_guru",
+                    Password = "techpass789",
+                    Email = "tech@example.com",
+                    Role = "User"
+                },
+                new User
+                {
+                    Id = 5,
+                    Username = "sports_fan",
+                    Password = "sportspass789",
+                    Email = "sports@example.com",
+                    Role = "User"
+                }
             };
-
-            User user2 = new()
-            {
-                Id = 2,
-                Username = "janedoe2",
-                Password = "pwd456",
-                Email = "jane.doe@example.com",
-                Role = "User"
-            };
-
-            modelBuilder.Entity<User>().HasData(user1, user2);
+            modelBuilder.Entity<User>().HasData(users);
 
             // Seed Videos
-            Video video1 = new()
+            var videos = new List<Video>
             {
-                Id = 1,
-                UserId = 1,
-                Title = "164. What is the Future of Blazor? Should I Learn Blazor?",
-                Description = "Should I learn a JavaScript framework or concentrate on mastering Blazor? What is the future of Blazor? Is Microsoft invested in making Blazor great? We will answer these questions in today's Dev Questions episode.   Website: https://www.iamtimcorey.com/",
-                Genre = "Programming",
-                VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/youtube_OUUlO8fQOfE_1920x1080_h264.mp4",
-                ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/whatisthefutureofblazor.jpg",
-                BlobName = "youtube_OUUlO8fQOfE_1920x1080_h264.mp4",
-                DateUploaded = new DateTime(2025, 2, 1) 
+                new Video
+                {
+                    Id = 1,
+                    UserId = 1,
+                    Title = "Learn Animation Basics",
+                    Description = "Educational video about animation techniques",
+                    Genre = "Education",
+                    VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/541bc83a-c39b-41e0-93e2-b353a5957e0b_faststart.mp4",
+                    ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png",
+                    BlobName = "541bc83a-c39b-41e0-93e2-b353a5957e0b_faststart.mp4",
+                    DateUploaded = baseDate
+                },
+                new Video
+                {
+                    Id = 2,
+                    UserId = 2,
+                    Title = "Gaming Adventures",
+                    Description = "Fun gaming moments with Big Buck Bunny",
+                    Genre = "Gaming",
+                    VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/e1543acd-86de-46fb-994f-ee01dc9e4947_faststart.mp4",
+                    ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png",
+                    BlobName = "e1543acd-86de-46fb-994f-ee01dc9e4947_faststart.mp4",
+                    DateUploaded = baseDate.AddDays(1)
+                },
+                new Video
+                {
+                    Id = 3,
+                    UserId = 3,
+                    Title = "Entertainment Weekly",
+                    Description = "Weekly entertainment highlights",
+                    Genre = "Entertainment",
+                    VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/da06b2df-5389-4f6b-9969-54b538c8062d_faststart.mp4",
+                    ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png",
+                    BlobName = "da06b2df-5389-4f6b-9969-54b538c8062d_faststart.mp4",
+                    DateUploaded = baseDate.AddDays(2)
+                },
+                new Video
+                {
+                    Id = 4,
+                    UserId = 4,
+                    Title = "Tech News Today",
+                    Description = "Latest in technology",
+                    Genre = "Technology",
+                    VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/c1e82a0c-a48c-46aa-b33b-bf766ff77449_faststart.mp4",
+                    ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png",
+                    BlobName = "c1e82a0c-a48c-46aa-b33b-bf766ff77449_faststart.mp4",
+                    DateUploaded = baseDate.AddDays(3)
+                },
+                new Video
+                {
+                    Id = 5,
+                    UserId = 5,
+                    Title = "Sports Highlights",
+                    Description = "Best sports moments of the week",
+                    Genre = "Sports",
+                    VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/a6e61589-a50a-482e-b3ec-5ccfb0ec04d6_faststart.mp4",
+                    ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png",
+                    BlobName = "a6e61589-a50a-482e-b3ec-5ccfb0ec04d6_faststart.mp4",
+                    DateUploaded = baseDate.AddDays(4)
+                },
+                new Video
+                {
+                    Id = 6,
+                    UserId = 1,
+                    Title = "Music Session",
+                    Description = "Amazing music compilation",
+                    Genre = "Music",
+                    VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/fc30b0ae-c983-4af5-b9b6-6ec3a1b5609a_faststart.mp4",
+                    ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png",
+                    BlobName = "fc30b0ae-c983-4af5-b9b6-6ec3a1b5609a_faststart.mp4",
+                    DateUploaded = baseDate.AddDays(5)
+                },
+                new Video
+                {
+                    Id = 7,
+                    UserId = 2,
+                    Title = "Breaking News",
+                    Description = "Latest news updates",
+                    Genre = "News",
+                    VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/b13bb460-5ec7-4e44-8f06-88c161aa10c6_faststart.mp4",
+                    ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png",
+                    BlobName = "b13bb460-5ec7-4e44-8f06-88c161aa10c6_faststart.mp4",
+                    DateUploaded = baseDate.AddDays(6)
+                },
+                new Video
+                {
+                    Id = 8,
+                    UserId = 3,
+                    Title = "Miscellaneous Fun",
+                    Description = "Random entertaining content",
+                    Genre = "Other",
+                    VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/174c4367-4740-4166-a714-4774d113834d_faststart.mp4",
+                    ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png",
+                    BlobName = "174c4367-4740-4166-a714-4774d113834d_faststart.mp4",
+                    DateUploaded = baseDate.AddDays(7)
+                },
+                new Video
+                {
+                    Id = 9,
+                    UserId = 4,
+                    Title = "Educational Tech",
+                    Description = "Learning about technology",
+                    Genre = "Education",
+                    VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/6495e892-4155-47e1-94b8-cbe317691e4f_faststart.mp4",
+                    ThumbnailUrl = "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png",
+                    BlobName = "6495e892-4155-47e1-94b8-cbe317691e4f_faststart.mp4",
+                    DateUploaded = baseDate.AddDays(8)
+                }
             };
+            modelBuilder.Entity<Video>().HasData(videos);
 
-            Video video2 = new()
+            // Seed Comments
+            var comments = new List<Comment>
             {
-                Id = 2,
-                UserId = 2,
-                Title = "string",
-                Description = "string",
-                Genre = "string",
-                VideoUrl = "https://looplegionmetube20250129.blob.core.windows.net/videos/videoplayback%20%281%29.mp4",
-                ThumbnailUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/YouTube_Diamond_Play_Button.png/1200px-YouTube_Diamond_Play_Button.png",
-                BlobName = "videoplayback (1).mp4",
-                DateUploaded = new DateTime(2025, 2, 1)
+                new Comment
+                {
+                    Id = 1,
+                    VideoId = 1,
+                    UserId = 2,
+                    Content = "Great educational content!",
+                    DateAdded = baseDate.AddDays(1)
+                },
+                new Comment
+                {
+                    Id = 2,
+                    VideoId = 1,
+                    UserId = 3,
+                    Content = "Very informative video",
+                    DateAdded = baseDate.AddDays(1)
+                },
+                new Comment
+                {
+                    Id = 3,
+                    VideoId = 2,
+                    UserId = 1,
+                    Content = "Amazing gaming content",
+                    DateAdded = baseDate.AddDays(2)
+                },
+                new Comment
+                {
+                    Id = 4,
+                    VideoId = 2,
+                    UserId = 4,
+                    Content = "Love this game!",
+                    DateAdded = baseDate.AddDays(2)
+                }
             };
+            modelBuilder.Entity<Comment>().HasData(comments);
 
-            modelBuilder.Entity<Video>().HasData(video1, video2);
+            // Seed Likes
+            var likes = new List<Like>
+            {
+                new Like { VideoID = 1, UserID = 2 },
+                new Like { VideoID = 1, UserID = 3 },
+                new Like { VideoID = 1, UserID = 4 },
+                new Like { VideoID = 2, UserID = 1 },
+                new Like { VideoID = 2, UserID = 3 },
+                new Like { VideoID = 3, UserID = 1 },
+                new Like { VideoID = 3, UserID = 2 },
+                new Like { VideoID = 4, UserID = 5 }
+            };
+            modelBuilder.Entity<Like>().HasData(likes);
+
+            // Seed History
+            var histories = new List<History>
+            {
+                new History
+                {
+                    Id = 1,
+                    VideoId = 1,
+                    UserId = 2,
+                    DateWatched = baseDate.AddDays(1)
+                },
+                new History
+                {
+                    Id = 2,
+                    VideoId = 1,
+                    UserId = 3,
+                    DateWatched = baseDate.AddDays(1)
+                },
+                new History
+                {
+                    Id = 3,
+                    VideoId = 2,
+                    UserId = 1,
+                    DateWatched = baseDate.AddDays(2)
+                },
+                new History
+                {
+                    Id = 4,
+                    VideoId = 2,
+                    UserId = 4,
+                    DateWatched = baseDate.AddDays(2)
+                }
+            };
+            modelBuilder.Entity<History>().HasData(histories);
         }
     }
 }
