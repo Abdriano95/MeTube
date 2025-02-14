@@ -124,8 +124,7 @@ namespace MeTube.Data.Migrations
                         name: "FK_Likes_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Likes_Videos_VideoID",
                         column: x => x.VideoID,
@@ -139,8 +138,11 @@ namespace MeTube.Data.Migrations
                 columns: new[] { "Id", "Email", "Password", "Role", "Username" },
                 values: new object[,]
                 {
-                    { 1, "john.doe@example.com", "pwd123", "Admin", "johndoe1" },
-                    { 2, "jane.doe@example.com", "pwd456", "User", "janedoe2" }
+                    { 1, "admin@example.com", "adminpwd123", "Admin", "admin" },
+                    { 2, "john@example.com", "password123", "User", "john_doe" },
+                    { 3, "jane@example.com", "password456", "User", "jane_smith" },
+                    { 4, "tech@example.com", "techpass789", "User", "tech_guru" },
+                    { 5, "sports@example.com", "sportspass789", "User", "sports_fan" }
                 });
 
             migrationBuilder.InsertData(
@@ -148,8 +150,52 @@ namespace MeTube.Data.Migrations
                 columns: new[] { "Id", "BlobName", "DateUploaded", "Description", "Genre", "ThumbnailUrl", "Title", "UserId", "VideoUrl" },
                 values: new object[,]
                 {
-                    { 1, "youtube_OUUlO8fQOfE_1920x1080_h264.mp4", new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Should I learn a JavaScript framework or concentrate on mastering Blazor? What is the future of Blazor? Is Microsoft invested in making Blazor great? We will answer these questions in today's Dev Questions episode.   Website: https://www.iamtimcorey.com/", "Programming", "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/whatisthefutureofblazor.jpg", "164. What is the Future of Blazor? Should I Learn Blazor?", 1, "https://looplegionmetube20250129.blob.core.windows.net/videos/youtube_OUUlO8fQOfE_1920x1080_h264.mp4" },
-                    { 2, "videoplayback (1).mp4", new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "string", "string", "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/YouTube_Diamond_Play_Button.png/1200px-YouTube_Diamond_Play_Button.png", "string", 2, "https://looplegionmetube20250129.blob.core.windows.net/videos/videoplayback%20%281%29.mp4" }
+                    { 1, "541bc83a-c39b-41e0-93e2-b353a5957e0b_faststart.mp4", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Educational video about animation techniques", "Education", "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png", "Learn Animation Basics", 1, "https://looplegionmetube20250129.blob.core.windows.net/videos/541bc83a-c39b-41e0-93e2-b353a5957e0b_faststart.mp4" },
+                    { 2, "e1543acd-86de-46fb-994f-ee01dc9e4947_faststart.mp4", new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), "Fun gaming moments with Big Buck Bunny", "Gaming", "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png", "Gaming Adventures", 2, "https://looplegionmetube20250129.blob.core.windows.net/videos/e1543acd-86de-46fb-994f-ee01dc9e4947_faststart.mp4" },
+                    { 3, "da06b2df-5389-4f6b-9969-54b538c8062d_faststart.mp4", new DateTime(2024, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), "Weekly entertainment highlights", "Entertainment", "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png", "Entertainment Weekly", 3, "https://looplegionmetube20250129.blob.core.windows.net/videos/da06b2df-5389-4f6b-9969-54b538c8062d_faststart.mp4" },
+                    { 4, "c1e82a0c-a48c-46aa-b33b-bf766ff77449_faststart.mp4", new DateTime(2024, 1, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "Latest in technology", "Technology", "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png", "Tech News Today", 4, "https://looplegionmetube20250129.blob.core.windows.net/videos/c1e82a0c-a48c-46aa-b33b-bf766ff77449_faststart.mp4" },
+                    { 5, "a6e61589-a50a-482e-b3ec-5ccfb0ec04d6_faststart.mp4", new DateTime(2024, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), "Best sports moments of the week", "Sports", "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png", "Sports Highlights", 5, "https://looplegionmetube20250129.blob.core.windows.net/videos/a6e61589-a50a-482e-b3ec-5ccfb0ec04d6_faststart.mp4" },
+                    { 6, "fc30b0ae-c983-4af5-b9b6-6ec3a1b5609a_faststart.mp4", new DateTime(2024, 1, 6, 0, 0, 0, 0, DateTimeKind.Unspecified), "Amazing music compilation", "Music", "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png", "Music Session", 1, "https://looplegionmetube20250129.blob.core.windows.net/videos/fc30b0ae-c983-4af5-b9b6-6ec3a1b5609a_faststart.mp4" },
+                    { 7, "b13bb460-5ec7-4e44-8f06-88c161aa10c6_faststart.mp4", new DateTime(2024, 1, 7, 0, 0, 0, 0, DateTimeKind.Unspecified), "Latest news updates", "News", "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png", "Breaking News", 2, "https://looplegionmetube20250129.blob.core.windows.net/videos/b13bb460-5ec7-4e44-8f06-88c161aa10c6_faststart.mp4" },
+                    { 8, "174c4367-4740-4166-a714-4774d113834d_faststart.mp4", new DateTime(2024, 1, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), "Random entertaining content", "Other", "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png", "Miscellaneous Fun", 3, "https://looplegionmetube20250129.blob.core.windows.net/videos/174c4367-4740-4166-a714-4774d113834d_faststart.mp4" },
+                    { 9, "6495e892-4155-47e1-94b8-cbe317691e4f_faststart.mp4", new DateTime(2024, 1, 9, 0, 0, 0, 0, DateTimeKind.Unspecified), "Learning about technology", "Education", "https://looplegionmetube20250129.blob.core.windows.net/thumbnails/Big_Buck_Bunny_thumbnail_vlc.png", "Educational Tech", 4, "https://looplegionmetube20250129.blob.core.windows.net/videos/6495e892-4155-47e1-94b8-cbe317691e4f_faststart.mp4" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Comments",
+                columns: new[] { "Id", "Content", "DateAdded", "UserId", "VideoId" },
+                values: new object[,]
+                {
+                    { 1, "Great educational content!", new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, 1 },
+                    { 2, "Very informative video", new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, 1 },
+                    { 3, "Amazing gaming content", new DateTime(2024, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, 2 },
+                    { 4, "Love this game!", new DateTime(2024, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), 4, 2 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Histories",
+                columns: new[] { "Id", "DateWatched", "UserId", "VideoId" },
+                values: new object[,]
+                {
+                    { 1, new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, 1 },
+                    { 2, new DateTime(2024, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, 1 },
+                    { 3, new DateTime(2024, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, 2 },
+                    { 4, new DateTime(2024, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), 4, 2 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Likes",
+                columns: new[] { "UserID", "VideoID" },
+                values: new object[,]
+                {
+                    { 2, 1 },
+                    { 3, 1 },
+                    { 4, 1 },
+                    { 1, 2 },
+                    { 3, 2 },
+                    { 1, 3 },
+                    { 2, 3 },
+                    { 5, 4 }
                 });
 
             migrationBuilder.CreateIndex(
