@@ -88,6 +88,12 @@ This only needs to be done once on your local machine:
 ### 6. Update from master
 After following these steps, the project should be properly configured and ready to run on your local machine.
 
+### 7. Login Details
+
+Admin login details: 
+Username: admin
+Password: adminpwd123
+
 ## Application Architecture
 ![Application Architecture](./screenshots/architecture.png)
 
