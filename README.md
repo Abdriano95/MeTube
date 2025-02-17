@@ -42,7 +42,16 @@ To ensure you have a clean installation, you first need to restore the database:
 - Run the command: `update-database`
 - Navigate to the gear icon next to the Start button and choose "new profile" (or the name you have assigned). This is so you can return to multiple startup projects.
 
-### 2. Update from master
+### 3. Setting up multiple startup project
+- Right click on the solution "MeTube" and choose "Configure Startup Projects..."
+- Choose the alterantive "Mutliple startup projects:"
+- Click on "MeTube.API" and press the "Up arrow" to make it at the top of the list. Choose "Action" = Start, "Debug Target" = https
+- Click on "MeTube.Client" and press the "Up arrow" to make it second top of the list. Choose "Action" = Start, "Debug Target" = https
+- Press "Apply" then "OK"
+
+### 4. Run all the tests before starting the solution: 
+- Navigate to "Test" at the top of the menu in Visual Studio.
+- Press "Run All Tests" 
 
 Retrieve the latest version from the master branch:
 ```bash
@@ -76,6 +85,7 @@ This only needs to be done once on your local machine:
    **DISCLAIMER: Contact us for the Azure Storage key!**
    Input the key instead of the x that are in between the citations.
 
+### 3. Update from master
 After following these steps, the project should be properly configured and ready to run on your local machine.
 
 ## Application Architecture
@@ -252,12 +262,17 @@ On this page you can see your entire video viewing history.
 #### Review
 - **Completed**:
   - *User Story 1*:
+  - *User Story 2*:
+  - *User Story 3*:  
 - **Not Completed**:
-  - *User Story 2*: 
 - **Issues**:
-
+- No noticable issues were present in this sprint.
 
 #### Retrospective
 - **What went well**:
+- Communication has been improved drastically, compared to earlier sprints
+- Testing has been the focus of this sprint, new bugs and issues related were found thanks to testing 
 - **What could be improved**:
+- Time management, we could estimate the time of each user story better
 - **Amendments to process**:
+- Since this is the last sprint there is not going to be any adjusments. 
