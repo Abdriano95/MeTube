@@ -265,10 +265,11 @@ On this page you can see your entire video viewing history.
 
 #### Review
 - **Completed**:
-  - *User Story 1*:
-  - *User Story 2*:
-  - *User Story 3*:  
+  - *User Story 1*: History is now fully implemented and is viewable from the "History" tab.
+  - *User Story 2*: Admin functionality implemented.
+  - *User Story 3*: The algorithm has been fully implemented and works by checking your most liked video genre.
 - **Not Completed**:
+  - All user stories are completed.
 - **Issues**:
 - No noticable issues were present in this sprint.
 
