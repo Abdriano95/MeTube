@@ -138,7 +138,8 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
             {
                 Username = user.Username,
                 Email = user.Email,
-                Password = user.Password,
+                // Null keeps the current password on the server
+                Password = string.IsNullOrWhiteSpace(user.Password) ? null : user.Password,
                 Role = user.Role,
             };
 
@@ -162,7 +163,7 @@ namespace MeTube.Client.ViewModels.ManageUsersViewModels
         {
             if (string.IsNullOrWhiteSpace(Search))
                 ResetSearchedSongs();
-            IEnumerable<User> result = FilteredUsers.Where(a => a.Username.ToLower().Contains(Search.ToLower()) || a.Email.ToLower().Contains(Search.ToLower()) || a.Password.ToLower().Contains(Search.ToLower()) || a.Role.ToLower().Contains(Search.ToLower())).Distinct();
+            IEnumerable<User> result = FilteredUsers.Where(a => a.Username.ToLower().Contains(Search.ToLower()) || a.Email.ToLower().Contains(Search.ToLower()) || a.Role.ToLower().Contains(Search.ToLower())).Distinct();
             AllUsers.Clear();
             foreach (User user in result)
                 AllUsers.Add(user);

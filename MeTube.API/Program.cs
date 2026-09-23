@@ -10,6 +10,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.AspNetCore.Identity;
+using MeTube.Data.Entity;
 
 namespace MeTube.API
 {
@@ -28,6 +30,9 @@ namespace MeTube.API
             builder.Services.AddControllers().AddNewtonsoftJson();
             builder.Services.AddEndpointsApiExplorer();
 
+            // The JWT signing key comes from configuration (user secrets locally), never from source code
+            var jwtKey = builder.Configuration["Jwt:Key"];
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -45,7 +50,7 @@ namespace MeTube.API
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = "Customer",
                     ValidAudience = "User",
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword")),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
                     RoleClaimType = ClaimTypes.Role,
                 };
                 options.Events = new JwtBearerEvents
@@ -104,6 +109,9 @@ namespace MeTube.API
 
             // Add UnitOfWork 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // Add password hashing (PBKDF2 via ASP.NET Core Identity)
+            builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             builder.Services.AddSwaggerGen();
 
             // Add AutoMapper
@@ -126,6 +134,14 @@ namespace MeTube.API
 
 
             var app = builder.Build();
+
+            // HS256 needs a key of at least 256 bits. Checked after Build() so EF Core design-time tools still work.
+            if (string.IsNullOrWhiteSpace(jwtKey) || Encoding.UTF8.GetByteCount(jwtKey) < 32)
+            {
+                throw new InvalidOperationException(
+                    "Jwt:Key is missing or shorter than 32 bytes. Set it with: " +
+                    "dotnet user-secrets set \"Jwt:Key\" \"<at least 32 random characters>\" --project MeTube.API");
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

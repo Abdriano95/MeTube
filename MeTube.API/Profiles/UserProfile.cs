@@ -8,8 +8,9 @@ namespace MeTube.API.Profiles
     {
         public UserProfile()
         {
-            // Map from CreateUserDto to User
-            CreateMap<CreateUserDto, User>();
+            // Map from CreateUserDto to User (the password is hashed in UserController, never mapped)
+            CreateMap<CreateUserDto, User>()
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore());
 
             // Map from UpdateUserDto to User
             CreateMap<UpdateUserDto, User>();
@@ -25,7 +26,7 @@ namespace MeTube.API.Profiles
 
             CreateMap<UpdateUserDto, User>()
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
-                .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password))
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role));
 

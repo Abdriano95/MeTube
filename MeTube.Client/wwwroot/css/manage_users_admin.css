@@ -171,7 +171,7 @@ h1 {
 
 .user-row {
     display: grid;
-    grid-template-columns: 1.2fr 2fr 1.5fr 1.2fr auto;
+    grid-template-columns: 1.2fr 2fr 1.2fr auto;
     gap: 10px;
     align-items: center;
     padding: 12px;

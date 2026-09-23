@@ -20,7 +20,6 @@
     <div class="user-row">
         <label>Username</label>
         <label>Email</label>
-        <label>Password</label>
         <label for="roles">Role</label>
     </div>
     @foreach (var user in ViewModel.AllUsers)
@@ -28,7 +27,6 @@
         <div class="user-row">
             <input type="text" readonly @bind="user.Username" />
             <input type="email" readonly @bind="user.Email" />
-            <input type="text" readonly @bind="user.Password" />
             <input type="text" readonly @bind="user.Role" />
 
             <button id="deleteButton" @onclick="() => ViewModel.EditUserButton(user)">EDIT</button>
@@ -51,8 +49,8 @@
             <label>Email</label>
             <input @bind="ViewModel.SelectedUser.Email" type="email" />
 
-            <label>Password</label>
-            <input @bind="ViewModel.SelectedUser.Password" type="text" />
+            <label>New password</label>
+            <input @bind="ViewModel.SelectedUser.Password" type="password" placeholder="Leave empty to keep the current password" />
             <label for="roles">Role</label>
             <div class="SelectRole">
                 <select id="roles" @bind="ViewModel.SelectedUser.Role">

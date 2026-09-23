@@ -106,7 +106,7 @@ namespace MeTube.Test.Repositories
                 {
                     UserID = 1,
                     VideoID = 1,
-                    User = new User { Id = 1, Username = "TestUser", Email = "Test@example.se", Password = "example123", Role = "Admin" },
+                    User = new User { Id = 1, Username = "TestUser", Email = "Test@example.se", PasswordHash = "not-a-real-hash", Role = "Admin" },
                     Video = new Video { Id = 1, Title = "TestVideo", Description = "Test description", Genre = "Test Genre" }
                 }
             };

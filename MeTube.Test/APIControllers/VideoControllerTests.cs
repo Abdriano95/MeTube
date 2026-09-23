@@ -120,7 +120,7 @@ namespace MeTube.Test.APIControllers
                 Id = video.UserId,
                 Username = "UploaderUser",
                 Email = "test@example.com",
-                Password = "pwd123",
+                PasswordHash = "not-a-real-hash",
                 Role = "User"
             };
             _mockUnitOfWork.Setup(u => u.Videos.GetVideoByIdAsync(video.Id))

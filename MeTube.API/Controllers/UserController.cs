@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Data;
 using Microsoft.JSInterop;
 using Azure.Core;
+using Microsoft.AspNetCore.Identity;
 
 namespace MeTube.API.Controllers
 {
@@ -21,11 +22,15 @@ namespace MeTube.API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IConfiguration _configuration;
 
-        public UserController(IUnitOfWork unitOfWork, IMapper mapper)
+        public UserController(IUnitOfWork unitOfWork, IMapper mapper, IPasswordHasher<User> passwordHasher, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _passwordHasher = passwordHasher;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -128,6 +133,7 @@ namespace MeTube.API.Controllers
             }
 
             var user = _mapper.Map<User>(request);
+            user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
 
             await _unitOfWork.Users.AddUserAsync(user);
             await _unitOfWork.SaveChangesAsync();
@@ -164,6 +170,10 @@ namespace MeTube.API.Controllers
             }
 
             _mapper.Map(request, user);
+
+            // An empty password means "keep the current one"
+            if (!string.IsNullOrWhiteSpace(request.Password))
+                user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -214,9 +224,22 @@ namespace MeTube.API.Controllers
             try
             {
                 var user = await _unitOfWork.Users.GetUserByUsernameAsync(request.Username);
-                if (user == null || user.Password != request.Password)
+                if (user == null)
                 {
                     return BadRequest(new { Message = "Invalid username or password" });
+                }
+
+                var verification = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
+                if (verification == PasswordVerificationResult.Failed)
+                {
+                    return BadRequest(new { Message = "Invalid username or password" });
+                }
+
+                // Upgrade hashes created with older hasher settings
+                if (verification == PasswordVerificationResult.SuccessRehashNeeded)
+                {
+                    user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
+                    await _unitOfWork.SaveChangesAsync();
                 }
 
                 var token = GenerateJwtToken(user);
@@ -264,7 +287,7 @@ namespace MeTube.API.Controllers
         /// <returns>A JWT token for the user</returns>
         private string GenerateJwtToken(User user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VerySecretMeTubePasswordVerySecretMeTubePassword"));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]

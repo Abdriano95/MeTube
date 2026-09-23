@@ -31,7 +31,7 @@ namespace MeTube.Test.Repositories
             {
                 Id = 1,
                 Username = "TestUser",
-                Password = "Hej123",
+                PasswordHash = "not-a-real-hash",
                 Email = "hej@gmail.com",
                 Role = "User",
             };
@@ -56,7 +56,7 @@ namespace MeTube.Test.Repositories
             {
                 Id = 1,
                 Username = "TestUser",
-                Password = "Hej123",
+                PasswordHash = "not-a-real-hash",
                 Email = "hej@gmail.com",
                 Role = "User",
             };
@@ -115,7 +115,7 @@ namespace MeTube.Test.Repositories
                 Id = 1,
                 Email = email,
                 Username = "TestUser",
-                Password = "securepassword",
+                PasswordHash = "not-a-real-hash",
                 Role = "User"
             };
 

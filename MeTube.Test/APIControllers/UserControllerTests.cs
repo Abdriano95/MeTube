@@ -10,6 +10,8 @@ using Xunit;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace MeTube.Test.APIControllers
 {
@@ -17,13 +19,21 @@ namespace MeTube.Test.APIControllers
     {
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IMapper> _mockMapper;
+        private readonly IPasswordHasher<User> _passwordHasher;
         private readonly UserController _controller;
 
         public UserControllerTests()
         {
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockMapper = new Mock<IMapper>();
-            _controller = new UserController(_mockUnitOfWork.Object, _mockMapper.Object);
+            _passwordHasher = new PasswordHasher<User>();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Jwt:Key"] = "unit-test-signing-key-that-is-at-least-32-bytes-long"
+                })
+                .Build();
+            _controller = new UserController(_mockUnitOfWork.Object, _mockMapper.Object, _passwordHasher, configuration);
 
             // Setup ClaimsPrincipal för autentiserade anrop
             var claims = new List<Claim>
@@ -54,7 +64,7 @@ namespace MeTube.Test.APIControllers
                 Id = userId, 
                 Username = "TestUser", 
                 Email = "test@example.com", 
-                Password = "Svartlosenord",
+                PasswordHash = "not-a-real-hash",
                 Role = "User" 
             
             };
@@ -90,7 +100,7 @@ namespace MeTube.Test.APIControllers
         public async Task SignUp_ShouldCreateUserSuccessfully()
         {
             var request = new CreateUserDto { Username = "NewUser", Email = "new@example.com", Password = "password" };
-            var user = new User { Id = 1, Username = "NewUser", Email = "new@example.com", Password = "password", Role = "User" };
+            var user = new User { Id = 1, Username = "NewUser", Email = "new@example.com", PasswordHash = string.Empty, Role = "User" };
 
             _mockUnitOfWork.Setup(uow => uow.Users.GetUserByUsernameAsync(request.Username)).ReturnsAsync((User)null);
             _mockUnitOfWork.Setup(uow => uow.Users.GetUserByEmailAsync(request.Email)).ReturnsAsync((User)null);
@@ -112,10 +122,29 @@ namespace MeTube.Test.APIControllers
         }
 
         [Fact]
+        public async Task SignUp_ShouldStoreHashedPassword_NotPlainText()
+        {
+            var request = new CreateUserDto { Username = "NewUser", Email = "new@example.com", Password = "password" };
+            var user = new User { Id = 1, Username = "NewUser", Email = "new@example.com", PasswordHash = string.Empty, Role = "User" };
+
+            _mockUnitOfWork.Setup(uow => uow.Users.GetUserByUsernameAsync(request.Username)).ReturnsAsync((User)null);
+            _mockUnitOfWork.Setup(uow => uow.Users.GetUserByEmailAsync(request.Email)).ReturnsAsync((User)null);
+            _mockMapper.Setup(m => m.Map<User>(request)).Returns(user);
+            _mockUnitOfWork.Setup(uow => uow.Users.AddUserAsync(user)).Returns(Task.CompletedTask);
+            _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync()).ReturnsAsync(1);
+
+            await _controller.SignUp(request);
+
+            Assert.NotEqual(request.Password, user.PasswordHash);
+            Assert.Equal(PasswordVerificationResult.Success,
+                _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password));
+        }
+
+        [Fact]
         public async Task SignUp_ShouldReturnBadRequest_WhenUsernameExists()
         {
             var request = new CreateUserDto { Username = "ExistingUser", Email = "existing@example.com", Password = "password" };
-            var existingUser = new User { Id = 1, Username = "ExistingUser", Email = "existing@example.com", Password = "password", Role = "User" };
+            var existingUser = new User { Id = 1, Username = "ExistingUser", Email = "existing@example.com", PasswordHash = "not-a-real-hash", Role = "User" };
 
             _mockUnitOfWork.Setup(uow => uow.Users.GetUserByUsernameAsync(request.Username)).ReturnsAsync(existingUser);
 
@@ -141,7 +170,7 @@ namespace MeTube.Test.APIControllers
                 Id = userId,
                 Username = "Pärsan",
                 Email = "Hej@gmail.com",
-                Password = "Hej123",
+                PasswordHash = "not-a-real-hash",
                 Role = "Admin"
             };
 
@@ -218,7 +247,8 @@ namespace MeTube.Test.APIControllers
         public async Task Login_ShouldReturnToken_WhenCredentialsAreCorrect()
         {
             var request = new LoginDto { Username = "TestUser", Password = "password" };
-            var user = new User { Id = 1, Username = "TestUser", Email = "test@example.com", Password = "password", Role = "User" };
+            var user = new User { Id = 1, Username = "TestUser", Email = "test@example.com", PasswordHash = string.Empty, Role = "User" };
+            user.PasswordHash = _passwordHasher.HashPassword(user, "password");
 
             _mockUnitOfWork.Setup(uow => uow.Users.GetUserByUsernameAsync(request.Username)).ReturnsAsync(user);
             _mockMapper.Setup(m => m.Map<UserDto>(user)).Returns(new UserDto { Id = user.Id, Username = user.Username });
@@ -249,6 +279,52 @@ namespace MeTube.Test.APIControllers
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task Login_ShouldReturnBadRequest_WhenPasswordIsWrong()
+        {
+            var request = new LoginDto { Username = "TestUser", Password = "wrongpassword" };
+            var user = new User { Id = 1, Username = "TestUser", Email = "test@example.com", PasswordHash = string.Empty, Role = "User" };
+            user.PasswordHash = _passwordHasher.HashPassword(user, "password");
+
+            _mockUnitOfWork.Setup(uow => uow.Users.GetUserByUsernameAsync(request.Username)).ReturnsAsync(user);
+
+            var result = await _controller.Login(request);
+
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task UpdateUser_ShouldKeepPasswordHash_WhenPasswordIsEmpty()
+        {
+            var userId = 2;
+            var user = new User { Id = userId, Username = "Other", Email = "other@example.com", PasswordHash = "existing-hash", Role = "User" };
+            var request = new UpdateUserDto { Username = "Other", Email = "other@example.com", Password = null, Role = "User" };
+
+            _mockUnitOfWork.Setup(uow => uow.Users.GetUserByIdAsync(userId)).ReturnsAsync(user);
+            _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync()).ReturnsAsync(1);
+
+            var result = await _controller.UpdateUser(userId, request);
+
+            Assert.IsType<OkObjectResult>(result);
+            Assert.Equal("existing-hash", user.PasswordHash);
+        }
+
+        [Fact]
+        public async Task UpdateUser_ShouldHashNewPassword_WhenPasswordIsProvided()
+        {
+            var userId = 2;
+            var user = new User { Id = userId, Username = "Other", Email = "other@example.com", PasswordHash = "existing-hash", Role = "User" };
+            var request = new UpdateUserDto { Username = "Other", Email = "other@example.com", Password = "newpassword", Role = "User" };
+
+            _mockUnitOfWork.Setup(uow => uow.Users.GetUserByIdAsync(userId)).ReturnsAsync(user);
+            _mockUnitOfWork.Setup(uow => uow.SaveChangesAsync()).ReturnsAsync(1);
+
+            await _controller.UpdateUser(userId, request);
+
+            Assert.Equal(PasswordVerificationResult.Success,
+                _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, "newpassword"));
         }
     }
 }

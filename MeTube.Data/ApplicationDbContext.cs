@@ -31,7 +31,7 @@ namespace MeTube.Data
                 entity.HasKey(u => u.Id);
                 entity.Property(u => u.Id).ValueGeneratedOnAdd();
                 entity.Property(entity => entity.Username).IsRequired().HasMaxLength(20);
-                entity.Property(entity => entity.Password).IsRequired().HasMaxLength(20);
+                entity.Property(entity => entity.PasswordHash).IsRequired();
                 entity.Property(entity => entity.Email).IsRequired();
                 entity.Property(entity => entity.Role).IsRequired().HasDefaultValue("User");
 
@@ -114,13 +114,15 @@ namespace MeTube.Data
             var baseDate = new DateTime(2024, 1, 1);
 
             // Seed Users
+            // Password hashes are pre-computed with ASP.NET Core's PasswordHasher so the seed stays deterministic.
+            // They verify against the demo passwords documented in the README.
             var users = new List<User>
             {
                 new User
                 {
                     Id = 1,
                     Username = "admin",
-                    Password = "adminpwd123",
+                    PasswordHash = "AQAAAAIAAYagAAAAENBrsFjWlhFR21aqhZiWi5E29981L6d1gmGBZa9LruXy6+GybP8DwOeb7Db7yKvfdQ==",
                     Email = "admin@example.com",
                     Role = "Admin"
                 },
@@ -128,7 +130,7 @@ namespace MeTube.Data
                 {
                     Id = 2,
                     Username = "john_doe",
-                    Password = "password123",
+                    PasswordHash = "AQAAAAIAAYagAAAAEDQl8P2Q4yHcdFtZ0H17ypgCk7pNPgs+HuX0UAra36wA0g46cJ/15pPbj49eAKjBuA==",
                     Email = "john@example.com",
                     Role = "User"
                 },
@@ -136,7 +138,7 @@ namespace MeTube.Data
                 {
                     Id = 3,
                     Username = "jane_smith",
-                    Password = "password456",
+                    PasswordHash = "AQAAAAIAAYagAAAAEPWdUQJ8OTYN0ScQ21ZhFw068zFbVx8lbbWwfRwKJQj5LDTxyeC7ycpWZhFeTcn/rg==",
                     Email = "jane@example.com",
                     Role = "User"
                 },
@@ -144,7 +146,7 @@ namespace MeTube.Data
                 {
                     Id = 4,
                     Username = "tech_guru",
-                    Password = "techpass789",
+                    PasswordHash = "AQAAAAIAAYagAAAAEKghpDEr/826Z3r24cikByoYMCqID6PHW3SmGBvynQBQEqQ0bXv71KDZgLLDyEz9uA==",
                     Email = "tech@example.com",
                     Role = "User"
                 },
@@ -152,7 +154,7 @@ namespace MeTube.Data
                 {
                     Id = 5,
                     Username = "sports_fan",
-                    Password = "sportspass789",
+                    PasswordHash = "AQAAAAIAAYagAAAAEPXYKs7y6BbA/MINoZDGPdoQifzhX57DEfr8KE38rxE3KZMECi5hUjerSGArfKIhwQ==",
                     Email = "sports@example.com",
                     Role = "User"
                 }

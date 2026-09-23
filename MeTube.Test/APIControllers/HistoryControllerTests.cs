@@ -186,7 +186,7 @@ namespace MeTube.Test.APIControllers
         public async Task GetHistoryForUser_ReturnsNotFound_WhenNoHistoryExists()
         {
             // Arrange
-            _mockUnitOfWork.Setup(uow => uow.Users.GetUserByIdAsync(1)).ReturnsAsync(new User { Id = 1, Username = "TestUser", Email = "Example@example.se", Password ="pwd123", Role ="User" });
+            _mockUnitOfWork.Setup(uow => uow.Users.GetUserByIdAsync(1)).ReturnsAsync(new User { Id = 1, Username = "TestUser", Email = "Example@example.se", PasswordHash = "not-a-real-hash", Role ="User" });
             _mockUnitOfWork.Setup(uow => uow.Histories.GetHistoriesByUserIdAsync(1)).ReturnsAsync(new List<History>());
 
             // Act
@@ -213,7 +213,7 @@ namespace MeTube.Test.APIControllers
             // Arrange
             _mockUnitOfWork
                 .Setup(uow => uow.Users.GetUserByIdAsync(1))
-                .ReturnsAsync(new User { Id = 1, Username = "MockUser" , Email = "example@live.se", Password = "pwd213", Role = "User"});
+                .ReturnsAsync(new User { Id = 1, Username = "MockUser" , Email = "example@live.se", PasswordHash = "not-a-real-hash", Role = "User"});
 
             // History is empty
             _mockUnitOfWork
@@ -234,7 +234,7 @@ namespace MeTube.Test.APIControllers
             // User exists
             _mockUnitOfWork
                 .Setup(uow => uow.Users.GetUserByIdAsync(1))
-                .ReturnsAsync(new User { Id = 1, Username = "MockUser", Email = "example@live.se", Password = "pwd213", Role = "User" });
+                .ReturnsAsync(new User { Id = 1, Username = "MockUser", Email = "example@live.se", PasswordHash = "not-a-real-hash", Role = "User" });
 
             // History exists
             _mockUnitOfWork
@@ -272,7 +272,7 @@ namespace MeTube.Test.APIControllers
             // Arrange
             _mockUnitOfWork
                 .Setup(uow => uow.Users.GetUserByIdAsync(1))
-                .ReturnsAsync(new User {Id = 1, Username = "MockUser", Email = "example@live.se", Password = "pwd213", Role = " User" });
+                .ReturnsAsync(new User {Id = 1, Username = "MockUser", Email = "example@live.se", PasswordHash = "not-a-real-hash", Role = " User" });
 
             _mockUnitOfWork
                 .Setup(uow => uow.Histories.GetHistoriesByUserIdAsync(1))
@@ -309,7 +309,7 @@ namespace MeTube.Test.APIControllers
             // Mock if user exists
             _mockUnitOfWork
                 .Setup(uow => uow.Users.GetUserByIdAsync(1))
-                .ReturnsAsync(new User { Id = 1, Username = "MockUser", Email = "test@example.com", Role = "User", Password = "pwe234" });
+                .ReturnsAsync(new User { Id = 1, Username = "MockUser", Email = "test@example.com", Role = "User", PasswordHash = "not-a-real-hash" });
 
             // Mock if user has history
             _mockUnitOfWork
@@ -340,7 +340,7 @@ namespace MeTube.Test.APIControllers
                 HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity(claims)) }
             };
 
-            _mockUnitOfWork.Setup(u => u.Users.GetUserByIdAsync(1)).ReturnsAsync(new User { Id = 1, Username = "TestUser", Email = "Example@example.com", Password = "pwd234", Role = "User" });
+            _mockUnitOfWork.Setup(u => u.Users.GetUserByIdAsync(1)).ReturnsAsync(new User { Id = 1, Username = "TestUser", Email = "Example@example.com", PasswordHash = "not-a-real-hash", Role = "User" });
             _mockMapper.Setup(m => m.Map<History>(historyDto)).Returns(history);
             _mockUnitOfWork.Setup(u => u.Histories.AddAsync(It.IsAny<History>())).Returns(Task.CompletedTask);
             _mockUnitOfWork.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
@@ -403,7 +403,7 @@ namespace MeTube.Test.APIControllers
             // Arrange
             var historyDto = new HistoryCreateDto { UserId = 1, VideoId = 1 };
 
-            _mockUnitOfWork.Setup(u => u.Users.GetUserByIdAsync(1)).ReturnsAsync(new User { Id = 1, Username = "TestUser", Email = "Example@example.com", Password = "pwd234", Role = "User" });
+            _mockUnitOfWork.Setup(u => u.Users.GetUserByIdAsync(1)).ReturnsAsync(new User { Id = 1, Username = "TestUser", Email = "Example@example.com", PasswordHash = "not-a-real-hash", Role = "User" });
             _mockUnitOfWork.Setup(u => u.Histories.AddAsync(It.IsAny<History>())).ThrowsAsync(new Exception("Database error"));
 
             // Act

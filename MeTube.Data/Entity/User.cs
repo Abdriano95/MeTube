@@ -16,9 +16,9 @@ namespace MeTube.Data.Entity
         [StringLength(20, MinimumLength = 3, ErrorMessage = "Username must be between 3 and 20 characters.")]
         public required string Username { get; set; }
 
-        [Required(ErrorMessage = "Password is required.")]
-        [StringLength(20, MinimumLength = 3, ErrorMessage = "Password must be between 3 and 20 characters.")]
-        public required string Password { get; set; }
+        // Salted PBKDF2 hash produced by ASP.NET Core's PasswordHasher, never the plain-text password
+        [Required(ErrorMessage = "Password hash is required.")]
+        public required string PasswordHash { get; set; }
 
         [Required(ErrorMessage = "Email is required")]
         public required string Email { get; set; }
