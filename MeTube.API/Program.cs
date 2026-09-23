@@ -114,12 +114,8 @@ namespace MeTube.API
             builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             builder.Services.AddSwaggerGen();
 
-            // Add AutoMapper
-            builder.Services.AddAutoMapper(typeof(UserProfile));
-            builder.Services.AddAutoMapper(typeof(UserProfile), typeof(VideoProfile));
-            builder.Services.AddAutoMapper(typeof(LikeProfile));
-            builder.Services.AddAutoMapper(typeof(CommentProfile));
-            builder.Services.AddAutoMapper(typeof(HistoryProfile));
+            // Add AutoMapper (all mapping profiles live in this assembly)
+            builder.Services.AddAutoMapper(cfg => { }, typeof(UserProfile));
 
             builder.Services.AddCors(options =>
             {

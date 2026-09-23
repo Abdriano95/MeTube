@@ -56,11 +56,8 @@ namespace MeTube.Client
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddAuthorizationCore();
-            builder.Services.AddAutoMapper(typeof(User));
-            builder.Services.AddAutoMapper(typeof(Video));
-            builder.Services.AddAutoMapper(typeof(Like));
-            builder.Services.AddAutoMapper(typeof(History));
-            builder.Services.AddAutoMapper(typeof(Program).Assembly);
+            // All mapping profiles live in this assembly
+            builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
             builder.Services.AddTransient<HttpClient>();
 
 
