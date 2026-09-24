@@ -5,11 +5,15 @@ This is our group project for our Object Oriented Software Development course.
 
 It's a simple YouTube-inspired web application that demonstrates core video streaming concepts—uploading, searching, and playing videos—while focusing on clean design and user-friendly interactions.
 
+Users can sign up, log in, upload and manage their own videos, watch videos, like and comment on them, see their viewing history and get recommendations based on their most liked genre. Admins can manage users, videos, metadata, likes, comments and history.
+
 Authors: Ali Behrooz, Ronnie, Abdulla Mehdi, Oskar, Sebastian Svensson - Loop Legion
 
+Abdulla Mehdi's main areas in the git history are the Blazor client's view models and views, a large part of the test project and the EF Core migrations. In January 2026 Abdulla Mehdi also replaced the plain-text password storage with salted hashes and moved the JWT signing key to configuration.
 
 ## Table of Contents
-- [Documentation](#documentation)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
 - [Application Architecture](#application-architecture)
 - [Screenshots](#screenshots)
 - [Sprints](#sprints)
@@ -18,79 +22,61 @@ Authors: Ali Behrooz, Ronnie, Abdulla Mehdi, Oskar, Sebastian Svensson - Loop Le
   - [Sprint 3](#sprint-3)
   - [Sprint 4](#sprint-4)
 
-## Documentation
-This section contains step-by-step instructions for setting up the project on your local computer.
+## Tech Stack
+- **API:** ASP.NET Core Web API (.NET 9), Entity Framework Core 9 with SQL Server LocalDB, JWT bearer authentication, password hashing with ASP.NET Core's `PasswordHasher`, Azure Blob Storage for video files, AutoMapper and Swagger
+- **Client:** Blazor WebAssembly (.NET 9) using MVVM with CommunityToolkit.Mvvm
+- **Tests:** xUnit, Moq and FluentAssertions
 
-### 1. Restore the database
-To ensure you have a clean installation, you first need to restore the database:
+## Getting Started
 
-#### 1.1 Remove migrations
-- Locate and remove all migration files in the project
-- Also remove the file `ApplicationDbContextModelSnapShot.cs`
+### Prerequisites
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- SQL Server LocalDB (included with Visual Studio)
+- EF Core CLI tools: `dotnet tool install --global dotnet-ef`
+- A trusted HTTPS development certificate: `dotnet dev-certs https --trust`
+- For uploading and playing videos: your own Azure Storage account
 
-#### 1.2 Remove the database
-- Open SQL Server Object Explorer in Visual Studio (View -> SQL Server Object Explorer)
-- Go to (localdb)\MSSQLLocalDB
-- Expand the "Databases" dropdown
-- Expand the "MeTubeDB" dropdown
-- Right-click on the database
-- Choose "Delete"
-
-#### 1.3 Update the database
-- Open the Package Manager Console (Tools -> NuGet Package Manager -> Package Manager Console)
-- Right-click on MeTube.Data and select "Set as Start Up Project"
-- Run the command: `update-database`
-- Navigate to the gear icon next to the Start button and choose "new profile" (or the name you have assigned). This is so you can return to multiple startup projects.
-
-Retrieve the latest version from the master branch:
+### 1. Clone and build
 ```bash
-git pull origin master
+git clone https://github.com/Abdriano95/MeTube.git
+cd MeTube
+dotnet build
 ```
-Or in Visual Studio, select master and click the Pull button.
 
+### 2. Create the database
+```bash
+dotnet ef database update --project MeTube.Data --startup-project MeTube.Data
+```
+This creates `MeTubeDB` on `(localdb)\MSSQLLocalDB` (see `MeTube.Data/appSettings.json`) with demo users, videos, likes, comments and history.
 
-### 3. Configure User Secrets
+### 3. Configure secrets
+```bash
+dotnet user-secrets set "Jwt:Key" "<at least 32 random characters>" --project MeTube.API
 
-This only needs to be done once on your local machine:
+# Needed for uploading and playing videos
+dotnet user-secrets set "AzureStorage:AccountName" "<your storage account name>" --project MeTube.API
+dotnet user-secrets set "AzureStorage:AccountKey" "<your storage account key>" --project MeTube.API
+```
+The API refuses to start without `Jwt:Key`. Without the Azure Storage settings, sign-up, login and user administration work, but the video endpoints return errors. The API creates the `videos` and `thumbnails` containers if they are missing. The seeded videos point to the original team's storage account, which no longer exists, so they will not play.
 
-1. Open Developer PowerShell:
-   - Go to `Tools -> Command Line -> Developer PowerShell`
+### 4. Run the API and the client
+Run each command in its own terminal:
+```bash
+dotnet run --no-build --project MeTube.API --launch-profile https
+dotnet run --no-build --project MeTube.Client --launch-profile https
+```
+Open https://localhost:7248. The client calls the API at `https://localhost:5001` (see `MeTube.Client/Constants.cs`), which is why the API is started with the `https` profile. Swagger is available at https://localhost:5001/swagger. Building once first and running with `--no-build` avoids both processes building the shared projects at the same time.
 
-2. Navigate to the API project:
-   ```bash
-   cd MeTube.API
-   ```
+In Visual Studio you can instead set `MeTube.API` and `MeTube.Client` as multiple startup projects, both with the `https` profile.
 
-3. Initialize user secrets:
-   ```bash
-   dotnet user-secrets init
-   ```
+### 5. Run the tests
+```bash
+dotnet test
+```
 
-4. Configure Azure Storage settings:
-   ```bash
-   dotnet user-secrets set "AzureStorage:AccountName" "looplegionmetube20250129"
-   dotnet user-secrets set "AzureStorage:AccountKey" "xxxx"
-   ```
-   **DISCLAIMER: Contact us for the Azure Storage key!**
-   Input the key instead of the x that are in between the citations.
-
-### 4. Setting up multiple startup project
-- Right click on the solution "MeTube" and choose "Configure Startup Projects..."
-- Choose the alterantive "Mutliple startup projects:"
-- Click on "MeTube.API" and press the "Up arrow" to make it at the top of the list. Choose "Action" = Start, "Debug Target" = https
-- Click on "MeTube.Client" and press the "Up arrow" to make it second top of the list. Choose "Action" = Start, "Debug Target" = https
-- Press "Apply" then "OK"
-
-### 5. Run all the tests before starting the solution: 
-- Navigate to "Test" at the top of the menu in Visual Studio.
-- Press "Run All Tests" 
-
-### 6. Update from master
-After following these steps, the project should be properly configured and ready to run on your local machine.
-
-### 7. Login Details
-- Username: admin
-- Password: adminpwd123
+### Login Details
+- Username: `admin`
+- Password: `adminpwd123`
 
 ## Application Architecture
 ![Application Architecture](./screenshots/architecture.png)
